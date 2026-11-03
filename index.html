@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>3bhady finance tracker</title>
+<title>3bhady Financial Aid</title>
 <meta name="description" content="متابعة الكروت والقروض والجمعيات والسلف والمصروفات">
 <meta name="theme-color" content="#12263a">
 <link rel="manifest" href="manifest.webmanifest">
@@ -24,7 +24,7 @@ img{max-width:100%}
 <style id="app-style"></style>
 </head>
 <body>
-<div id="root"><div id="boot"><h1>3bhady finance tracker</h1><p>بيحمّل…</p></div></div>
+<div id="root"><div id="boot"><h1>3bhady Financial Aid</h1><p>بيحمّل…</p></div></div>
 <script>
 (function(){
   var BUILTIN_VERSION='1.0.0', KEY='3bh_app_update';
@@ -32,7 +32,7 @@ img{max-width:100%}
   function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
   function root(){return document.getElementById('root')}
   function fail(msg,canReset){
-    root().innerHTML='<div id="boot"><h1>3bhady finance tracker</h1><p>'+msg+'</p>'+
+    root().innerHTML='<div id="boot"><h1>3bhady Financial Aid</h1><p>'+msg+'</p>'+
       (canReset?'<button id="b-reset">ارجع للنسخة الأصلية</button>':'')+'<button id="b-reload">حاول تاني</button></div>';
     var r=document.getElementById('b-reset');if(r)r.onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
     document.getElementById('b-reload').onclick=function(){location.reload()};
