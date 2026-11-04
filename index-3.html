@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3bhady Financial Aid</title>
+<meta name="description" content="متابعة الكروت والقروض والجمعيات والسلف والمصروفات">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+html,body{margin:0;min-height:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+#boot{font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;padding:48px 20px;text-align:center;color:#f2f2f3;background:#000;min-height:100vh;box-sizing:border-box}
+#boot h1{font-size:20px;margin:0 0 8px}
+#boot p{color:#9b9ba1;margin:0 0 16px}
+#boot button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:#e3bb55;color:#141108;margin:4px}
+</style>
+<style id="app-style"></style>
+</head>
+<body>
+<div id="root"><div id="boot"><h1>3bhady Financial Aid</h1><p>بيحمّل…</p></div></div>
+<script>
+(function(){
+  var BUILTIN_VERSION='1.9.6', KEY='3bh_app_update';
+  window.BUILTIN_VERSION=BUILTIN_VERSION;
+  function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
+  function root(){return document.getElementById('root')}
+  function fail(msg,canReset){
+    root().innerHTML='<div id="boot"><h1>3bhady Financial Aid</h1><p>'+msg+'</p>'+
+      (canReset?'<button id="b-reset">ارجع للنسخة الأصلية</button>':'')+'<button id="b-reload">حاول تاني</button></div>';
+    var r=document.getElementById('b-reset');if(r)r.onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+    document.getElementById('b-reload').onclick=function(){location.reload()};
+  }
+  function inject(b){
+    window.APP_VERSION=b.version;window.APP_SOURCE=b.source;
+    document.getElementById('app-style').textContent=b.css;
+    root().innerHTML=b.html;
+    var s=document.createElement('script');s.textContent=b.js+'\n//# sourceURL=app-v'+b.version+'.js';
+    document.body.appendChild(s);
+    setTimeout(function(){if(!window.__appReady)fail('البرنامج ما اشتغلش ('+(window.__bootErr||'خطأ غير معروف')+').',b.source==='update')},4000);
+  }
+  window.addEventListener('error',function(e){window.__bootErr=e.message});
+  function builtin(){
+    return Promise.all(['app.css','app.html','app.js'].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f+' '+r.status);return r.text()})}))
+      .then(function(a){return {version:BUILTIN_VERSION,css:a[0],html:a[1],js:a[2],source:'builtin'}});
+  }
+  var up=null;try{up=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(up&&up.kind==='3bhady-update'&&up.js&&cmpV(up.version,BUILTIN_VERSION)>0){up.source='update';inject(up)}
+  else{
+    if(up){try{localStorage.removeItem(KEY)}catch(e){}}   /* the site itself is newer than the stored update */
+    builtin().then(inject).catch(function(e){fail('ماقدرتش أحمّل ملفات البرنامج. اتأكد إن النت شغال أول مرة تفتحه.',false)});
+  }
+  /* forced update: every open checks the site's sw.js version; a newer one installs and the app reopens by itself */
+  var hadCtrl=!!(navigator.serviceWorker&&navigator.serviceWorker.controller), reloading=false;
+  function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);sessionStorage.setItem(k,v)}catch(e){return null}}
+  function updGate(ver,stuck){
+    var d=document.getElementById('upd-gate');
+    if(!d){d=document.createElement('div');d.id='upd-gate';d.setAttribute('role','alertdialog');d.style.cssText='position:fixed;inset:0;z-index:400;background:#000;color:#f2f2f3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif';document.body.appendChild(d)}
+    d.innerHTML='<div style="width:44px;height:44px;border-radius:50%;border:4px solid #3a3220;border-top-color:#e3bb55;animation:ugspin 1s linear infinite"></div><style>@keyframes ugspin{to{transform:rotate(360deg)}}</style>'+
+      '<h2 style="margin:0;font-size:21px">في تحديث جديد'+(ver?' (v'+ver+')':'')+'</h2><p style="margin:0;color:#9b9ba1;max-width:320px;line-height:1.7">'+
+      (stuck?'التحديث لسه ما نزلش. اتأكد إن النت شغال ودوس حاول تاني.':'بينزل دلوقتي وهيفتح البرنامج تاني لوحده. بياناتك زي ما هي.')+'</p>'+
+      (stuck?'<div><button id="ug-retry" style="font:inherit;border:0;border-radius:10px;padding:10px 16px;background:#e3bb55;color:#141108;margin:4px">حاول تاني</button></div>':'')+
+      '<p style="margin:0;color:#6f6f75;font-size:12.5px">التحديث إجباري: البرنامج مش هيفتح بالنسخة القديمة.</p>';
+    var a=document.getElementById('ug-retry');if(a)a.onclick=function(){ss('3bh-upd-try','0');hardReload(true)};
+  }
+  function hardReload(clear){if(reloading)return;reloading=true;
+    var go=function(){location.reload()};
+    if(clear&&window.caches)caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('3bh-')===0&&k!=='3bh-notify'}).map(function(k){return caches.delete(k)}))}).then(go,go);else go()}
+  function checkRemote(reg){
+    fetch('sw.js?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+      var m=/CACHE='3bh-([0-9][0-9.]*)'/.exec(t||''); if(!m)return;
+      var have=window.APP_VERSION&&cmpV(window.APP_VERSION,BUILTIN_VERSION)>0?window.APP_VERSION:BUILTIN_VERSION;
+      if(cmpV(m[1],have)<=0){ss('3bh-upd-try','0');return}
+      var tries=+(ss('3bh-upd-try')||0);
+      if(tries>=2){updGate(m[1],true);return}
+      ss('3bh-upd-try',String(tries+1));updGate(m[1],false);
+      if(reg)reg.update().catch(function(){});
+      setTimeout(function(){hardReload(true)},7000);
+    }).catch(function(){});
+  }
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadCtrl&&!reloading){updGate('',false);hardReload(false)}});
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(reg){
+        var check=function(){reg.update().catch(function(){});checkRemote(reg)};
+        setTimeout(check,1200);
+        document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')check()});
+        setInterval(check,10*60*1000);
+      }).catch(function(){checkRemote(null)});
+    });
+  }
+})();
+</script>
+</body>
+</html>
