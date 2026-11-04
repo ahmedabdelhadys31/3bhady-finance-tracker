@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3bhady Financial Aid</title>
+<meta name="description" content="متابعة الكروت والقروض والجمعيات والسلف والمصروفات">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+html,body{margin:0;min-height:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+#boot{font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;padding:48px 20px;text-align:center;color:#f2f2f3;background:#000;min-height:100vh;box-sizing:border-box}
+#boot h1{font-size:20px;margin:0 0 8px}
+#boot p{color:#9b9ba1;margin:0 0 16px}
+#boot button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:#e3bb55;color:#141108;margin:4px}
+</style>
+<style id="app-style"></style>
+</head>
+<body>
+<div id="root"><div id="boot"><h1>3bhady Financial Aid</h1><p>بيحمّل…</p></div></div>
+<script>
+(function(){
+  var BUILTIN_VERSION='1.9.4', KEY='3bh_app_update';
+  window.BUILTIN_VERSION=BUILTIN_VERSION;
+  function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
+  function root(){return document.getElementById('root')}
+  function fail(msg,canReset){
+    root().innerHTML='<div id="boot"><h1>3bhady Financial Aid</h1><p>'+msg+'</p>'+
+      (canReset?'<button id="b-reset">ارجع للنسخة الأصلية</button>':'')+'<button id="b-reload">حاول تاني</button></div>';
+    var r=document.getElementById('b-reset');if(r)r.onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+    document.getElementById('b-reload').onclick=function(){location.reload()};
+  }
+  function inject(b){
+    window.APP_VERSION=b.version;window.APP_SOURCE=b.source;
+    document.getElementById('app-style').textContent=b.css;
+    root().innerHTML=b.html;
+    var s=document.createElement('script');s.textContent=b.js+'\n//# sourceURL=app-v'+b.version+'.js';
+    document.body.appendChild(s);
+    setTimeout(function(){if(!window.__appReady)fail('البرنامج ما اشتغلش ('+(window.__bootErr||'خطأ غير معروف')+').',b.source==='update')},4000);
+  }
+  window.addEventListener('error',function(e){window.__bootErr=e.message});
+  function builtin(){
+    return Promise.all(['app.css','app.html','app.js'].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f+' '+r.status);return r.text()})}))
+      .then(function(a){return {version:BUILTIN_VERSION,css:a[0],html:a[1],js:a[2],source:'builtin'}});
+  }
+  var up=null;try{up=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(up&&up.kind==='3bhady-update'&&up.js&&cmpV(up.version,BUILTIN_VERSION)>0){up.source='update';inject(up)}
+  else{
+    if(up){try{localStorage.removeItem(KEY)}catch(e){}}   /* the site itself is newer than the stored update */
+    builtin().then(inject).catch(function(e){fail('ماقدرتش أحمّل ملفات البرنامج. اتأكد إن النت شغال أول مرة تفتحه.',false)});
+  }
+  if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+})();
+</script>
+</body>
+</html>
