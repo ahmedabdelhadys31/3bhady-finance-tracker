@@ -364,7 +364,7 @@ label.btn{display:inline-flex;align-items:center}
 #splash{position:fixed;inset:0;z-index:300;background:radial-gradient(circle at 50% 38%,#1f1f22 0,#0a0a0b 55%,#000 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:opacity .45s ease;cursor:pointer}
 #splash.out{opacity:0;pointer-events:none}
 #splash .sp-logo{animation:spIn .7s cubic-bezier(.2,.8,.2,1) both;margin-bottom:14px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-#splash .sp-t{font-size:44px;font-weight:700;direction:ltr;letter-spacing:.01em;animation:spUp .6s .15s ease both}
+#splash .sp-t{font-size:40px;font-weight:700;direction:ltr;letter-spacing:.01em;animation:spUp .6s .15s ease both}
 #splash .sp-s{font-size:21px;font-weight:600;direction:ltr;color:#e3bb55;letter-spacing:.14em;animation:spUp .6s .3s ease both}
 #splash .sp-v{font-size:12px;opacity:.55;direction:ltr;margin-top:18px;animation:spUp .6s .45s ease both}
 @keyframes spIn{from{opacity:0;transform:scale(.8) rotate(-6deg)}to{opacity:1;transform:none}}

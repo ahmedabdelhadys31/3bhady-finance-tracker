@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>3bhady Financial Aid</title>
+<title>Financial Aid</title>
 <meta name="description" content="متابعة الكروت والقروض والجمعيات والسلف والمصروفات">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="logo-192.png">
+<link rel="apple-touch-icon" href="logo-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
@@ -25,7 +25,7 @@ img{max-width:100%}
 <style id="app-style"></style>
 </head>
 <body>
-<div id="root"><div id="boot"><h1>3bhady Financial Aid</h1><p>بيحمّل…</p></div></div>
+<div id="root"><div id="boot"><h1>Financial Aid</h1><p>بيحمّل…</p></div></div>
 <script>
 (function(){
   /* the app fits the phone screen: no pinch zoom, no double-tap zoom, just scrolling */
@@ -37,12 +37,12 @@ img{max-width:100%}
   var LNG=(function(){try{return localStorage.getItem('3bh_lang')||'ar'}catch(e){return 'ar'}})();
   function L(ar,en,fr){return LNG==='en'?en:LNG==='fr'?fr:ar}
   if(LNG!=='ar'){document.documentElement.setAttribute('dir','ltr');document.documentElement.setAttribute('lang',LNG);var bp=document.querySelector('#boot p');if(bp)bp.textContent=L('','Loading…','Chargement…')}
-  var BUILTIN_VERSION='1.9.8', KEY='3bh_app_update';
+  var BUILTIN_VERSION='1.9.9', KEY='3bh_app_update';
   window.BUILTIN_VERSION=BUILTIN_VERSION;
   function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
   function root(){return document.getElementById('root')}
   function fail(msg,canReset){
-    root().innerHTML='<div id="boot"><h1>3bhady Financial Aid</h1><p>'+msg+'</p>'+
+    root().innerHTML='<div id="boot"><h1>Financial Aid</h1><p>'+msg+'</p>'+
       (canReset?'<button id="b-reset">'+L('ارجع للنسخة الأصلية','Back to the original version','Revenir à la version d\'origine')+'</button>':'')+'<button id="b-reload">'+L('حاول تاني','Try again','Réessayer')+'</button></div>';
     var r=document.getElementById('b-reset');if(r)r.onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
     document.getElementById('b-reload').onclick=function(){location.reload()};

@@ -1,6 +1,6 @@
 {
-  "name": "3bhady Financial Aid",
-  "short_name": "3bhady",
+  "name": "Financial Aid",
+  "short_name": "Financial Aid",
   "description": "متابعة الكروت والقروض والجمعيات والسلف والمصروفات",
   "id": "./",
   "start_url": "./",
@@ -12,8 +12,8 @@
   "lang": "ar",
   "dir": "rtl",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {"src": "logo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "logo-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }
