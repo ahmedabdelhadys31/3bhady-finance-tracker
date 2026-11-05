@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jUID7MWnXoDR30HgeaMhvRVDX4WQwmZUiabokIMMWNU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self'; child-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; manifest-src 'self'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Financial Aid</title>
 <meta name="description" content="متابعة الكروت والقروض والجمعيات والسلف والمصروفات">
@@ -28,6 +30,8 @@ img{max-width:100%}
 <div id="root"><div id="boot"><h1>Financial Aid</h1><p>بيحمّل…</p></div></div>
 <script>
 (function(){
+  /* never inside someone else's page */
+  try{if(window.top!==window.self){window.top.location.replace(window.self.location.href);return}}catch(e){document.documentElement.innerHTML='';return}
   /* the app fits the phone screen: no pinch zoom, no double-tap zoom, just scrolling */
   try{
     ['gesturestart','gesturechange','gestureend'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})});
@@ -37,7 +41,7 @@ img{max-width:100%}
   var LNG=(function(){try{return localStorage.getItem('3bh_lang')||'ar'}catch(e){return 'ar'}})();
   function L(ar,en,fr){return LNG==='en'?en:LNG==='fr'?fr:ar}
   if(LNG!=='ar'){document.documentElement.setAttribute('dir','ltr');document.documentElement.setAttribute('lang',LNG);var bp=document.querySelector('#boot p');if(bp)bp.textContent=L('','Loading…','Chargement…')}
-  var BUILTIN_VERSION='2.0.2', KEY='3bh_app_update';
+  var BUILTIN_VERSION='2.4.0', KEY='3bh_app_update';
   window.BUILTIN_VERSION=BUILTIN_VERSION;
   function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
   function root(){return document.getElementById('root')}
@@ -48,22 +52,21 @@ img{max-width:100%}
     document.getElementById('b-reload').onclick=function(){location.reload()};
   }
   function inject(b){
-    window.APP_VERSION=b.version;window.APP_SOURCE=b.source;
+    window.APP_VERSION=b.version;window.APP_SOURCE='builtin';
     document.getElementById('app-style').textContent=b.css;
     root().innerHTML=b.html;
-    var s=document.createElement('script');s.textContent=b.js+'\n//# sourceURL=app-v'+b.version+'.js';
+    /* the code always comes from the site's own app.js file: nothing stored on the phone is ever run as code */
+    var s=document.createElement('script');s.src='app.js';s.onerror=function(){fail(L('ماقدرتش أحمّل ملفات البرنامج. اتأكد إن النت شغال أول مرة تفتحه.','Could not load the app files. Make sure you are online the first time you open it.','Impossible de charger les fichiers de l\'app. Vérifiez votre connexion à la première ouverture.'),false)};
     document.body.appendChild(s);
     setTimeout(function(){if(!window.__appReady)fail(L('البرنامج ما اشتغلش','The app did not start','L\'app n\'a pas démarré')+' ('+(window.__bootErr||L('خطأ غير معروف','unknown error','erreur inconnue'))+').',b.source==='update')},4000);
   }
   window.addEventListener('error',function(e){window.__bootErr=e.message});
   function builtin(){
-    return Promise.all(['app.css','app.html','app.js'].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f+' '+r.status);return r.text()})}))
-      .then(function(a){return {version:BUILTIN_VERSION,css:a[0],html:a[1],js:a[2],source:'builtin'}});
+    return Promise.all(['app.css','app.html'].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f+' '+r.status);return r.text()})}))
+      .then(function(a){return {version:BUILTIN_VERSION,css:a[0],html:a[1],source:'builtin'}});
   }
-  var up=null;try{up=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
-  if(up&&up.kind==='3bhady-update'&&up.js&&cmpV(up.version,BUILTIN_VERSION)>0){up.source='update';inject(up)}
-  else{
-    if(up){try{localStorage.removeItem(KEY)}catch(e){}}   /* the site itself is newer than the stored update */
+  try{localStorage.removeItem(KEY)}catch(e){}   /* old in-app update files are no longer accepted */
+  {
     builtin().then(inject).catch(function(e){fail(L('ماقدرتش أحمّل ملفات البرنامج. اتأكد إن النت شغال أول مرة تفتحه.','Could not load the app files. Make sure you are online the first time you open it.','Impossible de charger les fichiers de l\'app. Vérifiez votre connexion à la première ouverture.'),false)});
   }
   /* forced update: every open checks the site's sw.js version; a newer one installs and the app reopens by itself */
@@ -85,7 +88,7 @@ img{max-width:100%}
   function checkRemote(reg){
     fetch('sw.js?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
       var m=/CACHE='3bh-([0-9][0-9.]*)'/.exec(t||''); if(!m)return;
-      var have=window.APP_VERSION&&cmpV(window.APP_VERSION,BUILTIN_VERSION)>0?window.APP_VERSION:BUILTIN_VERSION;
+      var have=BUILTIN_VERSION;
       if(cmpV(m[1],have)<=0){ss('3bh-upd-try','0');return}
       var tries=+(ss('3bh-upd-try')||0);
       if(tries>=2){updGate(m[1],true);return}
