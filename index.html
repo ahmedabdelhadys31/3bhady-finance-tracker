@@ -37,7 +37,7 @@ img{max-width:100%}
   var LNG=(function(){try{return localStorage.getItem('3bh_lang')||'ar'}catch(e){return 'ar'}})();
   function L(ar,en,fr){return LNG==='en'?en:LNG==='fr'?fr:ar}
   if(LNG!=='ar'){document.documentElement.setAttribute('dir','ltr');document.documentElement.setAttribute('lang',LNG);var bp=document.querySelector('#boot p');if(bp)bp.textContent=L('','Loading…','Chargement…')}
-  var BUILTIN_VERSION='1.9.9', KEY='3bh_app_update';
+  var BUILTIN_VERSION='2.0.1', KEY='3bh_app_update';
   window.BUILTIN_VERSION=BUILTIN_VERSION;
   function cmpV(a,b){a=String(a).split('.').map(Number);b=String(b).split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
   function root(){return document.getElementById('root')}
