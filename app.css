@@ -22,6 +22,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}html,body{overflow-x:hidden;max-width:100%}@supports (overflow:clip){html,body{overflow-x:clip}}
 input,select,textarea{font-size:16px!important}
 .fields textarea{display:block;width:100%;box-sizing:border-box;margin-top:6px;min-height:130px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface2);color:var(--ink);resize:vertical;line-height:1.6}
+.set-top{margin:2px 0 10px}.set-hub .ot{min-height:104px}.set-hub .ot .os{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 label.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:10px 0;line-height:1.5}label.chk input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--accent)}
 .gt-tip{background:var(--surface2);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:.92em;line-height:1.6}
 .appbar .home-btn{margin-inline-start:auto;display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}.appbar .back-btn{transform:scaleX(1)}
