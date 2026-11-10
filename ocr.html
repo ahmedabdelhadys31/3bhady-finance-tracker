@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ji+NfFgi0AOydsYwCxo9SZcoEMJprg5HkXkKJnl68kU=' https://cdn.jsdelivr.net blob: 'unsafe-eval' 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; connect-src https://cdn.jsdelivr.net https://tessdata.projectnaptha.com blob: data:; img-src blob: data:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4v4IXqVBdfaFDpnXM5MVcCu7n29o2idhxwXQChblAkg=' https://cdn.jsdelivr.net blob: 'unsafe-eval' 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; connect-src https://cdn.jsdelivr.net https://tessdata.projectnaptha.com blob: data:; img-src blob: data:; base-uri 'none'; form-action 'none'">
 <title>ocr</title></head><body><script>
 /* Financial Aid — photo reader. Runs in a sandboxed frame with no access to the app's data: it only sees the one picture it is given and returns text. */
 (function(){
@@ -9,7 +9,7 @@
     s.onload=function(){res()};s.onerror=function(){ready=null;rej(new Error('net'))};document.head.appendChild(s)});return ready}
   addEventListener('message',function(e){
     if(e.source!==parent)return;var m=e.data||{};if(m.t!=='ocr'||typeof m.img!=='string'||m.img.indexOf('data:image/')!==0)return;var id=m.id;
-    load().then(function(){return Tesseract.recognize(m.img,'eng',{cacheMethod:'none',logger:function(x){if(x&&x.status==='recognizing text')parent.postMessage({t:'p',id:id,p:+x.progress||0},'*')}})})
+    load().then(function(){return Tesseract.recognize(m.img,m.lang==='eng'?'eng':'eng+ara',{cacheMethod:'none',logger:function(x){if(x&&x.status==='recognizing text')parent.postMessage({t:'p',id:id,p:+x.progress||0},'*')}})})
       .then(function(r){parent.postMessage({t:'ok',id:id,text:String((r&&r.data&&r.data.text)||'')},'*')},function(err){parent.postMessage({t:'err',id:id,e:String((err&&err.message)||err)},'*')});
   });
   parent.postMessage({t:'hi'},'*');

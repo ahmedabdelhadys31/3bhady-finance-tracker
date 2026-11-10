@@ -232,7 +232,8 @@ button.item:hover{background:var(--surface2)}
 .mic-pop{position:relative;z-index:3}.mic-menu{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--accent);border-radius:16px;padding:8px;margin:6px 0;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .mic-menu button{display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:8px;text-align:start;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--ink);font:inherit;cursor:pointer}
 .mic-menu button span{grid-row:1/3;font-size:24px;text-align:center}.mic-menu button small{color:var(--muted);font-size:12px;line-height:1.5}.mic-menu .fine{margin:2px 4px 0}
-.vo-bar{flex:none}.vo-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;padding:8px 10px;margin:6px 0;font-weight:600}
+.vo-bar{flex:none}.ai-m.me{position:relative}.ai-edit{background:none;border:0;padding:0 0 0 6px;margin-inline-start:6px;font-size:13px;opacity:.55;cursor:pointer;vertical-align:middle}.ai-edit:hover{opacity:1}.vo-lg{display:inline-flex;gap:4px}.vo-lg .btn{min-width:36px;padding:6px 8px}
+.vo-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;padding:8px 10px;margin:6px 0;font-weight:600}
 .vo-in span:nth-child(2){flex:1;min-width:120px}.vo-dot{width:12px;height:12px;border-radius:50%;background:var(--muted)}.vo-dot.on{background:#ef4444;animation:vopulse 1s ease-in-out infinite}
 @keyframes vopulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
 /* ===== salary card ===== */
