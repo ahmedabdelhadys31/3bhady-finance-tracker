@@ -2178,6 +2178,7 @@
     if(AI.pend&&AI.pend.kind==='pdfpw'){var pf=AI.pend.file;AI.pend=null;aiFile(pf,raw.trim());return}
     function bdBtn(k,l){return aiAct(l||'افتح التفاصيل',function(){sheet={mode:'bd',k:k,back:{mode:'ai'}};renderSheet()})}
     var la=langAsk(t);if(la&&t.split(' ').length<=8){try{localStorage.setItem('3bh_ai_lang',la)}catch(e){}AI.lg=la;return aiSay(la==='ar'?'تمام، هرد عليك بالعربي من دلوقتي 👍':la==='en'?'تمام، هرد عليك بالإنجليزي من دلوقتي 👍':'تمام، هرد عليك بالفرنساوي من دلوقتي 👍')}
+    if(/(اوزع|اقسم|اظبط|انظم)\s+(ال)?(مرتب|دخل|فلوس)/.test(t)&&!amt){var fq=faqAnswer('اقسم المرتب');if(fq)return aiSay(fq)}
     if(investIntent(t))return aiSay(investAnswer(t));
     if(lentRepayAct(raw)&&aiActions(raw))return;
     /* just a name ("money fellows", "سي اي بي توفير", "ابراهيم"): show that thing */
@@ -2377,6 +2378,20 @@
     [/(swype|سويب|نون|noon|طلبات|talabat)/,'كروت CIB Swype بتقسّط كل عملية لوحدها (12 أو 36 أو 60 شهر، بفايدة 2.67% شهريًا و2% مصاريف إدارية مرة واحدة)، والبرنامج بيعمل التقسيط لوحده لما تسجّل صرف منها. كروت نون وطلبات ليها خصومات وكاش باك على المتجر بتاعها.'],
     [/(التامين|insurance|وثيقه)/,'ضيف وثايق التأمين من القائمة ← التأمين: القسط، ويوم الدفع، ونوع الوثيقة. البرنامج بيحسبها في المطلوب الشهري وبيفكّرك بميعادها.']];
   FAQ.push([/(ازاي اسجل سلفه|اسجل سلفه|سلفت حد|سلفه ولا مصروف|السلف بتتحسب|صرفت على حد|صرفت على حد هيرجع|فلوس ليا عند)/,'لو سلّفت حد أو صرفت على حد أو جهة وهيرجعلك الفلوس: قولّي مثلًا "سلفت أحمد 2000 من الكاش على 4 دفعات" أو "صرفت 500 على أحمد وهيرجعهم". الفلوس بتتخصم من رصيدك وتبان في التقارير كفلوس خرجت (سلف اديتها)، لكنها مش مصروف: بتفضل ليك في "فلوسك عند الناس". لو سلّفته تاني بتتجمع على نفس الشخص، وأي جزء يرجّعه بيتخصم من الباقي ويدخل على الرصيد اللي تختاره. ومن صفحة السلفة تعمل خطة رد بالمواعيد والمبالغ، ويجيلك إشعار قبل كل ميعاد وفي يومه ولو اتأخر، وتقدر تبعتله ملخص بالمواعيد.']);
+  /* more money knowledge, said simply (general information, not advice) */
+  FAQ.push(
+    [/(ای ?سكور|اي ?سكور|iscore|i-score|الجداره الائتمانيه|التصنيف الائتماني|سجلي الائتماني|credit score)/,'الـ <b>iScore</b> هو سجلك الائتماني في مصر: كل البنوك وشركات التقسيط بتبلّغ فيه عن سدادك. التأخير ولو يوم بعد آخر ميعاد بيتسجل ويقلل درجتك، وده بيأثر على موافقة القروض والكروت والحدود الجديدة.<br>عشان تحسّنه: ادفع الحد الأدنى على الأقل قبل الميعاد دايمًا، وخلّي المستخدم من كروتك أقل من 30% من الحد، وما تفتحش طلبات تمويل كتير في وقت قصير. تقدر تطلب تقريرك من موقع iScore.'],
+    [/(50.?30.?20|قاعده الميزانيه|اقسم المرتب|اوزع المرتب|اقسم الدخل|ازاي اوزع فلوسي|خطه صرف)/,'طريقة سهلة اسمها <b>50 / 30 / 20</b>: نص الدخل للأساسيات (إيجار، أكل، فواتير، مواصلات، أقساط)، و30% للحاجات اللي بتحبها (خروج، لبس، اشتراكات)، و20% للادخار وسداد الديون الزيادة.<br>لو عليك ديون بفايدة عالية، حط الـ 20% كلها على أعلاها فايدة الأول. وتقدر تحدد ميزانية الشهر من "الميزانية والأهداف" وأنا أنبهك قبل ما تعدّيها.'],
+    [/(صندوق طوارئ|فلوس طوارئ|احتياطي طوارئ|emergency fund)/,'<b>فلوس الطوارئ</b> مبلغ تسيبه على جنب لأي مفاجأة (مرض، عطل عربية، شغل وقف) عشان ما تلجأش للكريدت أو السلف. المعتاد إنه يكون مصاريف 3 لـ 6 شهور، في حاجة تقدر تسحب منها بسرعة زي حساب توفير أو شهادة قصيرة. ابدأ بمبلغ صغير ثابت كل شهر لحد ما توصله.'],
+    [/(كره الثلج|snowball|avalanche|الانهيار|اسدد الديون ازاي|اخلص من الديون|اقفل ديوني)/,'فيه طريقتين لسداد الديون:<br>• <b>الأعلى فايدة الأول</b>: تدفع الحد الأدنى للكل، والزيادة على أعلى فايدة (غالبًا الكريدت). دي أوفر في الفلوس.<br>• <b>الأصغر الأول</b>: تقفل أصغر دين بسرعة وبعدين اللي بعده. دي بتديك دفعة معنوية.<br>المهم في الاتنين: ما تتأخرش على أي حد أدنى، وما تزوّدش ديون جديدة وانت بتسدد.'],
+    [/(الفايده بتتحسب ازاي|حساب الفايده|يعني ايه ال ?apr|الفايده السنويه|فايده شهريه|الفايده الفعليه)/,'فايدة الكريدت بتتكتب غالبًا <b>شهري</b> (زي 3.5% في الشهر)، وده يساوي حوالي 42% في السنة. لو ما سددتش الكشف كله، بتتحسب على المتبقي (وبعض البنوك على الكشف كله) من يوم كل عملية.<br>في القروض بيكتبوا فايدة سنوية: <b>المتناقصة</b> بتتحسب على الباقي من الأصل بس فبتقل كل شهر، و<b>الثابتة</b> بتتحسب على أصل القرض كله طول المدة، فالثابتة 10% بتكلّف أكتر من متناقصة 10% بكتير.'],
+    [/(شهاده ولا وديعه|الفرق بين الشهاده والوديعه|حساب توفير ولا شهاده|احط فلوسي فين|افضل مكان للفلوس)/,'باختصار:<br>• <b>حساب التوفير</b>: الفلوس متاحة في أي وقت، وعائده أقل.<br>• <b>الوديعة</b>: بتربط الفلوس مدة (شهر لسنين) بعائد أعلى، وكسرها قبل ميعادها ممكن يقلل العائد.<br>• <b>الشهادة</b>: مدة أطول غالبًا (سنة لـ 5) وعائد ثابت أو متغير، ومعظمها ليها شروط استرداد.<br>اختار حسب إمتى هتحتاج الفلوس. ده كلام عام مش نصيحة استثمار، والأسعار بتتغير، فشوف عروض بنكك.'],
+    [/(التضخم|inflation|الفلوس بتقل قيمتها|العائد الحقيقي)/,'<b>التضخم</b> يعني الأسعار بتزيد فقيمة الجنيه بتقل. لو شهادة بتديك 20% والتضخم 25%، تبقى فلوسك فعليًا بتخسر حوالي 5% من قيمتها في السنة. ده اسمه العائد الحقيقي = العائد − التضخم. عشان كده مهم ما تسيبش فلوس كتير واقفة من غير عائد.'],
+    [/(كاش باك|cashback|نقط بونص|نقاط بونص|bonus points|المكافات|rewards)/,'<b>الكاش باك</b> مبلغ أو نسبة بترجعلك على المشتريات (زي 1%). <b>النقط</b> بتتجمع مع كل صرف وبتستبدلها برصيد أو هدايا أو أميال.<br>في البرنامج: من "تعديل" في الكارت اختار نوع المكافأة ونسبتها، والكاش باك والنقط هيتحسبوا لوحدهم مع كل صرف، وتقدر تعدّلهم في العملية نفسها. واستبدال النقط من صفحة الكارت.<br>خلي بالك: المكافأة ما تستاهلش تدفع فايدة؛ لو مش هتسدد الكشف كله، الفايدة هتاكل أي كاش باك.'],
+    [/(كارت مضمون|مضمن|مضمون بشهاده|مضمون بوديعه|secured card)/,'<b>الكارت المضمّن</b> بيطلع بضمان فلوس عندك في البنك (شهادة أو وديعة أو حساب)، وغالبًا الحد بيبقى نسبة منها. ميزته إنه سهل الموافقة وبيبني سجلك الائتماني، لكن البنك ممكن يوقف الكارت أو يقلل حده لو كسرت الضمان.<br>في البرنامج: من "تعديل" في الكارت اختار "مضمّن" واربطه بالشهادة أو الحساب، وهتلاقي تحذير في صفحة الضمان.'],
+    [/(نصب|احتيال|otp|كود التحقق|حد طلب الcvv|حد طلب الرقم|رسايل البنك المزيفه|فيشينج|phishing)/,'⚠️ <b>البنك عمره ما هيطلب منك</b> الرقم السري، أو كود التحقق (OTP)، أو الـ CVV، في تليفون أو رسالة أو واتساب. أي حد يطلبهم نصّاب حتى لو قال اسمك وبياناتك.<br>ما تدوسش على لينكات في رسايل غريبة، ولو حصل حاجة كلّم رقم البنك اللي ورا الكارت فورًا ووقّف الكارت من التطبيق.'],
+    [/(ازود الحد|زياده الحد|رفع الحد|credit limit increase|limit increase)/,'البنك بيزوّد الحد لما يلاقي سدادك منتظم ودخلك يسمح. ساعدها بإنك تسدد في الميعاد كل شهر، وتستخدم الكارت بانتظام من غير ما تقرّب من الحد، وتحدّث بيانات دخلك عندهم. وبعدها اطلب الزيادة من التطبيق أو خدمة العملاء.<br>بس افتكر: حد أعلى مش فلوس زيادة، ده دين محتمل أكبر.'],
+    [/(ازاي اوفر|اوفر فلوس|ادخر ازاي|نصايح ادخار|saving tips|احوش)/,'شوية حاجات بتفرق:<br>• حوّش أول ما المرتب ينزل، مش اللي يفضل آخر الشهر.<br>• راجع الاشتراكات اللي مش بتستخدمها.<br>• حط ميزانية لكل تصنيف وأنا أنبهك.<br>• ابعد عن سحب الكاش من الكريدت.<br>• سدّد الديون الغالية الأول، فده أكبر توفير مضمون.']);
   function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f[0]);if(m){var sc=m[0].length;if(sc>bs){bs=sc;best=f}}});return best?best[1]:null}
   function aiSend(){var i=document.getElementById('ai-in');if(!i)return;var v=i.value.trim();if(!v)return;var chip=AI.chip;AI.chip=0;AI.lg=aiPref()||(chip?LANG:msgLang(v))||LANG;AI.draft='';i.value='';if(!(AI.pend&&AI.pend.kind==='pdfpw')&&aiRude(v)){AI.msgs.push({me:true,h:'<span class="fine">🚫 الرسالة دي اتخفت لأن فيها ألفاظ غير لائقة</span>'});aiSave();aiLog();i.style.height='';aiSay(aiRudeReply());return}AI.rude=0;var pw0=AI.pend&&AI.pend.kind==='pdfpw';AI.msgs.push({me:true,h:pw0?'••••••':esc(chip&&LANG!=='ar'?TR(v):v),t:pw0?'':v,vo:VO.mode==='talk'?1:0});aiSave();aiLog();i.style.height='';
     try{aiAnswer(v)}catch(e){aiSay('حصلت مشكلة وأنا بفهم الرسالة دي. جرّب تكتبها بشكل تاني.')}}
@@ -2663,7 +2678,58 @@
   }
 
   /* home: what to show (everything by default) and hiding the big totals behind an eye */
-  var HOME_SECS=[['hello','👋','رسالة الترحيب'],['salary','💼','سؤال المرتب نزل ولا لسه'],['deps','📈','عائد الشهادات والودائع'],['worth','💎','صافي فلوسك'],['balances','👛','أرصدتك'],['budgetc','🎯','ميزانية الصرف'],['debts','🧾','إجمالي المديونيات'],['after','💼','المتبقي من الدخل'],['actions','⚡','أزرار اصرف وسدّد وحوّل'],['overview','📊','الصورة العامة'],['monthly','📅','الميزانية الشهرية'],['updates','📝','التحديث الشهري من الكشوف'],['payorder','⏰','ترتيب الدفع والمواعيد']];
+  var HOME_SECS=[['hello','👋','رسالة الترحيب'],['salary','💼','سؤال المرتب نزل ولا لسه'],['deps','📈','عائد الشهادات والودائع'],['worth','💎','صافي فلوسك'],['wallet','💳','كروتك (كروت المشتريات)'],['today','⏰','مطلوب منك النهاردة والأسبوع ده'],['balances','👛','أرصدتك'],['budgetc','🎯','ميزانية الصرف'],['debts','🧾','إجمالي المديونيات'],['after','💼','المتبقي من الدخل'],['actions','⚡','أزرار اصرف وسدّد وحوّل'],['overview','📊','الصورة العامة'],['monthly','📅','الميزانية الشهرية'],['updates','📝','التحديث الشهري من الكشوف'],['payorder','⏰','ترتيب الدفع والمواعيد']];
+
+  /* ================= home v3 (dark): header, metal hero, card wallet, what's due, dock — then the rest in the same identity ================= */
+  var H3_BANK={cib:['#1f5fae','#0a2346'],nbe:['#127a57','#063826'],bm:['#a3203a','#4a0b18'],adcb:['#c0162f','#4e0613'],qnb:['#6a2d93','#28103a'],hsbc:['#b0102a','#3d0410'],adib:['#0f6e52','#04291e'],
+    enbd:['#103e7a','#06172e'],fab:['#164e8c','#081d36'],aaib:['#0e5a8e','#04223a'],alex:['#d0263a','#560a14'],bdc:['#1d4a9a','#0a1b3c'],nbk:['#1a4e8f','#091d36'],cae:['#118064','#05322a'],mashreq:['#e2552a','#5e1a08'],citi:['#1e6fb8','#0a2949']};
+  function h3Bank(c){if(c.bankId&&H3_BANK[c.bankId])return H3_BANK[c.bankId];var b=String(c.bank||c.name||'').toLowerCase();
+    var m=[['cib','cib'],['تجاري','cib'],['الاهلي','nbe'],['الأهلي','nbe'],['nbe','nbe'],['مصر','bm'],['adcb','adcb'],['qnb','qnb'],['hsbc','hsbc'],['adib','adib'],['الامارات','enbd'],['enbd','enbd'],['fab','fab'],['aaib','aaib'],['الاسكندريه','alex'],['alex','alex'],['القاهره','bdc'],['nbk','nbk'],['مشرق','mashreq'],['citi','citi']].filter(function(x){return b.indexOf(x[0])>=0})[0];
+    return m?H3_BANK[m[1]]:null}
+  function h3Cur(){return esc(curSym())}
+  function h3Amt(v,mk){return mk?'<span class="h3-mask">••••••</span>':'<span class="num">'+fmt(Math.round(cv(v)))+'</span>'}
+  function h3Head(MK){var nm=(S.profile&&S.profile.name)||'',hr=cairoNow().getHours(),gr=hr<12?'صباح الخير ☀️':hr<18?'مساء الخير 🌤️':'مساء الخير 🌙',ini=(nm.trim()[0]||'؟').toUpperCase();
+    return '<header class="h3-head"><button class="h3-av" data-act="edit-name" aria-label="غيّر اسمك">'+esc(ini)+'</button><div class="h3-hi"><small>'+(nm?'أهلًا · ':'')+gr+' · '+esc(today().toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long'}))+'</small><b class="'+(nm.length>22?'xl':nm.length>14?'lg':'')+'">'+(nm?esc(nm.trim()):'أهلًا بيك')+'</b></div>'+
+      '<button class="h3-eye" data-act="home-mask" aria-label="'+(MK?'إظهار المبالغ':'إخفاء المبالغ')+'" aria-pressed="'+MK+'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'+(MK?'<line x1="3" y1="3" x2="21" y2="21"/>':'')+'</svg></button></header>'}
+  function h3Hero(MK){var W=breakdown('worth'),have=W.rows[0].amt+W.rows[1].amt,lent=W.rows[2].amt,owe=W.rows[3].amt,tot=Math.abs(have)+Math.abs(lent)+Math.abs(owe)||1,neg=W.total<0;
+    var seg=function(v,cl){var w=Math.abs(v)/tot*100;return w>0.4?'<i class="'+cl+'" style="width:'+w.toFixed(2)+'%"></i>':''};
+    return '<section class="h3-hero'+(neg?' neg':'')+'"><div class="h3-hl"><span>صافي فلوسك</span><button class="h3-link" data-act="bd" data-k="worth">التفاصيل</button></div>'+
+      '<button class="h3-big" data-act="bd" data-k="worth" aria-label="صافي فلوسك">'+(MK?'<span class="h3-mask">••••••••</span>':'<span class="num" data-count="'+Math.round(cv(W.total))+'">'+fmt(Math.round(cv(W.total)))+'</span>')+'<small>'+h3Cur()+'</small></button>'+
+      '<div class="h3-bar" aria-hidden="true">'+seg(have,'b-have')+seg(lent,'b-lent')+seg(owe,'b-owe')+'</div>'+
+      '<div class="h3-leg"><button data-act="bd" data-k="balances"><i class="b-have"></i>معاك <b>'+h3Amt(have,MK)+'</b></button>'+(lent?'<button data-act="bd" data-k="lentRem"><i class="b-lent"></i>ليك عند الناس <b>'+h3Amt(lent,MK)+'</b></button>':'')+
+      '<button data-act="bd" data-k="allDebt"><i class="b-owe"></i>عليك <b>'+h3Amt(owe,MK)+'</b></button></div></section>'}
+  function h3Wallet(MK){var C=S.cards.filter(function(c){var e=typeof cardExp==='function'?cardExp(c):null;return !(e&&e.days<-60)});
+    if(!C.length)return '<section class="h3-sec"><div class="h3-sh"><h2>كروتك</h2></div><button class="h3-empty" data-act="new" data-coll="cards">💳 ضيف أول كارت مشتريات، وهتلاقيه هنا بالمتاح وميعاد السداد</button></section>';
+    var cards=C.map(function(c,i){var x=calcCard(c),sh=hShort('cards',c),col=h3Bank(c),lim=n(c.limit),used=hUsed(c),av=Math.max(lim-used,0),p=lim>0?Math.min(used/lim,1):0,late=x.state==='late',bg=col?'background:linear-gradient(140deg,'+col[0]+' 0%,'+col[1]+' 100%)':faceBg(c,i);
+      var due=x.due&&x.rem>0?(late?'<span class="h3-due late">متأخر · ادفع '+(MK?'••':fmt(x.remMin))+'</span>':'<span class="h3-due">السداد '+esc(x.due.toLocaleDateString(LOC(),{day:'numeric',month:'short'}))+' · '+rel(x.days)+'</span>'):'<span class="h3-due ok">مفيش مطلوب دلوقتي</span>';
+      return '<button class="h3-card" style="'+bg+'" data-act="open" data-coll="cards" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+'"><span class="h3-sheen"></span>'+
+        '<span class="h3-ct"><span class="h3-bk" dir="'+tdir(sh.t1)+'">'+esc(sh.t1)+'</span><span class="h3-chip"></span></span>'+
+        '<span class="h3-nm" dir="'+tdir(sh.t2||c.name)+'">'+esc(sh.t2||c.name)+'</span>'+
+        '<span class="h3-l4">'+(sh.l4?'•••• '+esc(sh.l4):'')+'</span>'+
+        '<span class="h3-av2"><small>المتاح</small><b>'+h3Amt(av,MK)+' <small>'+h3Cur()+'</small></b></span>'+
+        '<span class="h3-use"><i style="width:'+(p*100).toFixed(1)+'%;background:'+(p>=0.9?'#ff8c82':p>=0.7?'#f0b955':'#7ee2a8')+'"></i></span>'+
+        '<span class="h3-cf">'+due+'<span class="h3-pc">'+Math.round(p*100)+'% مستخدم</span></span></button>'}).join('');
+    return '<section class="h3-sec"><div class="h3-sh"><h2>كروتك</h2><a class="h3-link" href="#cards">كل الكروت ('+C.length+')</a></div><div class="h3-wallet">'+cards+'</div></section>'}
+  function h3Today(MK){var it=agendaItems().filter(function(i){return i.amt>0&&i.state!=='paid'&&i.state!=='wait'&&i.days<=7}).sort(function(a,b){return a.days-b.days});
+    var due=it.filter(function(i){return i.days<=0}),dsum=sum(due,function(i){return i.amt});
+    if(!it.length){var nx=agendaItems().filter(function(i){return i.amt>0&&i.state!=='paid'&&i.days>7}).sort(function(a,b){return a.days-b.days})[0];
+      return '<section class="h3-sec"><div class="h3-ok"><span class="h3-okc">✓</span><div><b>مفيش دفع مستحق الأسبوع ده</b>'+(nx?'<small>أقرب ميعاد: '+esc(nx.name)+' '+rel(nx.days)+' · '+(MK?'••••':money(nx.amt))+'</small>':'')+'</div></div></section>'}
+    return '<section class="h3-sec"><div class="h3-sh"><h2>مطلوب منك</h2>'+(dsum>0?'<span class="h3-tot">النهاردة '+(MK?'••••':money(dsum))+'</span>':'<span class="h3-tot ok">مفيش حاجة النهاردة</span>')+'</div><div class="h3-due-row">'+
+      it.map(function(i){var cl=i.days<0?'late':i.days===0?'today':'soon';return '<button class="h3-pay '+cl+'" data-act="open" data-coll="'+i.coll+'" data-id="'+esc(i.id)+'"><span class="h3-pd">'+(i.days<0?'متأخر '+(-i.days)+' يوم':i.days===0?'النهاردة':rel(i.days))+'</span><b>'+esc(i.name)+'</b><span class="h3-pa">'+(MK?'••••':money(i.amt))+'</span></button>'}).join('')+'</div></section>'}
+  function homeV3(h,hin){var parts=h.split(/<!--hs:([a-z_]+)-->/),M={};for(var i=1;i<parts.length;i+=2)M[parts[i]]=(M[parts[i]]||'')+parts[i+1];
+    var HH=homeHidden(),on=function(k){return HH.indexOf(k)<0},MK=homeMasked(),B={};
+    B.hello=on('hello')?h3Head(MK):'';B.salary=M.salary||'';B.deps=M.deps||'';B.worth=on('worth')?h3Hero(MK):'';B.wallet=on('wallet')?h3Wallet(MK):'';
+    B.actions=M.actions?'<div class="h3-dock">'+M.actions+'</div>':'';B.today=on('today')?h3Today(MK):'';
+    ['balances','budgetc','debts','after','overview','monthly','updates','payorder'].forEach(function(k){B[k]=M[k]||''});
+    Object.keys(M).forEach(function(k){if(k.indexOf('x_')===0)B[k]=M[k]});
+    var custom=Array.isArray(S.homeOrder)&&S.homeOrder.length,order=custom?homeOrderKeys():['hello','worth','wallet','actions','salary','deps','today','debts','after','balances','budgetc','overview','monthly','updates','payorder'].concat(Object.keys(B).filter(function(k){return k.indexOf('x_')===0}));
+    var out='';order.forEach(function(k){if(B[k])out+=B[k]});
+    if(hin)setTimeout(h3Count,60);
+    return '<div class="hv2 h3'+(hin||'')+'">'+out+'</div>'}
+  /* the hero number counts up once when the app opens */
+  function h3Count(){var el=document.querySelector('.h3-big [data-count]');if(!el)return;var to=+el.getAttribute('data-count'),t0=performance.now(),D=900;
+    try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
+    (function f(t){var k=Math.min((t-t0)/D,1),e=1-Math.pow(1-k,3);el.textContent=fmt(Math.round(to*e));if(k<1)requestAnimationFrame(f)})(t0)}
   function homeHidden(){return Array.isArray(S.homeHide)?S.homeHide:[]}
   /* order of the home sections: markers split the page into blocks, then they are laid out in the saved order */
   function hs(k){return '<!--hs:'+k+'-->'}
@@ -2673,7 +2739,7 @@
     var parts=h.split(/<!--hs:([a-z_]+)-->/),pre=parts[0],M={};for(var i=1;i<parts.length;i+=2)M[parts[i]]=(M[parts[i]]||'')+parts[i+1];
     var top=String(M._top||''),out='';
     homeOrderKeys().forEach(function(k){if(M[k])out+=M[k]});
-    return pre+top+out+'</section>'}
+    return pre+top+out+(top?'</section>':'')}
   function homeVisible(){var HH=homeHidden(),AA=homeAdded(),lab={};HOME_SECS.forEach(function(x){lab[x[0]]=x});HOME_ADD.forEach(function(x){lab['x_'+x[0]]=x});
     return homeOrderKeys().filter(function(k){return k.indexOf('x_')===0?AA.indexOf(k.slice(2))>=0:HH.indexOf(k)<0}).map(function(k){return {k:k,x:lab[k]}})}
   function homeOrderHtml(){var V=homeVisible();if(V.length<2)return '';
@@ -2803,8 +2869,11 @@
       (up.length?'<div class="list">'+up.map(itemRow).join('')+'</div>':'<div class="list"><div class="empty">مفيش مواعيد تانية خلال الشهر الجاي.</div></div>')+'</section>';
     if(!on('payorder'))h=hp;
     h+=homeExtras();
-    return homeArrange(h);
+    var hin=HV_IN?' hv2-in':'';HV_IN=false;
+    if(document.documentElement.getAttribute('data-theme')==='dark'&&!document.documentElement.getAttribute('data-skin'))return homeV3(h,hin);
+    return '<div class="hv2'+hin+'">'+homeArrange(h)+'</div>';
   }
+  var HV_IN=true;
   function itemRow(i){
     var pill=i.state==='wait'?'<span class="pill wait">بانتظار الكشف</span>':i.state==='paid'?'<span class="pill paid">اتدفع</span>':i.state==='inc'?'<span class="pill inc">قبض '+rel(i.days)+'</span>':'<span class="pill '+i.state+'">'+rel(i.days)+'</span>';
     if(i.coll==='cards'&&i.amt===0&&i.state!=='wait')pill='<span class="pill minok">الحد الأدنى اتسدد</span>';
@@ -3365,14 +3434,47 @@
   function micDict(){VO.mode='dict';VO.retry=0;var i=document.getElementById('ai-in'),base=i?i.value.replace(/\s+$/,''):'';
     micListen(function(txt){var el=document.getElementById('ai-in');if(el&&txt){el.value=((base?base+' ':'')+txt).trim();AI.draft=el.value;try{el.focus()}catch(e){}}VO.mode='';micUi();if(!txt)toast('ما سمعتش حاجة، جرّب تاني')},
       function(p){var el=document.getElementById('ai-in');if(el)el.value=((base?base+' ':'')+p).trim()})}
-  function voPlain(h){var d=document.createElement('div');d.innerHTML=String(h).replace(/<button[\s\S]*?<\/button>/g,' ').replace(/<br\s*\/?>/g,'. ');var t=(d.textContent||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu,'').replace(/\s+/g,' ').trim();return t.length>420?t.slice(0,420)+'…':t}
   function ttsOk(){return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance)}
   function voPrime(){try{if(ttsOk()){var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}}   /* iOS only speaks after a tap */
-  function voSpeak(text,then,lg){var fired=false,go=function(){if(fired)return;fired=true;clearTimeout(VO.spT);if(VO.mode!=='talk')return;VO.st='';micUi();if(then)then()};
+  /* ---- speaking: the best voice on the phone, text prepared for the ear, sentences queued back to back ---- */
+  var VO_V={};
+  function voVoice(L){if(VO_V[L]!==undefined)return VO_V[L];var vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[],pre=L.slice(0,2).toLowerCase(),best=null,bs=-1;
+    vs.forEach(function(v){var vl=String(v.lang||'').replace('_','-').toLowerCase();if(vl.indexOf(pre)!==0)return;var sc=0;if(vl===L.toLowerCase())sc+=6;else if(pre==='ar'&&/ar-(sa|ae|kw|qa|jo)/.test(vl))sc+=2;
+      if(/natural|neural|online|premium|enhanced|wavenet/i.test(v.name))sc+=5;if(/google/i.test(v.name))sc+=3;if(v.localService===false)sc+=1;if(/compact|espeak/i.test(v.name))sc-=4;if(sc>bs){bs=sc;best=v}});
+    if(vs.length)VO_V[L]=best;return best}
+  try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){VO_V={}}}catch(e){}
+  /* Egyptian words written so the Arabic voice says them the Egyptian way */
+  var VO_TASH=[['دلوقتي','دِلْوَقْتِي'],['النهارده','النَّهارْدَه'],['النهاردة','النَّهارْدَه'],['امبارح','إمْبارِح'],['بكره','بُكْرَه'],['بكرة','بُكْرَه'],['عشان','عَشان'],['علشان','عَلَشان'],['ايه','إيه'],['إيه','إيه'],['ازاي','إزّاي'],['ليه','لِيه'],
+    ['فين','فِين'],['امتى','إمْتَى'],['مفيش','مَفِيش'],['فيه','فِيه'],['كده','كِدَه'],['عايز','عايِز'],['هجهّزلك','هَجَهِّزْلَك'],['هجهزلك','هَجَهِّزْلَك'],['هفتحلك','هَفْتَحْلَك'],['متملية','مِتْمَلِّيَة'],['راجعها','راجِعْها'],['وسجّل','وِسَجِّل'],['سجّل','سَجِّل'],
+    ['صرفت','صَرَفْت'],['حولت','حَوِّلْت'],['دفعت','دَفَعْت'],['استلفت','اسْتَلَفْت'],['سلفت','سَلِّفْت'],['فلوسك','فْلوسَك'],['فلوس','فْلوس'],['عليك','عَلِيك'],['عليا','عَلَيّا'],['ليك','لِيك'],['معاك','مَعاك'],['فاضل','فاضِل'],['الباقي','الباقِي'],
+    ['لسه','لِسَّه'],['خلاص','خَلاص'],['تمام','تَمام'],['كويس','كُوَيِّس'],['حاجة','حاجَة'],['هتتدفع','هَتِتْدِفِع'],['اتسجلت','اتْسَجِّلِت'],['اتسجل','اتْسَجِّل'],['بتاع','بِتاع'],['بتاعك','بِتاعَك'],['قدامك','قُدّامَك'],['الشهر','الشَّهْر'],['اللي','اللِّي']];
+  var VO_MON={ar:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],en:['January','February','March','April','May','June','July','August','September','October','November','December'],fr:['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']};
+  function voSpeech(h,lg){lg=lg||aiPref()||LANG;var d=document.createElement('div');d.innerHTML=String(h||'').replace(/<span class="ai-who">[\s\S]*?<\/span>/,'').replace(/<button[\s\S]*?<\/button>/g,' ').replace(/<(br|\/p|\/div|\/li|\/h\d)\s*\/?>/gi,'\n');
+    var t=(d.textContent||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/[•·▪●◦]/g,'\n').replace(/[←→↳⬆⬇▲▼✓✔️⚠]/g,' ');
+    var L=t.split(/\n+/).map(function(x){return x.replace(/\s+/g,' ').trim()}).filter(function(x){return x.length>1}),more=false;if(L.length>6){L=L.slice(0,5);more=true}
+    t=L.map(function(x){return /[.!?؟:،,]$/.test(x)?x:x+'.'}).join(' ');
+    t=t.replace(/(\d),(?=\d{3}\b)/g,'$1').replace(/(\d),(?=\d{3}\b)/g,'$1').replace(/\b(\d{3,})\.(\d+)\b/g,function(m){return String(Math.round(+m))});
+    var M=VO_MON[lg]||VO_MON.ar;t=t.replace(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g,function(m,a,b,c){var mi=+b-1;if(mi<0||mi>11)return m;var y=+c===today().getFullYear()?'':' '+c;return lg==='en'?M[mi]+' '+(+a)+y:(+a)+' '+M[mi]+y});
+    if(lg==='en')t=t.replace(/(\d)\s*(ج|EGP)(?=[\s.,،;)]|$)/g,'$1 pounds').replace(/(\d)\s*%/g,'$1 percent');
+    else if(lg==='fr')t=t.replace(/(\d)\s*(ج|EGP)(?=[\s.,،;)]|$)/g,'$1 livres').replace(/(\d)\s*%/g,'$1 pour cent');
+    else t=t.replace(/(\d)\s*ج(?=[\s.,،؛)]|$)/g,'$1 جنيه').replace(/(\d)\s*(%|٪)/g,'$1 في المية').replace(/(^|\s)ج(?=[\s.,،]|$)/g,'$1جنيه');
+    t=t.replace(/[()\[\]"“”«»*_]/g,'، ').replace(/\s*([،,!?؟:;]|\.(?!\d))\s*/g,'$1 ').replace(/([.،,:;])(\s*[.،,:;])+/g,'$1').replace(/[،,]\s*$/,'.').replace(/\s+/g,' ').trim();
+    if(lg!=='en'&&lg!=='fr')VO_TASH.forEach(function(w){t=t.replace(new RegExp('(^|[\\s،.,])'+w[0]+'(?=[\\s،.,!?؟:]|$)','g'),'$1'+w[1])});
+    if(t.length>700){var cut=t.slice(0,700),k=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('، '));t=(k>200?cut.slice(0,k+1):cut);more=true}
+    if(more)t+=lg==='en'?' The rest is on your screen.':lg==='fr'?' Le reste est à l\'écran.':' والباقي قدامك على الشاشة.';
+    return t}
+  function voPlain(h){return voSpeech(h)}
+  function voChunks(t){var out=[],cur='';String(t).replace(/([.!?؟])\s+/g,'$1\u0001').split('\u0001').forEach(function(sn){if((cur+' '+sn).length>180&&cur){out.push(cur);cur=sn}else cur=cur?cur+' '+sn:sn});if(cur)out.push(cur);
+    return out.reduce(function(a,c){if(c.length<=220)a.push(c);else c.replace(/([،,])\s+/g,'$1\u0001').split('\u0001').forEach(function(x){a.push(x)});return a},[])}
+  function voSpeak(text,then,lg){var fired=false,ka=0,go=function(){if(fired)return;fired=true;clearTimeout(VO.spT);clearInterval(ka);if(VO.mode!=='talk')return;VO.st='';micUi();if(then)then()};
     if(!ttsOk()||!text){go();return}
-    try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text),L=srLang(lg),vs=(speechSynthesis.getVoices()||[]).filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(L.slice(0,2))===0});
-      u.lang=L;var best=vs.filter(function(v){return v.lang===L})[0]||vs[0];if(best)u.voice=best;u.rate=1;u.onend=go;u.onerror=go;VO.st='speak';micUi();speechSynthesis.speak(u);
-      VO.spT=setTimeout(go,Math.min(25000,2500+text.length*70))}catch(e){go()}}
+    try{speechSynthesis.cancel();var L=srLang(lg),v=voVoice(L),C=voChunks(text);if(!C.length){go();return}
+      C.forEach(function(c,i){var u=new SpeechSynthesisUtterance(c);u.lang=v&&v.lang?v.lang:L;if(v)u.voice=v;u.rate=L.indexOf('ar')===0?1.03:1;u.pitch=1;u.volume=1;
+        if(i===C.length-1)u.onend=go;u.onerror=function(e){if(e&&e.error==='interrupted'||e&&e.error==='canceled')return;if(i===C.length-1)go()};speechSynthesis.speak(u)});
+      VO.st='speak';micUi();
+      /* desktop Chrome stops long speech after ~15s unless nudged; phones don't need it */
+      if(!/Android|iPhone|iPad/i.test(navigator.userAgent))ka=setInterval(function(){if(speechSynthesis.speaking&&!speechSynthesis.paused){speechSynthesis.pause();speechSynthesis.resume()}},9000);
+      VO.spT=setTimeout(go,Math.min(60000,3000+text.length*95))}catch(e){go()}}
   function voTalk(){VO.mode='talk';VO.retry=0;voPrime();voTurn()}
   function voTurn(){if(VO.mode!=='talk')return;if(sheet&&sheet.mode!=='ai'){VO.st='wait';micUi();return}
     micListen(function(txt){if(VO.mode!=='talk')return;
