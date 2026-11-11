@@ -1560,10 +1560,11 @@
     window.addEventListener('message',function(e){if(e.source!==f.contentWindow)return;var m=e.data||{};if(m.t==='hi'){clearTimeout(to);res(f);return}
       var q=OCRQ[m.id];if(!q)return;if(m.t==='p'){if(q.p)q.p(+m.p||0);return}delete OCRQ[m.id];if(m.t==='ok')q.res(String(m.text||''));else{OCRF=null;try{f.remove()}catch(e2){}q.rej(new Error('net'))}});
     f.src='ocr.html';document.body.appendChild(f)});return OCRF}
-  function ocrRun(src,onProg){var img=src&&src.toDataURL?src.toDataURL('image/png'):String(src||'');
-    return ocrFrame().then(function(f){return new Promise(function(res,rej){var id=++OCRN;OCRQ[id]={res:res,rej:rej,p:onProg};f.contentWindow.postMessage({t:'ocr',id:id,img:img},'*')})})}
+  function ocrRun(src,onProg,lang){var img=src&&src.toDataURL?src.toDataURL('image/png'):String(src||'');
+    return ocrFrame().then(function(f){return new Promise(function(res,rej){var id=++OCRN;OCRQ[id]={res:res,rej:rej,p:onProg};f.contentWindow.postMessage({t:'ocr',id:id,img:img,lang:lang||''},'*')})})}
+  var OCRL=null;
   function ocrFile(file,onProg){return fileImg(file).then(function(im){
-    return ocrRun(prepImg(im,false),onProg).then(function(t){var cd=parseCard(t);if(cd.number)return t;
+    return ocrRun(prepImg(im,false),onProg).then(function(t){OCRL={a:t,im:im,at:Date.now()};var cd=parseCard(t);if(cd.number)return t;
       return ocrRun(prepImg(im,true),onProg).then(function(t2){return t+'\n'+t2})})})}
   var BANK_KEYS={nbe:['NATIONAL BANK OF EGYPT','NBE','AHLY','ALAHLY','الاهلي'],bm:['BANQUE MISR','BANK MISR','بنك مصر'],bdc:['BANQUE DU CAIRE','BANK OF CAIRO','بنك القاهره'],cib:['CIB','COMMERCIAL INTERNATIONAL BANK'],
     alex:['ALEXBANK','ALEX BANK','BANK OF ALEXANDRIA'],hdb:['HDB','HOUSING & DEVELOPMENT','HOUSING AND DEVELOPMENT'],ub:['UNITED BANK','THE UNITED BANK'],abe:['AGRICULTURAL BANK','ABE'],ealb:['EALB'],idb:['INDUSTRIAL DEVELOPMENT','IDB'],
@@ -2258,6 +2259,7 @@
     return aiSay('<b>'+esc(o.name)+'</b><div class="actions">'+op+'</div>')}
   function aiUnify(raw){var s=String(raw==null?'':raw);if(!s.trim())return s;try{if(isFranco(s))s=franco2ar(s);s=phUnify(s)}catch(e){}return s}
   function aiAnswer(raw){
+    if(!(AI.pend&&AI.pend.kind==='pdfpw')){var smT=bankSms(raw,1);if(smT)return smsSay(smsUniq(smT))}
     raw=aiUnify(raw);var t=nz(raw), amt=aiAmount(t), H;
     if(AI.pend&&AI.pend.kind==='pdfpw'){var pf=AI.pend.file;AI.pend=null;aiFile(pf,raw.trim());return}
     function bdBtn(k,l){return aiAct(l||'افتح التفاصيل',function(){sheet={mode:'bd',k:k,back:{mode:'ai'}};renderSheet()})}
@@ -2513,6 +2515,117 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
           if(v!=null&&v!==''){var num=+v;if(t!=='s'&&t!=='inlineStr'&&t!=='str'&&isFinite(num)&&num>20000&&num<80000&&/s="\d+"/.test(a)&&Math.round(num)===num){var d=new Date(Date.UTC(1899,11,30)+num*864e5);v=('0'+d.getUTCDate()).slice(-2)+'/'+('0'+(d.getUTCMonth()+1)).slice(-2)+'/'+d.getUTCFullYear()}cells.push(xmlText(String(v)))}return ''});
         if(cells.length)rows.push(cells.join('  '));return ''})});
       if(!rows.length)throw new Error('empty');return rows.join('\n')})}
+  /* ================= bank SMS / notification reader: one screenshot or pasted text → every transaction in it ================= */
+  function smsNorm(s){return String(s||'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/٫/g,'.').replace(/٬/g,',')
+    .replace(/[ً-ْـ‎‏‪-‮]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ \t\r\n]+/g,' ')}
+  var SMS_START=/(?=(?:^|\s)(?:تم\s|عمليه\s+(?:شراء|سحب|تحويل)|Your\s+(?:account|a\/c|card|credit|debit|instant)|Dear\s+(?:customer|client|valued)|Instant\s+transfer|IPN\s+transfer|Transaction\s+of|Purchase\s+of|A\s+(?:transaction|purchase|transfer|withdrawal)|EGP\s?\d[\d,.]*\s+(?:has|was|were|is)))/i;
+  var SMS_MONEY=/(بمبلغ|مبلغ|بقيمه|EGP|L\.?E\b|جم|ج\.م|جنيه)/i;
+  var SMS_MARK=/(حسابك|حسابكم|بطاقتك|بطاقتكم|كارتك|رقم مرجعي|الرقم المرجعي|رقم المرجع|الرصيد المتاح|رصيدكم|your (?:account|a\/c|card)|a\/c|account no|card ending|available balance|avl\.? bal|ref(?:erence)?\s*(?:no|#|:)|instapay|انستاباي|تحويل لحظي|IPN|x{2,}\d{2,4}|\*{2,}\d{2,4})/i;
+  function smsAmt(s){
+    var R=[/(?:بمبلغ|مبلغ|بقيمه|قيمته|amount(?:\s+of)?|\bof)\s*:?\s*(?:EGP|L\.?E\.?|جم|ج\.م\.?|جنيها|جنيه|ج)?\s*(\d[\d,]*(?:\.\d+)?)/ig,/(?:EGP|L\.?E\.?)\s*(\d[\d,]*(?:\.\d+)?)/ig,/(\d[\d,]*(?:\.\d+)?)\s*(?:EGP|L\.?E\b|جم|ج\.م|جنيها|جنيه|ج(?=[\s.,،]|$))/ig];
+    for(var i=0;i<R.length;i++){var m;R[i].lastIndex=0;while((m=R[i].exec(s))){var pre=s.slice(Math.max(0,m.index-28),m.index+String(m[0]).indexOf(m[1]));
+      if(/(رصيد|balance|bal\b|bal\.|المتاح|available|limit|الحد|حد )/i.test(pre))continue;
+      var raw=m[1].replace(/,(?=\d{3}(?!\d))/g,'').replace(/,/g,'.'),v=parseFloat(raw);if(!(v>0)||v>=1e8||/^\d{9,}$/.test(raw))continue;return {v:Math.round(v*100)/100,at:m.index+m[0].length}}}
+    return null}
+  function smsCut(x){x=String(x||'').replace(/^[\s:،,.-]+/,'').split(/\s+(?:رقم مرجعي|رقم المرجع|الرقم المرجعي|مرجع|ref\b|reference|يوم|بتاريخ|تاريخ|on\s+\d|at\s+\d|الساعه|في\s+\d|بنجاح|عن طريق|via|using|برقم|رقم|الرصيد|رصيد|avl|available|balance|للاستفسار|for\s+more|call)(?=[\s.:،,]|$)|[.،,;؛\n]|\s\d{1,2}[-\/]\d{1,2}|\s\d{1,2}:\d{2}/i)[0].trim();
+    if(/^(حساب|your|you|بطاقت|كارت|account|card)/i.test(x))return '';
+    var w=x.split(/\s+/).filter(function(k){return /^[*•]*[A-Za-z0-9][A-Za-z0-9.'*•-]*$/.test(k)&&/[A-Za-z]{2}|[A-Za-z][*•]/.test(k)||/^[\u0621-\u064A]{2,}$/.test(k)});
+    while(w.length>1&&/^[a-z]{1,2}$/.test(w[w.length-1]))w.pop();return w.slice(0,5).join(' ').slice(0,40)}
+  var SMS_STRONG=/(حسابك|حسابكم|بطاقتك|بطاقتكم|رقم مرجعي|الرقم المرجعي|رقم المرجع|الرصيد المتاح|رصيدكم|your (?:account|a\/c|card)|a\/c|card ending|available balance|avl\.? bal|ref(?:erence)?\s*(?:no|#|:)|x{2,}\d{2,4}|\*{2,}\d{2,4})/i;
+  function bankSms(text,typed){
+    var T=smsNorm(text);if(!(typed?SMS_STRONG:SMS_MARK).test(T)||!SMS_MONEY.test(T))return null;
+    var segs=[];T.split(SMS_START).forEach(function(s){s=s.trim();var guard=0;
+      while(guard++<20){var a1=s.search(/(بمبلغ|مبلغ|بقيمه)/),a2=a1>=0?s.slice(a1+4).search(/(بمبلغ|مبلغ|بقيمه)/):-1;if(a2<0)break;var cutAt=-1,re=/\d{1,2}:\d{2}/g,mm;re.lastIndex=a1;while((mm=re.exec(s))){if(mm.index>a1&&mm.index<a1+4+a2){cutAt=mm.index+mm[0].length}}
+        if(cutAt<0)break;segs.push(s.slice(0,cutAt));s=s.slice(cutAt).trim()}
+      segs.push(s)});segs=segs.filter(function(s){return s.length>12});
+    var out=[],bankAll=findBank(text)||'';
+    segs.forEach(function(s){
+      if(/(OTP|رمز التحقق|كود التحقق|كلمه المرور|كلمه السر|لمره واحده|verification code|one.time|passcode|password)/i.test(s))return;
+      var A=smsAmt(s);if(!A)return;
+      var failed=/(لم تتم|لم يتم|غير ناجح|مرفوض|تم رفض|declined|failed|unsuccessful|insufficient|رصيد غير كاف)/i.test(s);
+      var dir='';
+      if(/(من حساب(?:كم|ك)|من بطاق(?:تكم|تك)|from your|debited|withdrawn|charged|spent|purchase|تم خصم|تم سحب|تم شراء|عمليه شراء|عمليه سحب|استخدام بطاق|تم تنفيذ تحويل|تحويل صادر|sent to|paid to|transferred to)/i.test(s))dir='out';
+      else if(/((?:الي|في|ل)\s?حساب(?:كم|ك)|(?:الي|في|ل)\s?بطاق(?:تكم|تك)|to your|credited|received|deposit|refund|reversal|reversed|تم اضافه|تم ايداع|تحويل وارد|تم استلام|تم استرداد|تم رد|incoming)/i.test(s))dir='in';
+      else if(/(خصم|سحب|شراء|سداد|دفع|تحويل الي)/.test(s))dir='out';
+      else if(/(اضافه|ايداع|وارد|استلام)/.test(s))dir='in';
+      if(!dir)return;
+      var l4=(s.match(/(?:x{2,}|\*{2,}|•{2,}|\.{3,})\s?(\d{3,4})(?!\d)/i)||s.match(/(?:ending(?:\s+with|\s+in)?|المنتهي(?:ه)?\s+ب|ينتهي\s+ب|منتهي\s+ب|حساب(?:كم|ك)?\s+رقم\s*\S*?|بطاق(?:تكم|تك)\s+رقم\s*\S*?)\s*(\d{4})(?!\d)/i)||[])[1]||'';
+      var rest=s.slice(A.at),cp='',m;
+      if(dir==='in'){m=rest.match(/(?:\sمن|^من|\bfrom)\s+(.+)/i);if(m)cp=smsCut(m[1])}
+      else{m=rest.match(/(?:\sالي|^الي|\sلدي|^لدي|\sعند|\bto|\bat)\s+(.+)/i)||rest.match(/(?:\sل|^ل)(?!حساب)\s*([A-Za-z].+)/);if(m)cp=smsCut(m[1])}
+      if(!cp){var m3=rest.match(/^\s*(?:جم|ج\.م|جنيها|جنيه|EGP|L\.?E)?\.?\s*(?:من|الي|لدي|عند|from|to|at)?\s*([A-Za-z*•][A-Za-z0-9 .'*•-]{2,})/i);if(m3)cp=smsCut(m3[1])}
+      if(!cp){var m2=s.slice(0,A.at-String(A.v).length).match(/(?:من|from|الي|to|لدي|at)\s+([A-Za-z؀-ۿ][^\d]{2,40}?)\s+(?:بمبلغ|مبلغ|بقيمه|EGP)/i);if(m2)cp=smsCut(m2[1])}
+      var d=s.match(/(?:^|\D)(20\d{2})[-\/.](\d{1,2})[-\/.](\d{1,2})(?!\d)/),dt='';
+      if(d&&+d[2]>=1&&+d[2]<=12&&+d[3]>=1&&+d[3]<=31)dt=iso(new Date(+d[1],+d[2]-1,+d[3]));
+      if(!dt){d=s.match(/(?:^|\D)(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d{2}|\d{2})(?!\d)/);if(d){var y=+d[3];if(y<100)y+=2000;var mo=+d[2],dd=+d[1];if(mo>=1&&mo<=12&&dd>=1&&dd<=31)dt=iso(new Date(y,mo-1,dd))}}
+      var tm=(s.match(/(?:^|\D)([01]?\d|2[0-3]):([0-5]\d)(?!\d)/)||[]);
+      var bal=s.match(/(?:الرصيد(?:\s+المتاح|\s+الحالي)?|رصيدكم|رصيدك|available balance|avl\.? bal\.?|balance)\s*(?:هو|is|:)?\s*(?:EGP|L\.?E\.?|جم)?\s*(\d[\d,]*(?:\.\d+)?)/i);
+      var via=/(لحظي|instapay|انستاباي|IPN)/i.test(s)?'إنستاباي':/(شراء|استخدام بطاق|purchase|POS|لدي\s|\bat\s+[A-Z])/i.test(s)?'شراء':/(سحب نقدي|ATM|صراف)/i.test(s)?'سحب':/(ايداع|deposit)/i.test(s)?'إيداع':'تحويل';
+      out.push({dir:dir,amt:A.v,l4:l4,cp:cp,date:dt,time:tm[1]?(tm[1].length<2?'0':'')+tm[1]+':'+tm[2]:'',bal:bal?parseFloat(bal[1].replace(/,/g,'')):null,via:via,failed:failed,bank:findBank(s)||bankAll,usd:/(USD|\$|دولار)/.test(s)})});
+    return out.length?out:null}
+  /* who is it: my own account, someone I lent / owe, or the account holder itself */
+  function smsHolding(r){var L=hList();
+    if(r.l4){var a=L.filter(function(h){var o=h.o;return [o.accountNo,o.cardNumber,o.number,o.iban,o.walletNo,o.phone].some(function(x){var d0=digits(x);return d0.length>=4&&d0.slice(-r.l4.length)===r.l4})||(hShort(h.coll,h.o).l4||'')===r.l4});if(a.length)return a[0]}
+    if(r.bank){var b=L.filter(function(h){return h.coll!=='cards'&&!h.cash&&findBank((h.o.bank||'')+' '+(h.o.name||''))===r.bank});if(b.length===1)return b[0];var b2=b.filter(function(h){return h.coll==='accounts'});if(b2.length)return b2[0]}
+    return null}
+  function smsToks(s){return nz(String(s||'').replace(/[*•]+/g,'').toLowerCase()).split(/[^a-z0-9؀-ۿ]+/i).filter(function(x){return x.length>1})}
+  function smsPerson(cp,list){var c=smsToks(cp);if(!c.length)return null;var best=null,bs=0;
+    (list||[]).forEach(function(p){var t=smsToks(p.name);if(!t.length||!(phSame(c[0],t[0])||c[0]===t[0]))return;var sc=1;if(t[1]){if(c[1]&&(phSame(c[1],t[1])||c[1]===t[1]))sc=3;else return}if(sc>bs){bs=sc;best=p}});return best}
+  function smsSelf(cp){var c=smsToks(cp);if(!c.length)return false;var me=smsToks((S.profile&&S.profile.name)||'').concat(['عبهادي']);return me.some(function(x){return x.length>2&&(phSame(c[0],x)||c[0]===x)})}
+  function smsOwn(cp,H){var c=smsToks(cp);if(!c.length)return null;return hList().filter(function(h){return (!H||h.key!==H.key)&&!h.cash&&smsToks(h.o.name).some(function(x){return x.length>2&&(phSame(c[0],x)||c[0]===x)})})[0]||null}
+  function smsDup(r,H){return (S.reports||[]).some(function(t){if(t.date!==r.date||Math.abs(Math.abs(n(t.amount))-r.amt)>0.009)return false;return !H||JSON.stringify(t).indexOf(H.o.id)>=0})}
+  function smsSay(rows,src){
+    AI.lg=aiPref()||LANG;var K=uid(),H0=null;rows.forEach(function(r){r.H=smsHolding(r);if(r.H&&!H0)H0=r.H;if(!r.date)r.date=iso(today())});
+    rows.forEach(function(r){if(!r.H)r.H=H0;r.dup=!r.failed&&smsDup(r,r.H);
+      var lent=(S.lent||[]).filter(function(d){return calcDebt(d).rem>0}),debts=(S.debts||[]).filter(function(d){return calcDebt(d).rem>0});
+      var o=[];if(r.dir==='in'){var lp=smsPerson(r.cp,lent),self=smsSelf(r.cp),own=smsOwn(r.cp,r.H);r.src=own;
+        if(lp)o.push(['lent:'+lp.id,esc(lp.name)+' رجّعلي من السلفة']);
+        o.push(['xin','تحويل من حساب ليا'+(own?' ('+esc(hName(own.coll,own.o))+')':'')]);o.push(['add','فلوس داخلة (دخل)']);
+        lent.forEach(function(d){if(!lp||d.id!==lp.id)o.push(['lent:'+d.id,esc(d.name)+' رجّعلي من السلفة'])});
+        o.push(['borrow','استلفتهم من '+(r.cp?esc(r.cp.split(' ').slice(0,2).join(' ')):'حد')]);
+        r.def=lp?'lent:'+lp.id:(self||own)?'xin':'add'}
+      else{var dp=smsPerson(r.cp,debts),self2=smsSelf(r.cp),own2=smsOwn(r.cp,r.H),cdp=r.cp?S.cards.filter(function(c){var t=smsToks(c.name+' '+(c.bank||''));return smsToks(r.cp).some(function(x){return x.length>2&&t.indexOf(x)>=0})})[0]:null;r.dst=own2;
+        o.push(['xout','تحويل لحساب ليا'+(own2?' ('+esc(hName(own2.coll,own2.o))+')':'')]);o.push(['spend','صرف / دفع']);
+        if(dp)o.push(['debt:'+dp.id,'سددت لـ '+esc(dp.name)]);
+        S.cards.forEach(function(c){o.push(['card:'+c.id,'سداد كارت '+esc(c.name)])});
+        debts.forEach(function(d){if(!dp||d.id!==dp.id)o.push(['debt:'+d.id,'سددت لـ '+esc(d.name)])});
+        o.push(['lend','سلّفتهم لـ '+(r.cp?esc(r.cp.split(' ').slice(0,2).join(' ')):'حد')]);
+        r.def=dp?'debt:'+dp.id:(self2||own2)?'xout':cdp?'card:'+cdp.id:'spend'}
+      r.opts=o});
+    var ok=rows.filter(function(r){return !r.failed}),inS=sum(ok.filter(function(r){return r.dir==='in'}),function(r){return r.amt}),outS=sum(ok.filter(function(r){return r.dir==='out'}),function(r){return r.amt});
+    var bk=rows[0].bank?bankById(rows[0].bank):null,last=rows.filter(function(r){return r.bal!=null}).slice(-1)[0];
+    var h='📩 لقيت <b>'+rows.length+'</b> '+(rows.length===1?'عملية':'عمليات')+' في الرسايل'+(H0?' على <b>'+esc(hName(H0.coll,H0.o))+'</b>':' من '+(bk?esc(bk.s):'البنك')+(rows[0].l4?' (حساب •••'+esc(rows[0].l4)+')':''))+':'+
+      '<div class="smsl">'+rows.map(function(r,i){return '<div class="smsr'+(r.failed?' off':'')+'"><label><input type="checkbox" id="smc-'+K+'-'+i+'"'+(r.failed||r.dup?'':' checked')+(r.failed?' disabled':'')+'> '+
+        '<b dir="ltr" class="'+(r.dir==='in'?'pos':'neg')+'">'+(r.dir==='in'?'+':'−')+fmt(r.amt)+(r.usd?' $':'')+'</b> '+(r.dir==='in'?'من ':'لـ ')+(r.cp?'<bdi>'+esc(r.cp)+'</bdi>':'—')+
+        '<span class="fine sm-meta">'+esc(r.via)+' · '+dShort(r.date)+(r.time?' '+r.time:'')+(r.failed?' · مرفوضة، مش هتتسجل':'')+(r.dup?' · شكلها متسجلة قبل كده':'')+'</span></label>'+
+        (r.failed?'':'<select class="in" id="sms-'+K+'-'+i+'" aria-label="نوع العملية">'+r.opts.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===r.def?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>')+'</div>'}).join('')+'</div>'+
+      '<span class="fine">داخل '+fmt(inS)+' · خارج '+fmt(outS)+' · الصافي '+(inS-outS>=0?'+':'−')+fmt(Math.abs(inS-outS))+(last?' · رصيدك حسب آخر رسالة '+fmt(last.bal):'')+(H0?'':' · ما عرفتش الحساب، هتختاره في كل عملية')+'</span>'+
+      '<br><span class="fine">غيّر نوع أي عملية من القايمة، وشيل علامة اللي مش عايز تسجّله. هفتحلك كل واحدة متملية تراجعها وتسجّل.</span>'+
+      '<div class="actions">'+aiAct('سجّل المختار',function(){
+        var items=[];rows.forEach(function(r,i){var cb=document.getElementById('smc-'+K+'-'+i),se=document.getElementById('sms-'+K+'-'+i);if(r.failed||(cb&&!cb.checked))return;var a=smsItem(r,se?se.value:r.def);if(a)items.push(a)});
+        if(!items.length)return aiSay('ما اخترتش أي عملية.');aiqStart(items)},1)+'</div>';
+    aiSay(h)}
+  function smsItem(r,k){var H=r.H,amt=String(r.amt),who=r.cp||'',nm=who.split(' ').slice(0,3).join(' '),note=(r.via==='إنستاباي'?'إنستاباي ':'')+(r.dir==='in'?(nm?'من '+nm:'وارد'):(nm?'لـ '+nm:'صادر')),hn=H?esc(hName(H.coll,H.o)):'',a=null,p;
+    var base=mny(r.amt)+(nm?(r.dir==='in'?' من ':' لـ ')+'<bdi>'+esc(nm)+'</bdi>':'');
+    if(k==='add')a={d:'⬇️ '+base+(hn?' دخلت '+hn:''),run:function(){openMove('add',{to:H?H.key:'',amt:amt,note:note,date:r.date})}};
+    else if(k==='xin')a={d:'🔁 '+base+(hn?' على '+hn:''),run:function(){openMove('xfer',{from:r.src?r.src.key:'',to:H?H.key:'',amt:amt,note:note,date:r.date})}};
+    else if(k==='xout')a={d:'🔁 '+base+(hn?' من '+hn:''),run:function(){openMove('xfer',{from:H?H.key:'',to:r.dst?r.dst.key:'',amt:amt,note:note,date:r.date})}};
+    else if(k==='spend')a={d:'💸 '+base+(hn?' من '+hn:''),run:function(){openMove('spend',{from:H?H.key:'',amt:amt,note:note,date:r.date,kind:catGuess(who)||MV_KINDS[MV_KINDS.length-1]})}};
+    else if(k==='lend')a={d:'🤝 سلّفت '+base,run:function(){openForm('lent',null,{name:nm,amount:r.amt,src:DSRC.lent[0][1],to:H?H.key:'',notes:note})}};
+    else if(k==='borrow')a={d:'🤝 استلفت '+base,run:function(){openForm('debts',null,{name:nm,amount:r.amt,src:DSRC.debts[0][1],to:H?H.key:'',notes:note})}};
+    else if((p=k.match(/^lent:(.+)$/))){var d=(S.lent||[]).filter(function(x){return x.id===p[1]})[0];if(d)a={d:'↩️ <b>'+esc(d.name)+'</b> رجّعلك '+mny(r.amt)+(hn?' على '+hn:''),run:lentRun(d,r.amt,H)}}
+    else if((p=k.match(/^debt:(.+)$/))){var d2=(S.debts||[]).filter(function(x){return x.id===p[1]})[0];if(d2)a={d:'✅ سددت لـ <b>'+esc(d2.name)+'</b> '+mny(r.amt)+(hn?' من '+hn:''),run:function(){openPay({tgt:'debts:'+d2.id,src:H?H.key:'',amt:amt,note:note,date:r.date})}}}
+    else if((p=k.match(/^card:(.+)$/))){var c=S.cards.filter(function(x){return x.id===p[1]})[0];if(c)a={d:'💳 سداد كارت <b>'+esc(c.name)+'</b> '+mny(r.amt)+(hn?' من '+hn:''),run:function(){openPay({tgt:'cards:'+c.id,src:H?H.key:'',amt:amt,note:note,date:r.date})}}}
+    return a?aiDated(a,r.date):null}
+  function smsFix(ar,en){var A=String(ar||'').split(/\n/).filter(function(l){return l.trim()}),E=String(en||'').split(/\n/).filter(function(l){return l.trim()});if(!E.length)return A.join('\n');
+    return A.map(function(l,i){var m=l.match(/^[\s\u200e\u200f]*(\d[\d,.]*)/);if(!m)return l;var dn=m[1].replace(/\D/g,''),j=A.length===E.length?i:Math.round(i*(E.length-1)/Math.max(1,A.length-1)),best='';
+      (A.length===E.length?[j]:[j,j-1,j+1]).forEach(function(k){if(best||k<0||k>=E.length)return;var ns=E[k].match(/\d[\d,.]*\d|\d/g)||[];
+        for(var q=ns.length-1;q>=0;q--){var M=ns[q],dm=M.replace(/\D/g,'');if(dm.length>dn.length&&dm.slice(-dn.length)===dn&&!/:/.test(M)){best=M;break}}});
+      return best?l.replace(m[1],best):l}).join('\n')}
+  function smsEnrich(rows,en){var E=String(en||'').split(/\n/);(rows||[]).forEach(function(r){if(/[A-Za-z\u0621-\u064A]{4,}/.test(r.cp||''))return;
+      var a=String(r.amt),i=-1;E.forEach(function(l,k){if(i<0&&(l.replace(/,(?=\d{3})/g,'').match(/\d[\d.]*/g)||[]).indexOf(a)>=0)i=k});if(i<0)return;
+      var w=E[i].split(/\s+/).filter(function(k){return /[A-Za-z]{3,}/.test(k)&&(/[*•\d]/.test(k)&&/^[*•\dA-Za-z]+$/.test(k)||/^[A-Z][A-Z'-]{2,}$/.test(k))});if(w.length)r.cp=w.slice(0,4).join(' ')})}
+  function smsUniq(rows){var seen={};return (rows||[]).filter(function(r){var k=r.dir+'|'+r.amt+'|'+r.date+'|'+r.time;if(seen[k])return false;seen[k]=1;return true})}
   function aiFile(file,pw){
     var fn=String(file.name||''),ft=String(file.type||''),isImg=/^image\//.test(ft)||/\.(jpe?g|png|webp|gif|bmp|heic|heif|tiff?|avif|jfif)$/i.test(fn), isPdf=/pdf/i.test(ft)||/\.pdf$/i.test(fn),
       isOff=/\.(xlsx|docx)$/i.test(fn)||/(spreadsheetml|wordprocessingml)/.test(ft),isOld=/\.(xls|doc|ppt|pptx|numbers|pages)$/i.test(fn)&&!isOff,isTxt=/^text\//.test(ft)||/\.(csv|txt|tsv|json|xml|html?)$/i.test(fn);
@@ -2523,8 +2636,12 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       ocrFile(file,function(p){aiBusy('بقرا الصورة… '+Math.round(p*100)+'%')}).then(function(t){AI.busy='';
         var sk=0;[/statement|كشف حساب|كشف الحساب/i,/minimum (payment|due|amount)|الحد الادني|الحد الأدنى|الحد الأدني|الحد الادنى/i,/due date|payment due|تاريخ الاستحقاق|اخر موعد|آخر موعد|تاريخ السداد/i,/closing balance|statement balance|new balance|الرصيد المستحق|اجمالي المستحق|إجمالي المستحق|المبلغ المستحق|total due/i,/credit limit|الحد الائتماني|الحد الإئتماني|available (credit|limit)/i,/statement date|تاريخ الكشف|billing date/i,/transaction date|posting date|تاريخ العمليه|تاريخ العملية/i].forEach(function(re){if(re.test(t))sk++});
         if(sk>=2){var prev=AI.stImg;AI.stImg=(prev&&Date.now()-prev.at<180000?prev.t+'\n':'')+t;AI.stImg={t:AI.stImg,at:Date.now()};return aiStmt(AI.stImg.t,file.name)}
+        var sm=bankSms(t);
+        if(sm){var L0=OCRL&&OCRL.im&&Date.now()-OCRL.at<600000?OCRL:null,EN0='',fin=function(r){AI.busy='';if(EN0)smsEnrich(r,EN0);try{smsSay(smsUniq(r))}catch(e){aiSay('قريت رسايل البنك بس ما قدرتش أرتّبها. ابعت سكرين أوضح أو انسخ نص الرسالة وابعتهولي.')}};
+          if(!L0)return fin(sm);aiBusy('بقرا رسايل البنك…');
+          return ocrRun(prepImg(L0.im,false),null,'eng').then(function(en){EN0=en;fin(bankSms(smsFix(L0.a,en))||sm)},function(){fin(sm)})}
         var cd=parseCard(t);
-        if(cd.number||(cd.exp&&cd.bankId)){var bk=cd.bankId?bankById(cd.bankId):null;
+        if(cd.number||(cd.exp&&cd.bankId&&/(VALID|THRU|EXPIR|CARD|DEBIT|CREDIT|VISA|MASTER|MEEZA|كارت|بطاق|ميزه|ميزة)/i.test(t))){var bk=cd.bankId?bankById(cd.bankId):null;
           var H='لقيت كارت 💳<br>'+(bk?'البنك: <b>'+esc(bk.s)+'</b><br>':'')+(cd.type?'النوع: '+esc(cd.type)+'<br>':'')+(cd.number?'الرقم: •••• '+esc(cd.number.slice(-4))+(luhn(cd.number)?'':' <span class="fine">(راجعه، ممكن رقم اتقرا غلط)</span>')+'<br>':'')+(cd.exp?'ينتهي: '+dShort(cd.exp)+'<br>':'')+(cd.net?'الشبكة: '+esc(cd.net)+'<br>':'')+'تحب أضيفه إزاي؟';
           function go(coll){openForm(coll,null,coll==='cards'?{rate:'',feePct:'',paid:0}:null);var g=cardFill(sheet,cd);sheet.auto='photo';renderSheet();toast('اتملى من الصورة: '+g.join('، '))}
           H+='<div class="actions">'+aiAct('كارت مشتريات (كريدت)',function(){go('cards')},!cd.debit)+aiAct('كارت حساب بنكي',function(){go('accounts')},cd.debit)+'</div>';
@@ -2538,7 +2655,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       }).catch(function(e){AI.busy='';if(e&&e.message==='img')return aiSay(/\.(heic|heif)$/i.test(fn)||/heic|heif/.test(ft)?'الصورة بصيغة HEIC (صيغة الآيفون) والمتصفح ده مش بيفتحها. ابعتها سكرين شوت، أو من إعدادات الكاميرا في الآيفون اختار "الأكثر توافقًا" (Most Compatible)، أو ابعتها من الآيفون نفسه.':'ما قدرتش أفتح الصورة دي. جرّب تبعتها سكرين شوت أو بصيغة JPG أو PNG.');aiSay('التحميل الأول لقارئ الصور يحتاج اتصالًا بالإنترنت. تأكد من الاتصال وحاول مرة أخرى.')});return}
     var getText=isPdf?pdfText(file,pw):isOff?officeText(file):(file.text?file.text():Promise.reject(new Error('type')));
     aiBusy(isPdf?'بقرا الكشف…':'بقرا الملف…');
-    getText.then(function(t){AI.busy='';if(/\.json$/i.test(fn)&&/"(cards|wallets|reports|vault)"/.test(String(t).slice(0,4000)))return aiSay('ده شكله ملف نسخة احتياطية من البرنامج 🛟 عشان ترجّع بياناتك منه افتح الإعدادات ← 🛟 النسخ الاحتياطي ← رجّع بياناتك من نسخة.<div class="actions">'+aiAct('افتح النسخ الاحتياطي',gSet('bk'))+'</div>');aiStmt(t,file.name)}).catch(function(e){AI.busy='';if(isOff)return aiSay('ما قدرتش أفتح الملف ده. اتأكد إنه xlsx أو docx سليم، أو احفظه PDF وابعته.');
+    getText.then(function(t){AI.busy='';if(/\.json$/i.test(fn)&&/"(cards|wallets|reports|vault)"/.test(String(t).slice(0,4000)))return aiSay('ده شكله ملف نسخة احتياطية من البرنامج 🛟 عشان ترجّع بياناتك منه افتح الإعدادات ← 🛟 النسخ الاحتياطي ← رجّع بياناتك من نسخة.<div class="actions">'+aiAct('افتح النسخ الاحتياطي',gSet('bk'))+'</div>');if(isTxt&&String(t).length<20000){var smF=bankSms(t);if(smF)return smsSay(smsUniq(smF))}aiStmt(t,file.name)}).catch(function(e){AI.busy='';if(isOff)return aiSay('ما قدرتش أفتح الملف ده. اتأكد إنه xlsx أو docx سليم، أو احفظه PDF وابعته.');
       if(e&&(e.name==='PasswordException'||/password/i.test(e.message||''))){AI.pend={kind:'pdfpw',file:file};return aiSay(pw?'الباسورد ده مش صح. اكتبه تاني:':'🔒 الكشف ده عليه باسورد (غالبًا البنك باعته في رسالة أو هو جزء من الرقم القومي أو تاريخ الميلاد). اكتبه هنا وأنا أفتحه على موبايلك بس:')}
       aiSay(isPdf?'ما قدرتش أفتح الـ PDF ده. محتاج نت أول مرة لتحميل القارئ، أو الملف ممكن يكون صورة متصورة: ابعته كصورة وأنا أقراه.':'نوع الملف ده مش مدعوم. ابعت PDF أو صورة أو CSV.')});
   }
@@ -2998,9 +3115,13 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
 
   var FACES=['#173a6b,#2a6fb4','#0e4a46,#1d8c7c','#3c1e52,#7d3f93','#25292f,#5b626d','#5a1d24,#a83c42','#4b360f,#a37b2b','#113a24,#2f8150','#1d2c46,#4c6d98'];
   function faceBg(c,i){var k=0,s=String(c.id||i);for(var j=0;j<s.length;j++)k=(k*31+s.charCodeAt(j))%997;var f=FACES[(c.color!=null?n(c.color):k)%FACES.length].split(',');return 'background:linear-gradient(135deg,'+f[0]+','+f[1]+')'}
-  function face(c,i,show){
+  /* what is left on the card: limit − used; goes below zero when the card is over the limit */
+  function cardAvail(c){var lim=n(c.limit);return lim>0?Math.round((lim-hUsed(c))*100)/100:null}
+  function faceAvail(c,ed){var av=cardAvail(c);if(av==null)return '';var neg=av<0,inner='<b>AVAILABLE</b><span class="v num">'+(neg?'−':'')+fmt(Math.abs(av))+'</span>'+(ed?'<span class="ed" aria-hidden="true">✎</span>':'');
+    return ed?'<button type="button" class="avl'+(neg?' neg':'')+'" data-act="cav-open" aria-label="المتاح في الكارت '+(neg?'سالب ':'')+fmt(Math.abs(av))+'، اضغط للتعديل">'+inner+'</button>':'<div class="avl'+(neg?' neg':'')+'">'+inner+'</div>'}
+  function face(c,i,show,ed){
     return '<div class="face" style="'+faceBg(c,i)+'"><div class="row"><div><div class="bk">'+esc(c.bank||c.name)+'</div><div class="nm">'+esc(c.name!==c.bank?c.name:'')+'</div></div><div class="chip"></div></div>'+
-      '<div class="pan">'+(show?esc(groupPan(rv(c,'number'))||'—'):maskPan(c.number))+'</div>'+
+      '<div class="pan">'+(show?esc(groupPan(rv(c,'number'))||'—'):maskPan(c.number))+'</div>'+faceAvail(c,ed)+
       '<div class="meta"><span><b>LIMIT</b>'+fmt(c.limit)+'</span><span><b>ISSUED</b>'+mmyy(c.issue)+'</span><span><b>EXPIRES</b>'+mmyy(c.expiry)+'</span>'+(show?'<span><b>CVV</b>'+esc(rv(c,'cvv')||'—')+'</span>':'')+'</div></div>';
   }
   function screenCards(){
@@ -4123,7 +4244,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     return vzRing(days<0?1:Math.max(.04,1-days/30),days<0?'متأخر':days===0?'النهاردة':'<span class="num">'+days+'</span>',(days<0?'من ':'السداد ')+dShort(iso(dt)),days<0?'bad':days<=3?'warn':'gold',days>0?(days===1?'يوم':'يوم فاضل'):(days<0?'<span class="num">'+(-days)+'</span> يوم':''))}
   function vzWrap(x){return x?'<div class="vz" aria-hidden="true">'+x+'</div>':''}
   function vzCard(c,x){var lim=n(c.limit),u=hUsed(c),p=lim>0?u/lim:0,h='';
-    if(lim>0)h+=vzRing(p,vzPct(p),'مستخدم من الحد',p>=.9?'bad':p>=.7?'warn':'ok','المتاح '+fmt(Math.max(lim-u,0)));
+    if(lim>0)h+=vzRing(p,vzPct(p),'مستخدم من الحد',p>=.9?'bad':p>=.7?'warn':'ok','المتاح '+(lim-u<0?'\u2066−'+fmt(Math.abs(Math.round((lim-u)*100)/100))+'\u2069':fmt(Math.round((lim-u)*100)/100)));
     h+=vzDue(x.due&&x.rem>0?x.days:null,x.due,false);return vzWrap(h)}
   function vzLoan(l,x){var h='',s=parseD(l.start),m=x.mat;
     if(n(l.amount)>0)h+=vzRing(x.paidPct,vzPct(x.paidPct),'اتدفع من القرض','gold');
@@ -4144,7 +4265,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     (function f(t){var k=Math.min((t-t0)/1000,1),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(f)})(t0)})}
   function detailCard(c){
     var x=calcCard(c), i=S.cards.indexOf(c), show=!!revealed[c.id];
-    var h=face(c,i,show)+vzCard(c,x)+'<div class="actions"><button class="btn sm" data-act="reveal">'+ic('eye',16)+' '+(show?'إخفاء الرقم والـ CVV':'إظهار الرقم والـ CVV')+'</button>'+cardPill(x)+'</div>';
+    var cav=sheet&&sheet.cav===c.id,av0=cardAvail(c);
+    var h=face(c,i,show,true)+(cav?'<div class="cav"><label for="cav-amt">المتاح في الكارت دلوقتي <span class="fine">(اكتبه بالسالب لو عدّيت الحد)</span></label>'+
+      '<div class="actions"><input class="in num-in" id="cav-amt" type="text" inputmode="decimal" dir="ltr" value="'+(av0==null?'':av0)+'" aria-label="المتاح في الكارت"><button class="btn primary sm" data-act="cav-save">حفظ</button><button class="btn sm" data-act="cav-cancel">إلغاء</button></div>'+
+      '<p class="fine" id="cav-hint">المستخدم هيبقى '+fmt(n(c.limit)-(av0||0))+' من حد '+fmt(c.limit)+'</p></div>':'')+vzCard(c,x)+'<div class="actions"><button class="btn sm" data-act="reveal">'+ic('eye',16)+' '+(show?'إخفاء الرقم والـ CVV':'إظهار الرقم والـ CVV')+'</button>'+cardPill(x)+'</div>';
     h+='<div class="rows"><h3>بيانات الكارت</h3>'+r('البنك',esc(c.bank||'—'))+r('رقم الكارت',show?'<span class="num">'+esc(groupPan(rv(c,'number'))||'—')+'</span>':'<span class="num">'+maskPan(c.number)+'</span>')+
       r('CVV',show?'<span class="num">'+esc(rv(c,'cvv')||'—')+'</span>':'•••')+r('تاريخ الإصدار',dShort(c.issue))+r('تاريخ الانتهاء',dShort(c.expiry))+
       r('الحد الائتماني',money(c.limit))+(x.olCap?r('مسموح فوق الحد (أوفر ليميت)',money(x.olCap)+(c.olType==='ج'?'':' <span class="fine">('+fmt(c.olAllow)+'%)</span>'))+r('أقصى صرف دلوقتي',money(x.availOL)+' <span class="fine">(المتاح '+fmt(x.avail)+' + أوفر ليميت'+(olFeeOn(c,1)?'، عليه رسوم تجاوز':'')+')</span>'):'')+(x.hasBal?r('الرصيد الحالي المستخدم',money(c.balance)+(c.balanceAt?' <span class="fine">('+dShort(c.balanceAt)+')</span>':'')):'')+
@@ -5619,6 +5743,11 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     if(act==='pts-set'){var nb=(document.getElementById('pb-bal')||{}).value;if(nb===''||nb==null||!isFinite(Number(nb))||Number(nb)<0){toast('اكتب رصيد النقط زي ما في البنك');return}
       mutate(function(){o.ptsBal=Math.round(Number(nb))-sum(o.ptsLog||[],function(x){return n(x.pts)})});renderSheet();toast('رصيد النقط بقى '+fmt(Math.round(Number(nb))));return}
     if(act==='pts-del'){var pid=t.getAttribute('data-pid');mutate(function(){o.ptsLog=(o.ptsLog||[]).filter(function(x){return x.id!==pid||x.grp})});renderSheet();toast('اتشالت');return}
+    if(act==='cav-open'){if(!(n(o.limit)>0)){toast('اكتب حد الكارت الأول من تعديل');return}sheet.cav=o.id;renderSheet();setTimeout(function(){var e=document.getElementById('cav-amt');if(e){e.focus();e.select();e.oninput=function(){var v=Number(String(e.value).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[,٬\s]/g,'').replace(/[−–]/g,'-').replace(/٫/g,'.')),hh=document.getElementById('cav-hint');if(hh&&!isNaN(v)&&e.value!=='')hh.textContent='المستخدم هيبقى '+fmt(Math.round((n(o.limit)-v)*100)/100)+' من حد '+fmt(o.limit)+(v<0?' (عدّيت الحد بـ '+fmt(-v)+')':'')}}},60);return}
+    if(act==='cav-cancel'){sheet.cav=null;renderSheet();return}
+    if(act==='cav-save'){var cvE=document.getElementById('cav-amt'),cvR=String(cvE?cvE.value:'').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[,٬\s]/g,'').replace(/[−–]/g,'-').replace(/٫/g,'.');
+      if(cvR===''||isNaN(Number(cvR))){toast('اكتب المبلغ المتاح');return}var cvV=Number(cvR),cvL=n(o.limit);
+      mutate(function(){o.balance=Math.round((cvL-cvV)*100)/100;o.balSync=iso(today())});sheet.cav=null;renderSheet();toast(cvV<0?'اتحدّث المتاح: '+fmt(Math.abs(cvV))+' بالسالب':'اتحدّث المتاح: '+fmt(cvV));return}
     if(act==='reveal'){if(revealed[o.id]){revealed[o.id]=false;delete REVEAL[o.id];renderSheet();return}var rid=o.id;vaultReveal(o,sheet.coll,function(){revealed[rid]=true;renderSheet();setTimeout(function(){if(revealed[rid]){revealed[rid]=false;delete REVEAL[rid];if(sheet)renderSheet()}},60000)});return}
     function cardPay(amt){ if(!(amt>0)){toast('اكتب مبلغ أكبر من صفر');return} var pa=document.getElementById('pay-amt');if(pa)pa.value='';
       mutate(function(){if(o.balance!==''&&o.balance!=null)hSet('cards',o,hBal('cards',o)+amt);o.paid=Math.round((n(o.paid)+amt)*100)/100;logTx('دفعة','cards',o,amt,'سداد كارت')}); var cx=calcCard(o);
