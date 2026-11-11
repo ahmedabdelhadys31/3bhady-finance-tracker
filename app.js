@@ -1587,7 +1587,7 @@
   /* ================= عبهادي (3bhady): the in-app assistant (works on the phone, no internet needed except to read files) ================= */
   var AI={msgs:[],acts:[],pend:null,files:{}};
   (function(){try{var j=JSON.parse(localStorage.getItem('3bh_ai')||'[]');if(Array.isArray(j))AI.msgs=j.slice(-40).map(function(m){return {me:m.me,h:m.h,lg:m.lg||'',old:1}})}catch(e){}})();
-  function aiGo(r){sheet=null;renderSheet();if(route===r)renderAll();else location.hash=r}
+  function aiGo(r){if(route===r){sheet=null;renderSheet();renderAll()}else navTo(r)}
   function aiKeep(){var i=document.getElementById('ai-in');if(i)AI.draft=i.value}
   function rawWord(raw,norm){var w=String(raw).split(/\s+/);for(var i=0;i<w.length;i++)for(var k=3;k>=1;k--){var x=w.slice(i,i+k).join(' ');if(nz(x).replace(/[?؟!.,]+$/,'')===norm)return x.replace(/[?؟!.,]+$/,'')}return norm}
   function aiSave(){var t0=aiT();if(!t0.s)aiSeen();try{localStorage.setItem('3bh_ai',JSON.stringify(AI.msgs.slice(-40).map(function(m){return {me:m.me,lg:m.lg||'',h:m.h.replace(/<button[^>]*data-act="ai-do"[^>]*>.*?<\/button>/g,'')}})))}catch(e){}}
@@ -1606,7 +1606,7 @@
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'&&sheet&&sheet.mode==='ai')aiSeen()});
   function openAI(){var fr=aiFresh();if(!AI.msgs.length||fr==='back'){AI.pend=null;if(!aiIntroSeen()){AI.msgs.push({me:false,h:aiIntro(),lg:aiPref()||LANG});S.aiIntro=1;try{save()}catch(e){}}else AI.msgs.push({me:false,h:aiHello(),lg:aiPref()||LANG});aiSave()}aiSeen();sheet={mode:'ai'};renderSheet();aiFit();setTimeout(aiBottom,40)}
   function aiLogHtml(){return '<p class="fine ai-note">🔒 عبهادي بيشتغل على موبايلك، وبياناتك ما بتطلعش منه. أي حاجة بيجهّزها بتراجعها قبل ما تتسجل.</p>'+
-    AI.msgs.map(function(m,i){var X=aiMsgHtml(m);return '<div class="ai-m '+(m.me?'me':'bot')+'"'+(m.me||X?' data-notr':'')+(X?' dir="'+X.dir+'"':m.me?' dir="auto"':'')+'>'+(m.me?'':'<span class="ai-who">'+(X?(m.lg==='ar'?'عبهادي':'3bhady'):'عبهادي')+'</span>')+(m.me&&m.vo?'🎙️ ':'')+(X?X.h:m.h)+(m.me&&m.t?'<button type="button" class="ai-edit" data-act="ai-edit" data-i="'+i+'" aria-label="عدّل الرسالة وابعتها تاني">✏️</button>':'')+'</div>'}).join('')+
+    AI.msgs.map(function(m,i){var X=aiMsgHtml(m);return '<div class="ai-m '+(m.me?'me':'bot')+'"'+(m.me||X?' data-notr':'')+(X?' dir="'+X.dir+'"':m.me?' dir="auto"':'')+'>'+(m.me?'':'<span class="ai-who">'+(X?(m.lg==='ar'?'عبهادي':'3bhady'):'عبهادي')+'</span>')+(m.me&&m.vo?'🎙️ ':'')+(!m.me&&(m.lg||LANG)==='ar'?aiTash(X?X.h:m.h):(X?X.h:m.h))+(m.me&&m.t?'<button type="button" class="ai-edit" data-act="ai-edit" data-i="'+i+'" aria-label="عدّل الرسالة وابعتها تاني">✏️</button>':'')+'</div>'}).join('')+
     (AI.busy?'<div class="ai-m bot"><span class="ai-who">عبهادي</span><span class="ai-dots">'+esc(AI.busy)+'</span></div>':'')}
   function aiLog(){var L=document.getElementById('ai-log');if(sheet&&sheet.mode==='ai'&&L){L.innerHTML=aiLogHtml();aiBottom()}else if(sheet&&sheet.mode==='ai'){renderSheet();setTimeout(aiBottom,30)}}
   /* keep the chat between the header and the keyboard: the open keyboard shrinks the visible area */
@@ -2689,7 +2689,7 @@
   function h3Cur(){return esc(curSym())}
   function h3Amt(v,mk){return mk?'<span class="h3-mask">••••••</span>':'<span class="num">'+fmt(Math.round(cv(v)))+'</span>'}
   function h3Head(MK){var nm=(S.profile&&S.profile.name)||'',hr=cairoNow().getHours(),gr=hr<12?'صباح الخير ☀️':hr<18?'مساء الخير 🌤️':'مساء الخير 🌙',ini=(nm.trim()[0]||'؟').toUpperCase();
-    return '<header class="h3-head"><button class="h3-av" data-act="edit-name" aria-label="غيّر اسمك">'+esc(ini)+'</button><div class="h3-hi"><small>'+(nm?'أهلًا · ':'')+gr+' · '+esc(today().toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long'}))+'</small><b class="'+(nm.length>22?'xl':nm.length>14?'lg':'')+'">'+(nm?esc(nm.trim()):'أهلًا بيك')+'</b></div>'+
+    return '<header class="h3-head'+(window.scrollY>6?' on':'')+'"><button class="h3-av" data-act="edit-name" aria-label="غيّر اسمك">'+esc(ini)+'</button><div class="h3-hi"><small>'+(nm?'أهلًا · ':'')+gr+' · '+esc(today().toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long'}))+'</small><b class="'+(nm.length>22?'xl':nm.length>14?'lg':'')+'">'+(nm?esc(nm.trim()):'أهلًا بيك')+'</b></div>'+
       '<button class="h3-eye" data-act="home-mask" aria-label="'+(MK?'إظهار المبالغ':'إخفاء المبالغ')+'" aria-pressed="'+MK+'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'+(MK?'<line x1="3" y1="3" x2="21" y2="21"/>':'')+'</svg></button></header>'}
   function h3Hero(MK){var W=breakdown('worth'),have=W.rows[0].amt+W.rows[1].amt,lent=W.rows[2].amt,owe=W.rows[3].amt,tot=Math.abs(have)+Math.abs(lent)+Math.abs(owe)||1,neg=W.total<0;
     var seg=function(v,cl){var w=Math.abs(v)/tot*100;return w>0.4?'<i class="'+cl+'" style="width:'+w.toFixed(2)+'%"></i>':''};
@@ -2725,7 +2725,11 @@
     var custom=Array.isArray(S.homeOrder)&&S.homeOrder.length,order=custom?homeOrderKeys():['hello','worth','wallet','actions','salary','deps','today','debts','after','balances','budgetc','overview','monthly','updates','payorder'].concat(Object.keys(B).filter(function(k){return k.indexOf('x_')===0}));
     var out='';order.forEach(function(k){if(B[k])out+=B[k]});
     if(hin)setTimeout(h3Count,60);
+    setTimeout(h3Stuck,0);
     return '<div class="hv2 h3'+(hin||'')+'">'+out+'</div>'}
+  /* the greeting bar stays pinned under the top bar; its size never changes, so the page can't jump. Only its shadow appears once the page moves */
+  var H3S=0;function h3Stuck(){H3S=0;var h=document.querySelector('.h3-head');if(!h)return;var on=window.scrollY>6;if(h.classList.contains('on')!==on)h.classList.toggle('on',on)}
+  window.addEventListener('scroll',function(){if(!H3S){H3S=1;requestAnimationFrame(h3Stuck)}},{passive:true});
   /* the hero number counts up once when the app opens */
   function h3Count(){var el=document.querySelector('.h3-big [data-count]');if(!el)return;var to=+el.getAttribute('data-count'),t0=performance.now(),D=900;
     try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
@@ -2870,7 +2874,7 @@
     if(!on('payorder'))h=hp;
     h+=homeExtras();
     var hin=HV_IN?' hv2-in':'';HV_IN=false;
-    if(document.documentElement.getAttribute('data-theme')==='dark'&&!document.documentElement.getAttribute('data-skin'))return homeV3(h,hin);
+    return homeV3(h,hin);
     return '<div class="hv2'+hin+'">'+homeArrange(h)+'</div>';
   }
   var HV_IN=true;
@@ -3443,11 +3447,18 @@
       if(/natural|neural|online|premium|enhanced|wavenet/i.test(v.name))sc+=5;if(/google/i.test(v.name))sc+=3;if(v.localService===false)sc+=1;if(/compact|espeak/i.test(v.name))sc-=4;if(sc>bs){bs=sc;best=v}});
     if(vs.length)VO_V[L]=best;return best}
   try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=function(){VO_V={}}}catch(e){}
-  /* Egyptian words written so the Arabic voice says them the Egyptian way */
-  var VO_TASH=[['دلوقتي','دِلْوَقْتِي'],['النهارده','النَّهارْدَه'],['النهاردة','النَّهارْدَه'],['امبارح','إمْبارِح'],['بكره','بُكْرَه'],['بكرة','بُكْرَه'],['عشان','عَشان'],['علشان','عَلَشان'],['ايه','إيه'],['إيه','إيه'],['ازاي','إزّاي'],['ليه','لِيه'],
-    ['فين','فِين'],['امتى','إمْتَى'],['مفيش','مَفِيش'],['فيه','فِيه'],['كده','كِدَه'],['عايز','عايِز'],['هجهّزلك','هَجَهِّزْلَك'],['هجهزلك','هَجَهِّزْلَك'],['هفتحلك','هَفْتَحْلَك'],['متملية','مِتْمَلِّيَة'],['راجعها','راجِعْها'],['وسجّل','وِسَجِّل'],['سجّل','سَجِّل'],
-    ['صرفت','صَرَفْت'],['حولت','حَوِّلْت'],['دفعت','دَفَعْت'],['استلفت','اسْتَلَفْت'],['سلفت','سَلِّفْت'],['فلوسك','فْلوسَك'],['فلوس','فْلوس'],['عليك','عَلِيك'],['عليا','عَلَيّا'],['ليك','لِيك'],['معاك','مَعاك'],['فاضل','فاضِل'],['الباقي','الباقِي'],
-    ['لسه','لِسَّه'],['خلاص','خَلاص'],['تمام','تَمام'],['كويس','كُوَيِّس'],['حاجة','حاجَة'],['هتتدفع','هَتِتْدِفِع'],['اتسجلت','اتْسَجِّلِت'],['اتسجل','اتْسَجِّل'],['بتاع','بِتاع'],['بتاعك','بِتاعَك'],['قدامك','قُدّامَك'],['الشهر','الشَّهْر'],['اللي','اللِّي']];
+  /* Egyptian words with their vowel marks: shown in 3bhady's Arabic replies and read aloud the Egyptian way */
+  var TASH_SRC='دلوقتي دِلْوَقْتِي|النهارده النَّهارْدَه|النهاردة النَّهارْدَه|امبارح إمْبارِح|بكره بُكْرَه|بكرة بُكْرَه|عشان عَشان|علشان عَلَشان|ازاي إزّاي|ليه لِيه|فين فِين|امتى إمْتَى|مين مِين|مفيش مَفِيش|فيه فِيه|فيها فِيها|كده كِدَه|كدا كِدَه|ده دَه|دي دِي|دول دُول|عايز عايِز|عايزة عايْزَة|عايزه عايْزَة|محتاج مِحْتاج|محتاجة مِحْتاجَة|لازم لازِم|ممكن مُمْكِن|يعني يَعْنِي|حاجة حاجَة|حاجه حاجَة|حاجات حاجات|تاني تانِي|تانية تانْيَة|تانيه تانْيَة|اول أوِّل|بعدين بَعْدِين|لسه لِسَّه|لسة لِسَّه|برضه بَرْضُه|برضو بَرْضُه|كمان كَمان|بس بَسّ|خلاص خَلاص|تمام تَمام|كويس كُوَيِّس|كويسة كُوَيِّسَة|اوي أوِي|مش مِش|عندك عَنْدَك|عندي عَنْدِي|عنده عَنْدُه|معاك مَعاك|معايا مَعايا|معاه مَعاه|عليك عَلِيك|عليا عَلَيّا|عليه عَلِيه|عليها عَلِيها|ليك لِيك|ليا لِيّا|منك مِنَّك|منه مِنُّه|منها مِنْها|بتاع بِتاع|بتاعك بِتاعَك|بتاعة بِتاعِة|بتاعتك بِتاعْتَك|زي زَيّ|ولا وَلّا|كله كُلُّه|كلها كُلَّها|كلهم كُلُّهُم|غير غِير|لحد لِحَدّ|هنا هِنا|انت إنْتَ|انتي إنْتِي|انك إنَّك|انه إنُّه|انها إنَّها|بقى بَقَى|بقت بَقِت|بقيت بَقِيت|كانت كانِت|يبقى يِبْقَى|خلي خَلِّي|خليك خَلِّيك|قول قُول|قولي قُولِّي|قوللي قُولِّي|شوف شُوف|تشوف تِشُوف|اكتب اكْتِب|اكتبه اكْتِبُه|اكتبها اكْتِبْها|دوس دُوس|اختار اخْتار|افتح افْتَح|افتحها افْتَحْها|ادفع ادْفَع|اصرف اصْرَف|سجلها سَجِّلْها|راجع راجِع|راجعها راجِعْها|راجعه راجْعُه|ضيف ضِيف|ضيفه ضِيفُه|هفتحلك هَفْتَحْلَك|هجهزلك هَجَهِّزْلَك|هسجلها هَسَجِّلْها|هتلاقي هَتْلاقِي|هتلاقيها هَتْلاقِيها|تقدر تِقْدَر|اقدر أقْدَر|اساعدك أساعْدَك|تحب تِحِبّ|تحبني تِحِبِّنِي|متملية مِتْمَلِّيَة|صرفت صَرَفْت|دفعت دَفَعْت|حولت حَوِّلْت|استلفت اسْتَلَفْت|سلفت سَلِّفْت|قبضت قَبَضْت|سددت سَدِّدْت|اشتريت اشْتَرِيت|اتسجل اتْسَجِّل|اتسجلت اتْسَجِّلِت|اتدفع اتْدَفَع|اتدفعت اتْدَفَعِت|اتسدد اتْسَدِّد|اتسددت اتْسَدِّدِت|اتأخر اتْأَخَّر|اتملت اتْمَلِت|اتعمل اتْعَمَل|بيتحسب بِيِتْحِسِب|بتتحسب بِتِتْحِسِب|بيتخصم بِيِتْخِصِم|هيتخصم هَيِتْخِصِم|هيتسجل هَيِتْسَجِّل|هتتسجل هَتِتْسَجِّل|بيتسجل بِيِتْسَجِّل|هيتضاف هَيِتْضاف|هتدفع هَتِدْفَع|هتتدفع هَتِتْدِفِع|تدفع تِدْفَع|تصرف تِصْرَف|تسدد تِسَدِّد|تسجل تِسَجِّل|تضيف تِضِيف|فلوس فِلُوس|فلوسك فِلُوسَك|الفلوس الفِلُوس|الشهر الشَّهْر|شهر شَهْر|شهري شَهْرِي|الشهري الشَّهْرِي|شهريا شَهْرِيًّا|الشهور الشُّهُور|يوم يُوم|الأسبوع الأُسْبُوع|الاسبوع الأُسْبُوع|السنة السَّنَة|سنوي سَنَوِي|الكارت الكارْت|كارت كارْت|كارتك كارْتَك|كروت كُرُوت|الكروت الكُرُوت|كروتك كُرُوتَك|البنك البَنْك|بنك بَنْك|الحساب الحِساب|حساب حِساب|حسابك حِسابَك|رصيد رَصِيد|الرصيد الرَّصِيد|رصيدك رَصِيدَك|المبلغ المَبْلَغ|مبلغ مَبْلَغ|الادنى الأدْنَى|الحد الحَدّ|حد حَدّ|قسط قِسْط|القسط القِسْط|اقساط أقْساط|الاقساط الأقْساط|الكشف الكَشْف|كشف كَشْف|السداد السَّداد|سداد سَداد|ميعاد مِيعاد|الميعاد المِيعاد|ميعاده مِيعادُه|مواعيد مَواعِيد|فايدة فايْدَة|الفايدة الفايْدَة|فوايد فَوايِد|الفوايد الفَوايِد|الدفع الدَّفْع|دفعة دَفْعَة|الدفعة الدَّفْعَة|المتاح المُتاح|متاح مُتاح|المطلوب المَطْلُوب|مطلوب مَطْلُوب|الباقي الباقِي|باقي باقِي|فاضل فاضِل|فاضلك فاضِلَّك|متأخر مِتْأَخَّر|المتأخر المِتْأَخَّر|المرتب المُرَتَّب|مرتب مُرَتَّب|الميزانية المِيزانِيَّة|ميزانية مِيزانِيَّة|سلفة سَلَفَة|السلفة السَّلَفَة|مصروف مَصْرُوف|المصروفات المَصْرُوفات|تحويل تَحْوِيل|التحويل التَّحْوِيل|عمولة عُمُولَة|العمولة العُمُولَة|غرامة غَرامَة|الغرامة الغَرامَة|الاجمالي الإجْمالِي|اجمالي إجْمالِي|جنيه جِنِيه|الف ألْف|المية المِيَّة|صافي صافِي|البرنامج البَرْنامِج|الشاشة الشّاشَة|صفحة صَفْحَة|الصفحة الصَّفْحَة|الرئيسية الرَّئِيسِيَّة|الاعدادات الإعْدادات|الموبايل المُوبايِل|اهلا أهْلًا|بيك بِيك|صباح صَباح|مساء مَساء|الخير الخِير|شكرا شُكْرًا|العفو العَفْو|حاضر حاضِر|طيب طَيِّب|اكيد أكِيد|نصيحة نَصِيحَة|الديون الدُّيُون|ديون دُيُون|مديونية مَدْيُونِيَّة|المديونيات المَدْيُونِيّات|مديونياتك مَدْيُونِيّاتَك|قرض قَرْض|القرض القَرْض|القروض القُرُوض|جمعية جَمْعِيَّة|الجمعية الجَمْعِيَّة|شهادة شَهادَة|الشهادة الشَّهادَة|وديعة وَدِيعَة|الوديعة الوَدِيعَة|الدهب الدَّهَب|دهب دَهَب|تقسيط تَقْسِيط|التقسيط التَّقْسِيط|محفظة مَحْفَظَة|المحفظة المَحْفَظَة|المحافظ المَحافِظ|عملية عَمَلِيَّة|العملية العَمَلِيَّة|عمليات عَمَلِيّات|معاملة مُعامْلَة|المعاملات المُعامْلات|تاريخ تارِيخ|الجاي الجّاي|الجاية الجّايَة|الجايه الجّايَة|حوالي حَوالِي|تقريبا تَقْرِيبًا|بالظبط بِالظَّبْط|اكتر أكْتَر|اقل أقَلّ|كتير كِتِير|شوية شُوَيَّة|شويه شُوَيَّة|كبير كِبِير|صغير صُغَيَّر|قدامك قُدّامَك|نزل نِزِل|جالك جالَك|جالي جالِي|خطوة خُطْوَة|طريقة طَرِيقَة|سهلة سَهْلَة|نص نُصّ|توفير تَوْفِير|وفر وَفَّر|الطوارئ الطَّوارِئ|السعر السِّعْر|سعر سِعْر|الاسعار الأسْعار|النسبة النِّسْبَة|نسبة نِسْبَة|لقيت لَقِيت|فهمت فِهِمْت|قصدك قَصْدَك|تقصد تُقْصُد|انهي أنْهِي|احسن أحْسَن|بره بَرَّه|برا بَرَّه|جوه جُوَّه|جوا جُوَّه|فوق فُوق|تحت تَحْت|واحد واحِد|واحدة واحْدَة|اتنين اتْنِين|ساعة ساعَة|لوحده لِوَحْدُه|لوحدها لِوَحْدَها|بايدك بِإيدَك|مستحق مُسْتَحَق|عدى عَدَّى|ميعادها مِيعادْها|ابعتلي ابْعَتْلِي|ابعت ابْعَت|هقولك هَقُولَّك|اقولك أقُولَّك|يومين يُومِين|ايام أيّام|الايام الأيّام|تسيب تِسِيب|سيب سِيب|خد خُد|اسأل اسْأَل|اسألني اسْأَلْنِي|اللي اللِّي|الدخل الدَّخْل|دخلك دَخْلَك|التفاصيل التَّفاصِيل|تفاصيل تَفاصِيل|بند بَنْد|اسمها اسْمَها|اسمه اسْمُه|عالية عالْيَة|الزيادة الزِّيادَة|زيادة زِيادَة|الادخار الادِّخار|بتحبها بِتْحِبَّها|اكل أكْل|لبس لِبْس|خروج خُرُوج|فواتير فَواتِير|مواصلات مُواصَلات|اشتراكات اشْتِراكات|ايجار إيجار|الحسابات الحِسابات|حساباتك حِساباتَك|البنوك البُنُوك|العائد العائِد|عائد عائِد|تجديد تَجْدِيد|المصاريف المَصارِيف|مصاريف مَصارِيف|الرسوم الرُّسُوم|رسوم رُسُوم|الجنيه الجِّنِيه|تحديث تَحْدِيث|اختياري اخْتِيارِي|ملحوظة مَلْحُوظَة|مثلا مَثَلًا|دايما دايْمًا|لما لَمّا|عادي عادِي|بدل بَدَل|ابدأ ابْدَأ|اعمل اعْمِل|اعرف اعْرَف|تعرف تِعْرَف|انصحك أنْصَحَك|فكرة فِكْرَة|المهم المُهِمّ|مهم مُهِمّ|سؤال سُؤال|الناس النّاس|بالكامل بِالكامِل|ناقص ناقِص|اقساطك أقْساطَك|الاقصى الأقْصَى|السحب السَّحْب|سحب سَحْب|ميزة مِيزَة|اسرع أسْرَع|اسهل أسْهَل|اوعى أوْعَى|بالك بالَك|اتأكد اتْأَكِّد|متأكد مِتْأَكِّد|خليني خَلِّينِي|اقفل اقْفِل|الفترة الفَتْرَة|المدة المُدَّة|مدة مُدَّة|نفس نَفْس|وقت وَقْت|الوقت الوَقْت|احتياطي احْتِياطِي|الاحتياطي الاحْتِياطِي|الشغل الشُّغْل|شغل شُغْل|مرة مَرَّة|كل كُلّ|الاول الأوِّل|الاخر الآخِر',TASH=null;
+  function tashNorm(w){return w.replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى$/,'ي').replace(/ة$/,'ه')}
+  function tashMap(){if(TASH)return TASH;TASH={};TASH_SRC.split('|').forEach(function(x){var i=x.indexOf(' ');TASH[tashNorm(x.slice(0,i))]=x.slice(i+1)});return TASH}
+  function tashWord(w){var M=tashMap(),k=tashNorm(w),v=M[k],p='';if(v)return v;
+    if(k.length>3&&k.charAt(0)==='و'){p='و';k=k.slice(1);if(v=M[k])return p+v}
+    if(k.length>4&&k.slice(0,2)==='لل'&&(v=M['ال'+k.slice(2)]))return p+'لِل'+v.slice(2);
+    if(k.length>4&&k.slice(0,3)==='بال'&&(v=M[k.slice(1)]))return p+'بِ'+v;
+    if(k.length>3&&k.charAt(0)==='ب'&&(v=M[k.slice(1)])&&v.charAt(0)!=='ا')return p+'بِ'+v;
+    return w}
+  function tashText(t){return String(t).replace(/[\u0621-\u064A\u064B-\u0652\u0640]+/g,tashWord)}
+  function aiTash(h){return String(h).split(/(<[^>]*>)/).map(function(x){return x.charAt(0)==='<'?x:tashText(x)}).join('')}
   var VO_MON={ar:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],en:['January','February','March','April','May','June','July','August','September','October','November','December'],fr:['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']};
   function voSpeech(h,lg){lg=lg||aiPref()||LANG;var d=document.createElement('div');d.innerHTML=String(h||'').replace(/<span class="ai-who">[\s\S]*?<\/span>/,'').replace(/<button[\s\S]*?<\/button>/g,' ').replace(/<(br|\/p|\/div|\/li|\/h\d)\s*\/?>/gi,'\n');
     var t=(d.textContent||'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/[•·▪●◦]/g,'\n').replace(/[←→↳⬆⬇▲▼✓✔️⚠]/g,' ');
@@ -3459,7 +3470,7 @@
     else if(lg==='fr')t=t.replace(/(\d)\s*(ج|EGP)(?=[\s.,،;)]|$)/g,'$1 livres').replace(/(\d)\s*%/g,'$1 pour cent');
     else t=t.replace(/(\d)\s*ج(?=[\s.,،؛)]|$)/g,'$1 جنيه').replace(/(\d)\s*(%|٪)/g,'$1 في المية').replace(/(^|\s)ج(?=[\s.,،]|$)/g,'$1جنيه');
     t=t.replace(/[()\[\]"“”«»*_]/g,'، ').replace(/\s*([،,!?؟:;]|\.(?!\d))\s*/g,'$1 ').replace(/([.،,:;])(\s*[.،,:;])+/g,'$1').replace(/[،,]\s*$/,'.').replace(/\s+/g,' ').trim();
-    if(lg!=='en'&&lg!=='fr')VO_TASH.forEach(function(w){t=t.replace(new RegExp('(^|[\\s،.,])'+w[0]+'(?=[\\s،.,!?؟:]|$)','g'),'$1'+w[1])});
+    if(lg!=='en'&&lg!=='fr')t=tashText(t);
     if(t.length>700){var cut=t.slice(0,700),k=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('، '));t=(k>200?cut.slice(0,k+1):cut);more=true}
     if(more)t+=lg==='en'?' The rest is on your screen.':lg==='fr'?' Le reste est à l\'écran.':' والباقي قدامك على الشاشة.';
     return t}
@@ -4210,7 +4221,14 @@
 
   function editNote(){return '<p class="note" style="margin:0 0 8px">✏️ بتعدّل عملية متسجلة. الأرصدة اللي قدامك محسوبة من غيرها، ولما تسجّل هتتلغي القديمة وتتسجل الجديدة مكانها.</p>'}
   var aiWasOpen=false;
-  function renderSheet(){var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpen||op)aiSeen();aiWasOpen=op;renderSheet0();ovSync()}
+  /* every page opened from another page remembers it, so back returns there (not to the home screen).
+   Pages that are one-off steps (forms, payment, results) are skipped: back from what follows them goes to the page before them */
+var SH_LAST=null,SH_TMP={form:1,move:1,pay:1,gmove:1,eppf:1,dtr:1,salgot:1,salset:1,salend:1,depgot:1,depend:1,assell:1,asprice:1,crepl:1,creplrev:1,stmtrev:1,acpw:1,devname:1,glink:1,fb:1,mvdone:1,goal:1,bud:1};
+function shKey(x){return x?[x.mode,x.coll||'',x.id||'',x.k||'',x.key||'',x.c||''].join('|'):''}
+function shChain(){var p=SH_LAST;SH_LAST=sheet;if(!sheet||!p||sheet===p||sheet.back||p.back===sheet)return;
+  var b=SH_TMP[p.mode]||shKey(p)===shKey(sheet)?p.back:p;while(b&&shKey(b)===shKey(sheet))b=b.back;if(!b)return;
+  for(var n=0,q=b;q;q=q.back)if(++n>20){return}sheet.back=b}
+function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpen||op)aiSeen();aiWasOpen=op;renderSheet0();ovSync()}
   var ROBOT='<svg class="robot" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="3.2" r="2" fill="currentColor"/><path d="M16 4.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="2" y="13" width="3.2" height="7" rx="1.6" fill="currentColor"/><rect x="26.8" y="13" width="3.2" height="7" rx="1.6" fill="currentColor"/><rect x="5" y="7.5" width="22" height="19" rx="6.5" fill="currentColor"/><circle cx="11.2" cy="15.4" r="4.3" fill="#3a3a42" stroke="#fff" stroke-width="1.9"/><circle cx="20.8" cy="15.4" r="4.3" fill="#3a3a42" stroke="#fff" stroke-width="1.9"/><path d="M15.4 14.8q.6-.8 1.2 0" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M6.9 14.6H5.4M25.1 14.6h1.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="11.6" cy="15.8" r="1.5" fill="#fff"/><circle cx="21.2" cy="15.8" r="1.5" fill="#fff"/><path class="rm" d="M12.4 21.6q3.6 2.4 7.2 0" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
   function renderSheet0(){
     var el=document.getElementById('sheet');
@@ -5052,16 +5070,23 @@
     renderSheet();
   });
 
-  function go(rt){ ovHist=0; if(ROUTES.indexOf(rt)<0)rt='home'; route=rt; navOpen=false; sheet=null; confirmDel=null; renderAll(); window.scrollTo(0,0);
+  var NAVI=0,NAVMAX=0,NSAVED={},NAVPEND=null;try{NAVMAX=+sessionStorage.getItem('3bh_navmax')||0}catch(e){}
+  function navTag(){var st=history.state;if(st&&st.ni!=null){NAVI=st.ni;return true}NAVI=++NAVMAX;try{sessionStorage.setItem('3bh_navmax',NAVMAX);history.replaceState(Object.assign({},st||{},{ni:NAVI}),'',location.href)}catch(e){}return false}
+  /* move to a screen; if a page is open it's kept, and coming back with the back button reopens it */
+  function navTo(r){if(ovHist){if(sheet)NSAVED[NAVI]=sheet;NAVPEND=r;ovHist=0;ovIgnore++;try{history.back()}catch(e){ovIgnore--;NAVPEND=null;location.hash=r}}else if(location.hash==='#'+r)go(r);else location.hash=r}
+  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||!ovHist)return;var r=a.getAttribute('href').slice(1);if(ROUTES.indexOf(r)<0)return;e.preventDefault();e.stopPropagation();navOpen=false;navTo(r)},true);
+  function go(rt){ var pI=NAVI,pS=sheet,trav=navTag();if(pS&&pI!==NAVI&&!trav)NSAVED[pI]=pS;
+    ovHist=0; if(ROUTES.indexOf(rt)<0)rt='home'; route=rt; navOpen=false; sheet=null; SH_LAST=null; confirmDel=null; renderAll(); window.scrollTo(0,0);
+    if(trav&&pI!==NAVI){var sv=NSAVED[NAVI],ov=history.state&&history.state.ov;delete NSAVED[NAVI];if(sv){sheet=sv;if(ov)ovHist=1;renderSheet()}else if(ov){ovIgnore++;try{history.back()}catch(e){ovIgnore--}}}
     if(rt==='notifs'&&ntUnread())setTimeout(function(){if(route!=='notifs')return;S.notifs.forEach(function(x){x.read=true});save();renderNav()},2500) }
   window.addEventListener('hashchange',function(){go(location.hash.slice(1))});
   /* phone back button / swipe: closes the open sheet or menu first (step back inside a sheet), then goes to the previous screen */
   var ovHist=0, ovIgnore=0;
   function ovSync(){var want=!!(sheet||navOpen);try{instPlace()}catch(e){}
-    if(want&&!ovHist){try{history.pushState({ov:1},'',location.href);ovHist=1}catch(e){}}
+    if(want&&!ovHist){try{history.pushState({ov:1,ni:NAVI},'',location.href);ovHist=1}catch(e){}}
     else if(!want&&ovHist){ovHist=0;ovIgnore++;try{history.back()}catch(e){ovIgnore--}}}
   window.addEventListener('popstate',function(){
-    if(ovIgnore){ovIgnore--;return}
+    if(ovIgnore){ovIgnore--;if(NAVPEND){var r=NAVPEND;NAVPEND=null;setTimeout(function(){if(location.hash==='#'+r)go(r);else location.hash=r},0)}return}
     if(!ovHist)return; ovHist=0;
     if(navOpen){navOpen=false;renderNav()}
     else if(sheet){if(sheet.back){sheet=sheet.back}else sheet=null;confirmDel=null;renderSheet()}
@@ -5083,7 +5108,7 @@
     if(act==='close-nav'){setNav(false);return}
     if(act==='close-sheet'){ if(e.target===t){sheet=null;confirmDel=null;renderSheet()} return }
     if(act==='close-sheet-btn'){if(VO.mode)micStop();sheet=null;confirmDel=null;renderSheet();return}
-    if(act==='go-home'){sheet=null;confirmDel=null;navOpen=false;if(route==='home'){renderAll();window.scrollTo(0,0)}else location.hash='home';return}
+    if(act==='go-home'){NSAVED={};if(route==='home'){sheet=null;confirmDel=null;navOpen=false;renderAll();window.scrollTo(0,0)}else{if(ovHist&&sheet)sheet=null;navTo('home')}return}
     if(act==='open'){var bk=sheet&&sheet.mode==='bd'?{mode:'bd',k:sheet.k,back:sheet.back}:sheet&&sheet.mode==='hbal'?{mode:'hbal',key:sheet.key,back:sheet.back}:sheet&&sheet.mode==='cat'?{mode:'cat',c:sheet.c,col:sheet.col,side:sheet.side}:sheet&&sheet.mode==='detail'?{mode:'detail',coll:sheet.coll,id:sheet.id,back:sheet.back}:null;sheet={mode:'detail',coll:t.getAttribute('data-coll'),id:t.getAttribute('data-id'),back:bk};confirmDel=null;renderSheet();return}
     if(act==='bd'){var bk2=sheet&&sheet.mode==='bd'?{mode:'bd',k:sheet.k,back:sheet.back}:null;sheet={mode:'bd',k:t.getAttribute('data-k'),back:bk2};renderSheet();var sb=document.querySelector('.sheet-scrim');if(sb)sb.scrollTop=0;return}
     if(act==='sheet-back'){sheet=sheet.back||null;confirmDel=null;renderSheet();return}
@@ -5159,7 +5184,7 @@
     if(act==='set-font'){try{localStorage.setItem('3bh_font',t.getAttribute('data-v')==='system'?'system':'app')}catch(e){}applyFont();renderMain();toast(fontPref()==='system'?'اتغيّر لخط الموبايل':'رجع خط البرنامج');return}
     if(act==='scr-top'||act==='scr-bot'){scrGo(act==='scr-bot');return}
     if(act==='quick-add'){sheet={mode:'pick',k:'quick'};renderSheet();return}
-    if(act==='go-budget'){sheet=null;renderSheet();if(route==='budget')renderAll();else location.hash='budget';return}
+    if(act==='go-budget'){if(route==='budget'){sheet=null;renderSheet();renderAll()}else navTo('budget');return}
     if(act==='set-accent'){try{localStorage.setItem('3bh_accent',t.getAttribute('data-v'))}catch(e){}applyAccent();renderMain();return}
     if(act==='trend'){HOMEP=t.getAttribute('data-d');try{localStorage.setItem('3bh_trend',HOMEP)}catch(e){}renderMain();return}
     if(act==='rp-cmp'){RP.cmp=t.getAttribute('data-k');renderMain();return}
