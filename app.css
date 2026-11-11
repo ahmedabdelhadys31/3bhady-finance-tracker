@@ -63,6 +63,7 @@ html.vz .bar>i,html.vz .pbar>b,html.vz .gbar>span,html.vz i.bar>b,html.vz .h3-ba
 .stk-sp{margin:0 0 12px;padding:10px 12px 8px;border-radius:18px;background:var(--surface2);border:1px solid var(--line)}
 .stk-sp svg{width:100%;height:56px;display:block;overflow:visible}.stk-sp .fine{display:block;margin-top:4px}
 .stk-line{stroke-dasharray:100}html.vz .stk-line{animation:vzRing 1.3s ease-out both}
+.po-ctl{gap:6px}.po-ctl select{font-size:13px;padding:8px 10px}
 /* ===== home v3 ===== */
 .h3{--g1:#f6dc8e;--g2:#e3bb55;--g3:#a87a2c;--ok:#7ee2a8;--bad:#ff8c82;--warn:#f0b955;
 --ink:#fff;--ink2:#f4efe3;--mut:#a9a192;--mut2:#cfc6b0;--soft:rgba(255,255,255,.05);--softb:rgba(255,255,255,.1);

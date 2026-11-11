@@ -149,7 +149,7 @@
     bnpl:{title:'تطبيقات وكروت التقسيط',one:'حساب تقسيط',add:'إضافة حساب تقسيط'},
     accounts:{title:'حساباتي البنكية',one:'حساب',add:'إضافة حساب'},
     wallets:{title:'كل الأرصدة والمحافظ',one:'رصيد',add:'إضافة حساب أو محفظة أو كاش'},
-    reports:{title:'التقارير',one:'معاملة',add:'إضافة معاملة'},
+    reports:{title:'تقارير المعاملات',one:'معاملة',add:'إضافة معاملة'},
     spend:{title:'الصرف والتحويل',one:'عملية',add:'اصرف'},
     notifs:{title:'الإشعارات',one:'إشعار',add:'ابعت رسالة النهاردة'},
     cash:{title:'الكاش',one:'كاش',add:'إضافة كاش'},
@@ -377,6 +377,7 @@
     (o.reports||[]).forEach(function(t){if(t.kind==='تحويل'&&/^lent:/.test(t.dref||'')){t.kind='سلفة';t.cat='سلف اديتها (ليك عند الناس)'}});
     o.loans.forEach(function(l){if(!l.outstandingAt&&l.outstanding!==''&&l.outstanding!=null)l.outstandingAt='2026-11-01'});
     /* once: ABC and ADCB cards get the ~5% over-limit allowance (editable from the card) */
+    if(d&&!o.seeds.txh){o.seeds.txh=1;var HA=Array.isArray(d.homeAdd)?d.homeAdd:[];if(HA.indexOf('recent')<0)o.homeAdd=HA.concat(['recent'])}
     if(d&&!o.seeds.ol){o.seeds.ol=1;o.cards.forEach(function(c){var b=String(c.bankId||'')+' '+String(c.bank||'')+' '+String(c.name||'');
       if((c.bankId==='adcb'||c.bankId==='abc'||/\bADCB\b|أبو ?ظبي التجاري|\bABC\b|المؤسسة العربية/i.test(b))&&(c.olAllow==null||c.olAllow==='')){c.olAllow=5;c.olType='%'}})}
     var EPP_SEED={
@@ -2625,7 +2626,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     function g(t){return '</div><div class="grp">'+t+'</div><div class="mtiles">'}
     document.getElementById('nav').innerHTML='<div class="nav-in">'+
       '<div class="brand"><div><b>Financial Aid</b><small>v'+esc(window.APP_VERSION||'')+'</small></div><button class="icon-btn close-nav" data-act="close-nav" aria-label="قفل القائمة">'+ic('close')+'</button></div>'+
-      '<div class="mtiles">'+a('home','الرئيسية')+a('notifs','الإشعارات')+a('spend','الصرف والسداد والتحويل')+a('reports','التقارير')+a('budget','الميزانية والأهداف')+
+      '<div class="mtiles">'+a('home','الرئيسية')+a('notifs','الإشعارات')+a('spend','الصرف والسداد والتحويل')+a('reports','تقارير المعاملات')+a('budget','الميزانية والأهداف')+
       g('التزاماتي')+a('cards','كروت المشتريات')+a('loans','قروضي')+a('bnpl','تطبيقات وكروت التقسيط')+a('gamiyas','جمعياتي')+a('insurance','وثائق التأمين')+
       g('فلوسي')+a('wallets','كل الأرصدة والمحافظ')+a('accounts','حساباتي البنكية')+a('cash','الكاش')+a('ewallets','المحافظ الإلكترونية')+a('prepaid','الكروت المدفوعة مسبقًا')+a('otherbal','أرصدة تانية')+
       g('استثماراتي وممتلكاتي')+a('invest','حسابات الاستثمار ودفاتر التوفير')+a('deposits','الودائع والشهادات')+a('assets','الممتلكات والأصول')+
@@ -2864,7 +2865,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function homeExtras(){var AA=homeAdded(),h='';if(!AA.length)return '';var MK=homeMasked();
     if(AA.indexOf('cards')>=0&&S.cards.length)h+=hs('x_cards')+'<section class="sec"><div class="sec-head"><h2>💳 كروت المشتريات</h2></div><div class="list">'+S.cards.map(function(c){var x=calcCard(c);return '<button class="item" data-act="open" data-coll="cards" data-id="'+esc(c.id)+'"><div class="main"><div class="t">'+esc(c.name)+'</div><div class="s">متاح '+(MK?'••••':money(x.avail))+(x.due?' · السداد '+dShort(iso(x.due)):'')+'</div></div><div class="end"><div class="v">'+(MK?'••••':money(x.debt))+'</div></div></button>'}).join('')+'</div></section>';
     if(AA.indexOf('recent')>=0){h+=hs('x_recent');var R=S.reports.filter(function(t){return t.kind!=='كشف'}).slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date))||(n(b.seq)-n(a.seq))}).slice(0,5);
-      h+='<section class="sec"><div class="sec-head"><h2>🧾 آخر المعاملات</h2><a class="fine" href="#reports">كل التقارير</a></div><div class="list">'+(R.length?R.map(function(t){var sg=txSign(t);return '<div class="item" style="cursor:default"><div class="main"><div class="t">'+esc(t.notes||t.kind)+'</div><div class="s">'+esc(t.name||'')+' · '+dShort(t.date)+'</div></div><div class="end"><div class="v" style="color:var('+(sg>0?'--ok':sg<0?'--bad':'--ink')+')">'+(sg>0?'+ ':sg<0?'− ':'')+money(t.amount)+'</div></div></div>'}).join(''):'<div class="empty">مفيش معاملات لسه.</div>')+'</div></section>'}
+      h+='<section class="sec"><div class="sec-head"><h2>🧾 معاملاتي</h2><button class="h3-link" data-act="go-tx">كل المعاملات ›</button></div><div class="chips">'+TXK.slice(1,7).map(function(k){return '<button class="chip" data-act="go-tx" data-k="'+k[0]+'">'+k[1]+'</button>'}).join('')+'<button class="chip" data-act="go-tx" data-p="day">النهاردة</button></div><div class="list">'+(R.length?R.map(function(t){var sg=txSign(t);return '<div class="item" style="cursor:default"><div class="main"><div class="t">'+esc(t.notes||t.kind)+'</div><div class="s">'+esc(t.name||'')+' · '+dShort(t.date)+'</div></div><div class="end"><div class="v" style="color:var('+(sg>0?'--ok':sg<0?'--bad':'--ink')+')">'+(sg>0?'+ ':sg<0?'− ':'')+money(t.amount)+'</div></div></div>'}).join(''):'<div class="empty">مفيش معاملات لسه.</div>')+'</div></section>'}
     if(AA.indexOf('goals')>=0){var G=S.goals||[];h+=hs('x_goals')+'<section class="sec"><div class="sec-head"><h2>🎯 أهداف الادخار</h2><a class="fine" href="#budget">كل الأهداف</a></div><div class="list">'+(G.length?G.map(function(g){var p=n(g.target)>0?Math.min(n(g.saved)/n(g.target),1):0;return '<div class="item" style="cursor:default"><div class="ava">'+esc(g.ic||'🎯')+'</div><div class="main"><div class="t">'+esc(g.name)+'</div><div class="s">'+money(g.saved)+' من '+money(g.target)+'</div></div><div class="end"><div class="v">'+Math.round(p*100)+'%</div></div></div>'}).join(''):'<div class="empty">مفيش أهداف لسه.</div>')+'</div></section>'}
     if(AA.indexOf('assets')>=0){h+=hs('x_assets');var A=(S.assets||[]).filter(function(a){return !a.sold}),tot=A.reduce(function(s0,a){return s0+(typeof assetVal==='function'?assetVal(a):0)},0);
       h+='<section class="sec"><div class="sec-head"><h2>📈 استثماراتك وأصولك</h2><a class="fine" href="#assets">التفاصيل</a></div><div class="list">'+(A.length?'<div class="item" style="cursor:default"><div class="main"><div class="t">القيمة التقديرية</div><div class="s">'+A.length+' أصل</div></div><div class="end"><div class="v">'+(MK?'••••':money(tot))+'</div></div></div>':'<div class="empty">مفيش أصول متسجلة.</div>')+'</div></section>'}
@@ -2912,7 +2913,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<span class="gs">'+fmt(inc0)+' دخل − '+fmt(need)+' مطلوب ('+(aS.rows.length-1)+' بند)'+(inc0>0?' · المطلوب '+Math.round(need/inc0*100)+'% من الدخل':'')+'</span></button></div>';
     h+=hs('actions');
     if(on('actions'))h+='<div class="otiles three">'+otile('💸','اصرف','data-act="mv-new" data-t="spend"','',1)+otile('✅','سدّد','data-act="pay-new"','',1)+otile('🔁','حوّل','data-act="mv-new" data-t="xfer"')+
-      otile('💰','فلوس من بره','data-act="mv-new" data-t="add"')+otile('🤝','استلفت','data-act="borrow-new"')+otile('📤','سلّفت حد','data-act="lend-new"')+'</div>';
+      otile('💰','فلوس من بره','data-act="mv-new" data-t="add"')+otile('🤝','استلفت','data-act="borrow-new"')+otile('📤','سلّفت حد','data-act="lend-new"')+otile('🧾','معاملاتي','data-act="go-tx"')+'</div>';
     h+=hs('_topend')+'</section>';
     /* overview */
     var w7=breakdown('w7min'), w7f=breakdown('w7full'), bal=breakdown('balances'), lent=breakdown('lentRem');
@@ -2951,29 +2952,41 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
             '<div class="end"><span class="pill near">حدّث</span></div></button>'}).join('')+'</div></section>';
     }
     /* payment order */
-    h+=hs('payorder');var hp=h;h+='<section class="sec"><div class="sec-head"><h2>ترتيب الدفع</h2><span class="fine">بالأقدم والأقرب</span></div>';
-    if(urgent.length){
-      h+='<div class="phead p-red"><span>'+(late.length?'⚠️ متأخر ومستحق النهاردة':'⏰ لازم تدفع النهاردة')+'</span><b>'+money(tdue)+'</b></div>';
-      h+='<div class="list">'+urgent.map(itemRow).join('')+'</div>';
-    }else{
-      var next=items.filter(function(i){return i.days>0&&i.amt>0&&i.state!=='paid'})[0];
-      h+='<div class="phead p-green"><span>✅ مفيش دفع مستحق النهاردة</span></div>';
-      if(next)h+='<p class="fine" style="margin:0">أقرب ميعاد: <b>'+esc(next.name)+'</b> '+rel(next.days)+' ('+dl(next.date)+') — '+money(next.amt)+'</p>';
-    }
-    var week=items.filter(function(i){return i.days>0&&i.days<=7&&i.amt>0&&i.state!=='paid'});
-    if(week.length){
-      h+='<div class="phead p-amber"><span>📅 خلال الأسبوع ده</span><b>'+money(sum(week,function(i){return i.amt}))+'</b></div>';
-      h+='<div class="list">'+week.map(itemRow).join('')+'</div>';
-    }
-    var up=items.filter(function(i){return i.days>7&&i.days<=31});
-    h+='<div class="phead p-violet"><span>🗓️ بعد كده (لحد 31 يوم)</span>'+(up.length?'<b>'+money(sum(up.filter(function(i){return i.amt>0}),function(i){return i.amt}))+'</b>':'')+'</div>'+
-      (up.length?'<div class="list">'+up.map(itemRow).join('')+'</div>':'<div class="list"><div class="empty">مفيش مواعيد تانية خلال الشهر الجاي.</div></div>')+'</section>';
+    h+=hs('payorder');var hp=h;h+=payOrderHtml(items);
     if(!on('payorder'))h=hp;
     h+=homeExtras();
     var hin=HV_IN?' hv2-in':'';HV_IN=false;
     return homeV3(h,hin);
     return '<div class="hv2'+hin+'">'+homeArrange(h)+'</div>';
   }
+
+  /* ---- payment order on the home screen: you choose the order, the amount shown and the period ---- */
+  var PO_SORT=[['urgent','الأهم الأول (متأخر، النهاردة، الأسبوع)'],['near','الأقرب ميعادًا'],['far','الأبعد ميعادًا'],['big','الأكبر مبلغًا'],['small','الأصغر مبلغًا']],
+      PO_AMT=[['min','الحد الأدنى'],['stmt','المطلوب من الكشف كله'],['debt','إجمالي المديونية']],PO_RNG=[['7','أسبوع'],['14','أسبوعين'],['31','شهر'],['62','شهرين'],['92','3 شهور'],['custom','فترة تختارها']];
+  function poOpt(){var o={};try{o=JSON.parse(localStorage.getItem('3bh_po')||'{}')||{}}catch(e){}return {sort:o.sort||'urgent',amt:o.amt||'min',rng:o.rng||'31',from:o.from||'',to:o.to||''}}
+  function poSet(k,v){var o=poOpt();o[k]=v;try{localStorage.setItem('3bh_po',JSON.stringify(o))}catch(e){}}
+  function poAmt(i,mode){if(i.coll!=='cards'||i.amt==null)return i.amt;if(mode==='stmt')return i.full;if(mode==='debt'){var c=find('cards',i.id);return c?Math.max(calcCard(c).debt,0):i.full}return i.amt}
+  function payOrderHtml(items0){var P=poOpt(),t=today(),lo=-36500,hi=+P.rng||31;
+    if(P.rng==='custom'){var f=parseD(P.from),e=parseD(P.to);lo=f?Math.round((f-t)/864e5):-36500;hi=e?Math.round((e-t)/864e5):31}
+    var items=items0.map(function(i){var c=Object.assign({},i);c.amt=poAmt(i,P.amt);return c}).filter(function(i){return i.days>=lo&&i.days<=hi});
+    var sel=function(id,L,v){return '<select class="in" id="'+id+'" style="flex:1;min-width:130px">'+L.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===v?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>'};
+    var h='<section class="sec"><div class="sec-head"><h2>ترتيب الدفع</h2><span class="fine">'+esc((PO_SORT.filter(function(x){return x[0]===P.sort})[0]||[])[1]||'')+'</span></div>'+
+      '<div class="actions po-ctl">'+sel('po-sort',PO_SORT,P.sort)+sel('po-amt',PO_AMT,P.amt)+sel('po-rng',PO_RNG,P.rng)+'</div>'+
+      (P.rng==='custom'?'<div class="actions"><label class="fine" for="po-from">من</label><input class="in" id="po-from" type="date" style="direction:ltr" value="'+esc(P.from)+'"><label class="fine" for="po-to">لـ</label><input class="in" id="po-to" type="date" style="direction:ltr" value="'+esc(P.to||iso(addDays(t,31)))+'"></div>':'');
+    var pay=items.filter(function(i){return i.amt>0&&i.state!=='paid'}),tot=sum(pay,function(i){return i.amt});
+    if(P.sort!=='urgent'){var L=items.filter(function(i){return i.amt!=null&&i.state!=='paid'||i.inc!=null}).slice();
+      L.sort(function(a,b){return P.sort==='near'?a.days-b.days:P.sort==='far'?b.days-a.days:P.sort==='big'?(n(b.amt)-n(a.amt))||(a.days-b.days):(n(a.amt)-n(b.amt))||(a.days-b.days)});
+      return h+'<div class="phead p-amber"><span>'+(P.amt==='min'?'الحد الأدنى':P.amt==='stmt'?'المطلوب':'إجمالي المديونية')+' في الفترة</span><b>'+money(tot)+'</b></div>'+(L.length?'<div class="list">'+L.map(itemRow).join('')+'</div>':'<div class="list"><div class="empty">مفيش دفع في الفترة دي.</div></div>')+'</section>'}
+    var late=items.filter(function(i){return i.days<0&&i.amt>0&&i.state!=='paid'}),urgent=items.filter(function(i){return i.days<=0&&i.amt>0&&i.state!=='paid'}),tdue=sum(urgent,function(i){return i.amt});
+    if(urgent.length)h+='<div class="phead p-red"><span>'+(late.length?'⚠️ متأخر ومستحق النهاردة':'⏰ لازم تدفع النهاردة')+'</span><b>'+money(tdue)+'</b></div><div class="list">'+urgent.map(itemRow).join('')+'</div>';
+    else{var nx=items.filter(function(i){return i.days>0&&i.amt>0&&i.state!=='paid'})[0];h+='<div class="phead p-green"><span>✅ مفيش دفع مستحق النهاردة</span></div>';
+      if(nx)h+='<p class="fine" style="margin:0">أقرب ميعاد: <b>'+esc(nx.name)+'</b> '+rel(nx.days)+' ('+dl(nx.date)+') — '+money(nx.amt)+'</p>'}
+    var wk=items.filter(function(i){return i.days>0&&i.days<=7&&i.amt>0&&i.state!=='paid'});
+    if(wk.length)h+='<div class="phead p-amber"><span>📅 خلال الأسبوع ده</span><b>'+money(sum(wk,function(i){return i.amt}))+'</b></div><div class="list">'+wk.map(itemRow).join('')+'</div>';
+    var up=items.filter(function(i){return i.days>7});
+    h+='<div class="phead p-violet"><span>🗓️ بعد كده (لحد '+(P.rng==='custom'?dShort(iso(addDays(t,hi))):(PO_RNG.filter(function(x){return x[0]===P.rng})[0]||['','شهر'])[1])+')</span>'+(up.length?'<b>'+money(sum(up.filter(function(i){return i.amt>0}),function(i){return i.amt}))+'</b>':'')+'</div>'+
+      (up.length?'<div class="list">'+up.map(itemRow).join('')+'</div>':'<div class="list"><div class="empty">مفيش مواعيد تانية في الفترة دي.</div></div>');
+    return h+'</section>'}
   var HV_IN=true;
   function itemRow(i){
     var pill=i.state==='wait'?'<span class="pill wait">بانتظار الكشف</span>':i.state==='paid'?'<span class="pill paid">اتدفع</span>':i.state==='inc'?'<span class="pill inc">قبض '+rel(i.days)+'</span>':'<span class="pill '+i.state+'">'+rel(i.days)+'</span>';
@@ -3120,7 +3133,9 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
 
   /* ================= reports ================= */
   var CAT={cards:'الكروت',loans:'القروض',gamiyas:'الجمعيات',insurance:'التأمين',bnpl:'أقساط كروت وتطبيقات التقسيط',expenses:'المصروفات الثابتة',debts:'السلف',lent:'فلوس رجعتلي',income:'الدخل',accounts:'الحسابات',wallets:'المحافظ',reports:'يدوي'};
-  var RP={p:'month',off:0,from:'',to:'',cat:'',side:'out'};
+  var RP={p:'month',off:0,from:'',to:'',cat:'',side:'out',kind:''};
+  var TXK=[['','الكل'],['spend','صرف'],['in','دخل'],['xfer','تحويلات'],['pay','سداد'],['lend','سلف'],['gift','تبرعات وهدايا'],['fee','رسوم وفوايد'],['stmt','كشوف']];
+  function txType(t){var k=t.kind,c=String(t.cat||'');if(k==='كشف')return 'stmt';if(k==='فوايد ورسوم')return 'fee';if(k==='سلفة'||t.dtr||t.coll==='debts'||t.coll==='lent'||/سلف/.test(c))return 'lend';if(/تبرع|هدايا|صدق|زكا/.test(c))return 'gift';if(k==='دفعة'||t.mv==='pay')return 'pay';if(k==='تحويل'||t.mv==='xfer')return 'xfer';if(TX_IN.indexOf(k)>=0)return 'in';if(TX_OUT.indexOf(k)>=0)return 'spend';return 'other'}
   function addDays(d,k){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+k)}
   function rpRange(){
     var t=today(),s,e,label,o=RP.off;
@@ -3980,12 +3995,14 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
 
   function screenReports(){
     var rg=rpRange(), s=iso(rg.s), e=iso(rg.e), side=RP.side||'out';
-    var all=S.reports.filter(function(t){return t.date>=s&&t.date<=e&&(!RP.book||t.book===RP.book)}).sort(function(a,b){return String(b.date).localeCompare(String(a.date))||String(b.at||'').localeCompare(String(a.at||''))||(b.seq||0)-(a.seq||0)});
+    var all=S.reports.filter(function(t){return t.date>=s&&t.date<=e&&(!RP.book||t.book===RP.book)&&(!RP.kind||txType(t)===RP.kind)}).sort(function(a,b){return String(b.date).localeCompare(String(a.date))||String(b.at||'').localeCompare(String(a.at||''))||(b.seq||0)-(a.seq||0)});
     var nOut=all.filter(function(t){return txSign(t)<0}).length,nIn=all.filter(function(t){return txSign(t)>0}).length;
     var out=sum(all.filter(function(t){return txSign(t)<0}),function(t){return t.amount}), inc=sum(all.filter(function(t){return txSign(t)>0}),function(t){return t.amount});
     var stm=sum(all.filter(function(t){return t.kind==='كشف'}),function(t){return t.amount}), chg=sum(all.filter(function(t){return t.kind==='فوايد ورسوم'}),function(t){return t.amount});
     function chip(p,l){return '<button class="btn sm'+(RP.p===p?' primary':'')+'" data-act="rp" data-p="'+p+'">'+l+'</button>'}
-    var h='<section class="sec"><div class="actions">'+chip('day','يومي')+chip('week','أسبوعي')+chip('month','شهري')+chip('year','سنوي')+chip('custom','فترة')+'</div>';
+    var h='<section class="sec"><div class="actions">'+chip('day','يومي')+chip('week','أسبوعي')+chip('month','شهري')+chip('year','سنوي')+chip('custom','فترة')+'</div>'+
+      '<div class="chips" role="group" aria-label="نوع المعاملة">'+TXK.map(function(k){return '<button class="chip'+((RP.kind||'')===k[0]?' on':'')+'" data-act="rp-kind" data-k="'+k[0]+'">'+k[1]+'</button>'}).join('')+'</div>';
+    if(RP.p==='day')h+='<div class="actions"><label class="fine" for="rp-day">يوم</label><input class="in" id="rp-day" type="date" style="direction:ltr" value="'+s+'" max="'+iso(today())+'"></div>';
     if(RP.p==='custom')h+='<div class="actions"><label class="fine" for="rp-from">من</label><input class="in" id="rp-from" type="date" style="direction:ltr" value="'+s+'"><label class="fine" for="rp-to">لـ</label><input class="in" id="rp-to" type="date" style="direction:ltr" value="'+e+'"></div>';
     else h+='<div class="actions" style="justify-content:space-between"><button class="btn sm" data-act="rp-off" data-d="-1" aria-label="اللي قبله">‹ اللي قبله</button><b>'+esc(rg.label)+'</b><button class="btn sm" data-act="rp-off" data-d="1" aria-label="اللي بعده"'+(RP.off>=0?' disabled':'')+'>اللي بعده ›</button></div>';
     if(RP.p==='month')h=h.replace(/<div class="actions" style="justify-content:space-between">[\s\S]*$/,'')+monthStrip();
@@ -5381,6 +5398,8 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
   document.getElementById('app').addEventListener('change',function(e){
     if(/^dp-(mode|every)$/.test(e.target.id)){e.target.dispatchEvent(new Event('input',{bubbles:true}));return}
     if(e.target.id==='nt-hour'){S.notifyHour=+e.target.value;save();ntWritePlan();renderMain();toast('الإشعار هيوصل كل يوم الساعة '+e.target.value+':00');return}
+    if(/^po-(sort|amt|rng|from|to)$/.test(e.target.id)){poSet(e.target.id.slice(3),e.target.value);renderMain();return}
+    if(e.target.id==='rp-day'){var dd=parseD(e.target.value);if(dd){RP.off=Math.round((dd-today())/864e5);if(RP.off>0)RP.off=0;renderMain()}return}
     if(e.target.id==='rp-from'||e.target.id==='rp-to'){RP[e.target.id==='rp-from'?'from':'to']=e.target.value;renderMain();return}
     if(sheet&&sheet.mode==='move'&&(e.target.id==='mv-from'||e.target.id==='mv-to')){grabMove();renderSheet();return}
     if(sheet&&sheet.mode==='move'&&e.target.id==='mv-when'){grabMove();renderSheet();return}
@@ -5453,6 +5472,8 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     if(act==='stmt-open'){var sc0=find('cards',t.getAttribute('data-id'));if(sc0){sheet=null;openStmtForm(sc0)}return}
     if(act==='loan-upd-open'){var ln0=find('loans',t.getAttribute('data-id'));if(ln0){sheet=null;openLoanUpd(ln0)}return}
     if(act==='rp'){RP.p=t.getAttribute('data-p');RP.off=0;renderMain();return}
+    if(act==='rp-kind'){RP.kind=t.getAttribute('data-k')||'';renderMain();return}
+    if(act==='go-tx'){RP.kind=t.getAttribute('data-k')||'';if(t.getAttribute('data-p')){RP.p=t.getAttribute('data-p');RP.off=0}navTo('reports');return}
     if(act==='rp-off'){RP.off+=+t.getAttribute('data-d');renderMain();return}
     if(act==='nt-enable'){ntEnable();return}
     if(act==='nt-now'){ntRun(true);toast('اتبعتت رسالة النهاردة');return}
