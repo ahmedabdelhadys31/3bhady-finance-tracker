@@ -1,5 +1,5 @@
 {
- "v": "2026-11-07",
+ "v": "2026-11-11",
  "note": "Financial Aid tariffs: edit and upload this file alone to update fees for every user (raise \"v\" to a later date).",
  "banks": [
   {
@@ -1008,7 +1008,8 @@
     "of": 175,
     "mf": 35,
     "minP": 5,
-    "minF": 0
+    "minF": 0,
+    "oa": 5
    },
    "t": [
     [
@@ -1180,7 +1181,8 @@
     "mf": 30,
     "mp": 0.05,
     "minP": 5,
-    "minF": 0
+    "minF": 0,
+    "oa": 5
    },
    "t": [
     [
