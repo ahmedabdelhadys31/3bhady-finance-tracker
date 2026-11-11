@@ -153,24 +153,27 @@
     spend:{title:'الصرف والتحويل',one:'عملية',add:'اصرف'},
     notifs:{title:'الإشعارات',one:'إشعار',add:'ابعت رسالة النهاردة'},
     cash:{title:'الكاش',one:'كاش',add:'إضافة كاش'},
-    ewallets:{title:'المحافظ الإلكترونية',one:'محفظة',add:'إضافة محفظة'},prepaid:{title:'الكروت المدفوعة مسبقًا',one:'كارت',add:'إضافة كارت مدفوع مسبقًا'},otherbal:{title:'أرصدة تانية',one:'رصيد',add:'إضافة رصيد'},
+    ewallets:{title:'المحافظ الإلكترونية',one:'محفظة',add:'إضافة محفظة'},prepaid:{title:'الكروت المدفوعة مسبقًا',one:'كارت',add:'إضافة كارت مدفوع مسبقًا'},otherbal:{title:'أرصدة تانية',one:'رصيد',add:'إضافة رصيد'},invest:{title:'حسابات الاستثمار ودفاتر التوفير',one:'حساب',add:'إضافة حساب استثمار أو دفتر توفير'},
     deposits:{title:'الودائع والشهادات',one:'شهادة أو وديعة',add:'إضافة شهادة أو وديعة'},
     assets:{title:'الممتلكات والأصول',one:'أصل',add:'إضافة ممتلكات'},
     budget:{title:'الميزانية والأهداف',one:'هدف',add:'هدف ادخار جديد'}
   };
   var KEYS=['cards','loans','debts','lent','income','expenses','gamiyas','insurance','bnpl','accounts','wallets','reports','deposits','assets'];
   var ROUTES=['home','spend','notifs'].concat(KEYS).concat(['settings']);
-  ROUTES.push('cash','ewallets','prepaid','otherbal');ROUTES.push('budget');
+  ROUTES.push('cash','ewallets','prepaid','otherbal');ROUTES.push('budget');ROUTES.push('invest');
   var DAYF={expenses:'day',insurance:'payDay',bnpl:'dueDay'};
   var CB_ON={cards:'على المشتريات من الكارت',accounts:'على الصرف والدفع من الحساب',wallets:'على الصرف والدفع منها',loans:'على كل قسط بتدفعه',bnpl:'على كل قسط بتدفعه'};
   var RW_T=['مفيش','كاش باك','نقاط بونص','كاش باك ونقاط'];
-  var INT_M=['مفيش','عائد بنسبة','عائد بقيمة ثابتة'],INT_B=['أقل رصيد في الفترة','الرصيد اليومي','متوسط الرصيد في الفترة','الرصيد يوم نزول العائد'],INT_F=['شهري','ربع سنوي','نص سنوي','سنوي'];
+  var INT_M=['مفيش','عائد بنسبة','عائد بقيمة ثابتة'],INT_B=['أقل رصيد في الفترة','الرصيد اليومي','متوسط الرصيد في الفترة','الرصيد يوم نزول العائد'],INT_F=['يومي','أسبوعي','شهري','ربع سنوي','نص سنوي','سنوي','كل عدد أيام'];
   function intF(){var on=function(v){return v.intMode==='عائد بنسبة'||v.intMode==='عائد بقيمة ثابتة'},pc=function(v){return v.intMode==='عائد بنسبة'};
     return [{g:'📈 فوايد الحساب (اختياري)'},{k:'intMode',l:'الحساب عليه فوايد؟',t:'select',opts:INT_M,refresh:1},
-      {k:'intRate',l:'العائد السنوي ٪',t:'number',when:pc},{k:'intBase',l:'بيتحسب على',t:'select',opts:INT_B,when:pc},
+      {k:'intRate',l:'نسبة العائد ٪',t:'number',when:pc},{k:'intRateP',l:'النسبة دي',t:'select',opts:['سنوية','شهرية','يومية'],when:pc},{k:'intBase',l:'بيتحسب على',t:'select',opts:INT_B,when:pc},
       {k:'intFixed',l:'قيمة العائد كل مرة (ج)',t:'number',when:function(v){return v.intMode==='عائد بقيمة ثابتة'}},
-      {k:'intFreq',l:'العائد بينزل',t:'select',opts:INT_F,when:on},{k:'intDay',l:'يوم نزوله في الشهر (فاضي = آخر الشهر)',t:'number',when:on},
+      {k:'intFreq',l:'العائد بينزل',t:'select',opts:INT_F,when:on,refresh:1},{k:'intEvery',l:'كل كام يوم',t:'number',when:function(v){return on(v)&&v.intFreq==='كل عدد أيام'}},
+      {k:'intDay',l:'يوم نزوله في الشهر (فاضي = آخر الشهر)',t:'number',when:function(v){return on(v)&&['يومي','أسبوعي','كل عدد أيام'].indexOf(v.intFreq)<0}},
       {k:'intMin',l:'الحد الأدنى للرصيد عشان يتحسب عائد (ج، اختياري)',t:'number',when:on},{k:'intMinDays',l:'لازم الرصيد يفضل فوق الحد الأدنى كام يوم في الفترة (اختياري)',t:'number',when:on},
+      {k:'intComp',l:'العائد لما ينزل',t:'select',opts:['تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده','بيتحوّل على حساب أو كاش تاني'],full:1,refresh:1,when:on},
+      {k:'intTo',l:'العائد بينزل على',t:'select',hold:1,full:1,when:function(v){return on(v)&&v.intComp==='بيتحوّل على حساب أو كاش تاني'}},
       {k:'intAuto',l:'لما ييجي ميعاده',t:'select',opts:['يتضاف للرصيد لوحده','اسألني الأول'],when:on}]}
   function cbF(coll){var on=function(v){return v.cbMode==='نسبة %'||v.cbMode==='مبلغ ثابت'};
     if(coll==='cards'){var cw=function(v){return /كاش/.test(v.rwType||'')},pw=function(v){return /نقاط/.test(v.rwType||'')};
@@ -356,7 +359,7 @@
 
   function mfOnly(v){return v.kind==='Money Fellows'}
   function normalize(d){
-    var o={v:2,seeds:(d&&d.seeds)||{},notifs:Array.isArray(d&&d.notifs)?d.notifs:[],notifyHour:d&&d.notifyHour!=null?d.notifyHour:10,profile:(d&&d.profile&&typeof d.profile==='object')?d.profile:{name:''},holidays:(d&&d.holidays&&typeof d.holidays==='object')?d.holidays:{add:[],del:[]},ntSince:(d&&d.ntSince)||'',cats:Array.isArray(d&&d.cats)?d.cats:[],goals:Array.isArray(d&&d.goals)?d.goals:[],salary:salMig(d&&d.salary),depLog:(d&&d.depLog&&typeof d.depLog==='object')?d.depLog:{},dcur:(d&&d.dcur&&d.dcur.cur)?d.dcur:null,salPrev:salMig(d&&d.salPrev),salLog:(d&&d.salLog&&typeof d.salLog==='object')?d.salLog:{},vault:(d&&d.vault&&d.vault.pub&&d.vault.wrap)?d.vault:null,budget:(d&&d.budget&&typeof d.budget==='object')?d.budget:{},homeHide:Array.isArray(d&&d.homeHide)?d.homeHide.filter(function(x){return typeof x==='string'}):[],homeAdd:Array.isArray(d&&d.homeAdd)?d.homeAdd.filter(function(x){return typeof x==='string'}):[],homeOrder:Array.isArray(d&&d.homeOrder)?d.homeOrder.filter(function(x){return typeof x==='string'}):[],aiIntro:d&&d.aiIntro?1:0};
+    var o={v:2,seeds:(d&&d.seeds)||{},notifs:Array.isArray(d&&d.notifs)?d.notifs:[],notifyHour:d&&d.notifyHour!=null?d.notifyHour:10,profile:(d&&d.profile&&typeof d.profile==='object')?d.profile:{name:''},holidays:(d&&d.holidays&&typeof d.holidays==='object')?d.holidays:{add:[],del:[]},ntSince:(d&&d.ntSince)||'',cats:Array.isArray(d&&d.cats)?d.cats:[],goals:Array.isArray(d&&d.goals)?d.goals:[],salary:salMig(d&&d.salary),depLog:(d&&d.depLog&&typeof d.depLog==='object')?d.depLog:{},dcur:(d&&d.dcur&&d.dcur.cur)?d.dcur:null,salPrev:salMig(d&&d.salPrev),salLog:(d&&d.salLog&&typeof d.salLog==='object')?d.salLog:{},vault:(d&&d.vault&&d.vault.pub&&d.vault.wrap)?d.vault:null,budget:(d&&d.budget&&typeof d.budget==='object')?d.budget:{},homeHide:Array.isArray(d&&d.homeHide)?d.homeHide.filter(function(x){return typeof x==='string'}):[],homeAdd:Array.isArray(d&&d.homeAdd)?d.homeAdd.filter(function(x){return typeof x==='string'}):[],homeOrder:Array.isArray(d&&d.homeOrder)?d.homeOrder.filter(function(x){return typeof x==='string'}):[],voidTx:Array.isArray(d&&d.voidTx)?d.voidTx:[],aiIntro:d&&d.aiIntro?1:0};
     KEYS.forEach(function(k){o[k]=Array.isArray(d&&d[k])?d[k]:[]});
     if(!d)o.seeds.cash=1;
     if(d&&!o.seeds.cash){o.seeds.cash=1;if(o.wallets.some(function(w){return w.id==='mf9028'})&&!o.wallets.some(function(w){return w.kind==='كاش'}))o.wallets.push({id:'cash_me',name:'كاش معايا',kind:'كاش',balance:0,currency:'EGP',notes:''},{id:'cash_wife',name:'كاش مع زوجتي',kind:'كاش',balance:0,currency:'EGP',notes:''})}
@@ -597,7 +600,9 @@
     wallets:{balance:'الرصيد اللي ظاهر في التطبيق أو الرسالة'},
     income:{amount:'الصافي اللي بينزل فعلًا',day:'رقم اليوم بس (1-31)'},
     expenses:{day:'رقم اليوم بس (1-31)'},
-    gamiyas:{turn:'دورك في القبض (مثلًا 3)',start:'ميعاد أول قسط'},
+    gamiyas:{turn:'دورك في القبض (مثلًا 3)',start:'ميعاد أول قسط',organizer:'اختار من اللي اشتركت معاهم قبل كده أو اكتب اسم جديد'},
+    debts:{name:'لو الاسم موجود قبل كده، المبلغ هيتزوّد على اللي عليك ليه'},
+    lent:{name:'لو الاسم موجود قبل كده، المبلغ هيتزوّد على اللي عنده'},
     insurance:{payDay:'رقم اليوم بس (1-31)'},
     bnpl:{dueDay:'رقم اليوم بس (1-31). لو فيه فترة سداد، ده أول يوم فيها',dueTo:'لو التطبيق بيدّيك فترة سداد (مثلًا من 1 لـ 10) اكتب آخر يوم (10). الغرامة والتأخير بيتحسبوا بعده بس'}
   };
@@ -648,7 +653,15 @@
       {t:'الرصيد',k:['name','provider','balance','currency','fxRate'],req:['name','balance'],w:function(v){var pp=provById(v.provId);return (pp&&pp.w)||WALW[v.kind]||'اكتب الرصيد اللي ظاهر في التطبيق.'}},
       {t:'تفاصيل',opt:1,k:['number','cardNumber','cvv','cardExpiry','notes'],w:'رقم الخط أو الكارت (لو فيه). مش لازمين للحسابات.'}]
   };
-  (function(){FIELDS.accounts=FIELDS.accounts.concat(intF());WIZ.accounts=(WIZ.accounts||[]).concat([{t:'فوايد الحساب',opt:1,k:['intMode','intRate','intBase','intFixed','intFreq','intDay','intMin','intMinDays','intAuto'],w:'لو الحساب (توفير أو جاري أو استثمار) عليه عائد: اكتب النسبة السنوية وبيتحسب على إيه، أو قيمة ثابتة، وإمتى بينزل، والحد الأدنى للرصيد والمدة اللي لازم يفضلها عشان يتحسب. هتلاقيها في شروط الحساب على موقع البنك أو التطبيق. البرنامج هيحسبه ويضيفه لوحده في ميعاده.'}])})();
+  (function(){FIELDS.accounts=FIELDS.accounts.concat(intF());WIZ.accounts=(WIZ.accounts||[]).concat([{t:'فوايد الحساب',opt:1,k:['intMode','intRate','intRateP','intBase','intFixed','intFreq','intEvery','intDay','intMin','intMinDays','intComp','intTo','intAuto'],w:'لو الحساب (توفير أو جاري أو استثمار) عليه عائد: اكتب النسبة السنوية وبيتحسب على إيه، أو قيمة ثابتة، وإمتى بينزل، والحد الأدنى للرصيد والمدة اللي لازم يفضلها عشان يتحسب. هتلاقيها في شروط الحساب على موقع البنك أو التطبيق. البرنامج هيحسبه ويضيفه لوحده في ميعاده.'}])})();
+  /* earlier names show as suggestions while you type */
+  function uniqL(a){var o=[],k={};a.forEach(function(x){x=String(x||'').trim();var q=nz(x).toLowerCase();if(x&&!k[q]){k[q]=1;o.push(x)}});return o}
+  function dMatch(coll,name){var q=nz(String(name||'')).trim().toLowerCase();if(!q)return null;return (S[coll]||[]).filter(function(d){return nz(String(d.name||'')).trim().toLowerCase()===q})[0]||null}
+  (function(){var people=function(){return uniqL((S.debts||[]).concat(S.lent||[]).map(function(d){return d.name}))};
+    ['debts','lent'].forEach(function(c){FIELDS[c].forEach(function(f){if(f.k==='name')f.list=people})});
+    FIELDS.gamiyas.forEach(function(f){if(f.k==='organizer')f.list=function(){return uniqL(S.gamiyas.map(function(g){return isMF(g)?'':g.organizer}))}});
+    FIELDS.assets.forEach(function(f){if(f.k==='broker')f.list=function(){return uniqL((S.assets||[]).map(function(a){return a.broker}).concat(['ثاندر (Thndr)','EFG Hermes One','مباشر مصر','بلتون','أزيموت مصر','سي آي كابيتال','برايم']))};if(f.k==='ticker')f.ltr=1});
+    ['income','expenses','insurance'].forEach(function(c){(FIELDS[c]||[]).forEach(function(f){if(f.k==='name'||f.k==='company')f.list=function(){return uniqL((S[c]||[]).map(function(o){return o[f.k]}))}})})})();
   (function(){['cards','accounts','wallets','loans','bnpl'].forEach(function(c){FIELDS[c]=FIELDS[c].concat(cbF(c));
     WIZ[c]=(WIZ[c]||[]).concat([{t:c==='cards'?'الكاش باك والبونص':'الكاش باك',opt:1,k:c==='cards'?['rwType','cbMode','cbVal','cbCap','ptsProg','ptsEarn','ptsPer','ptsVal','ptsBal']:['cbMode','cbVal','cbCap'],w:c==='cards'?'بتختلف حسب البنك ونوع الكارت: بعض الكروت بترجّع كاش باك (نسبة أو مبلغ)، وبعضها بيدّي نقط بونص (مثلًا نقطة على كل 10 ج) بتستبدلها برصيد أو هدايا. هتلاقيها في شروط الكارت على موقع البنك أو في التطبيق ← المكافآت. اللي تكتبه هيتحسب لوحده مع كل صرف، وتقدر تعدّله في العملية نفسها.':(c==='loans'||c==='bnpl')?'لو بتاخد كاش باك على سداد القسط، اكتبه هنا وهيتحسب مع كل دفعة، وتقدر تعدّله في كل دفعة.':'لو بتاخد كاش باك على الصرف أو الدفع من هنا، اكتبه وهيتحسب لوحده مع كل عملية.'}])})})();
   function sugOf(f){
@@ -676,18 +689,41 @@
     if(f.coll==='cards'&&s.k.indexOf('statement')>=0&&n(f.v.min)>n(f.v.statement)&&n(f.v.statement)>0){f.errK='min';return 'الحد الأدنى أكبر من المطلوب، راجعه'}
     f.errK=null;f.errMsg='';return '';
   }
-  (function(){var bl=BANKS.map(function(b){return b.s});['cards','loans','accounts','deposits'].forEach(function(c){var fd=FIELDS[c].filter(function(x){return x.k==='bank'})[0];if(fd)fd.list=bl});
+  (function(){var bl=BANKS.map(function(b){return b.s});['cards','loans','accounts','deposits'].forEach(function(c){var fd=FIELDS[c].filter(function(x){return x.k==='bank'})[0];if(fd)fd.list=bl});(function(){var fa=FIELDS.accounts.filter(function(x){return x.k==='bank'})[0];if(fa)fa.list=bl.concat(['البريد المصري','ماي فوري (Fawry)'])})();
     var L={loans:['قرض شخصي','قرض عربية','تمويل عقاري','قرض بضمان شهادة','قرض بضمان وديعة','قرض تعليم'],expenses:['إيجار','كهربا','مية','غاز','نت البيت','باقة الموبايل','مدرسة','نادي','اشتراكات'],
-      income:['المرتب','شغل حر','إيجار','عائد شهادات'],deposits:['الشهادة البلاتينية','شهادة ثلاثية','شهادة خماسية','شهادة ادخار','وديعة لأجل','وديعة دولارية'],insurance:['تأمين حياة','تأمين طبي','تأمين عربية','وثيقة استثمار'],accounts:['حساب جاري','حساب توفير','حساب مرتب']};
+      income:['المرتب','شغل حر','إيجار','عائد شهادات'],deposits:['الشهادة البلاتينية','شهادة ثلاثية','شهادة خماسية','شهادة ادخار','وديعة لأجل','وديعة دولارية'],insurance:['تأمين حياة','تأمين طبي','تأمين عربية','وثيقة استثمار'],accounts:['حساب جاري','حساب توفير','حساب مرتب','دفتر توفير','حساب استثمار','حساب توفير بعائد يومي']};
     for(var c in L){var fd=FIELDS[c].filter(function(x){return x.k==='name'})[0];if(fd&&!fd.list)fd.list=L[c]}})();
+
+  /* ================= drop-down suggestions under a text field (works the same on every phone and keyboard) ================= */
+  var CBX={el:null,inp:null,t:0,fAt:0};
+  function cbxOpts(inp){var dl=document.getElementById(inp.getAttribute('data-dl'));if(!dl)return [];var q=nz(inp.value||'').trim().toLowerCase(),all=[].map.call(dl.options,function(o){return o.value}).filter(Boolean);
+    var L=q?all.filter(function(x){return nz(x).toLowerCase().indexOf(q)>=0}):all;if(L.length===1&&nz(L[0]).toLowerCase()===q)return [];return L.slice(0,60)}
+  function cbxHide(){if(CBX.el){CBX.el.remove();CBX.el=null}CBX.inp=null}
+  function cbxPlace(){if(!CBX.el||!CBX.inp)return;var r=CBX.inp.getBoundingClientRect(),vv=window.visualViewport,vh=vv?vv.height+vv.offsetTop:window.innerHeight,below=vh-r.bottom-8,above=r.top-8,up=below<160&&above>below;
+    CBX.el.style.left=r.left+'px';CBX.el.style.width=r.width+'px';CBX.el.style.maxHeight=Math.max(120,Math.min(280,(up?above:below)))+'px';
+    if(up){CBX.el.style.top='';CBX.el.style.bottom=(window.innerHeight-r.top+4)+'px'}else{CBX.el.style.bottom='';CBX.el.style.top=(r.bottom+4)+'px'}}
+  function cbxShow(inp){var L=cbxOpts(inp);if(!L.length){cbxHide();return}
+    if(!CBX.el){CBX.el=document.createElement('div');CBX.el.className='cbx';CBX.el.setAttribute('role','listbox');document.body.appendChild(CBX.el);
+      CBX.el.addEventListener('pointerdown',function(e){e.preventDefault()});
+      CBX.el.addEventListener('click',function(e){var b=e.target.closest('[data-v]');if(!b||!CBX.inp)return;var i=CBX.inp;i.value=b.getAttribute('data-v');cbxHide();
+        i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}))})}
+    CBX.inp=inp;CBX.el.innerHTML=L.map(function(x){return '<button type="button" role="option" data-v="'+esc(x)+'">'+esc(x)+'</button>'}).join('');cbxPlace()}
+  document.addEventListener('focusin',function(e){var t=e.target;if(!t||!t.getAttribute)return;if(t.getAttribute('list')){t.setAttribute('data-dl',t.getAttribute('list'));t.removeAttribute('list')}
+    if(t.getAttribute('data-dl')){clearTimeout(CBX.t);CBX.fAt=Date.now();cbxShow(t)}else cbxHide()});
+  document.addEventListener('input',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('data-dl')&&document.activeElement===t)cbxShow(t)});
+  document.addEventListener('click',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('data-dl')){if(Date.now()-CBX.fAt<450)return;if(CBX.inp===t&&CBX.el)cbxHide();else cbxShow(t)}else if(!(t.closest&&t.closest('.cbx')))cbxHide()},true);
+  document.addEventListener('focusout',function(e){if(e.target===CBX.inp)CBX.t=setTimeout(cbxHide,180)});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')cbxHide()});
+  window.addEventListener('resize',cbxPlace);if(window.visualViewport){visualViewport.addEventListener('resize',cbxPlace);visualViewport.addEventListener('scroll',cbxPlace)}
+  document.addEventListener('scroll',function(){if(CBX.el)cbxPlace()},true);
   function fieldHtml(f,fd,sgv,reqd){
     var v=f.v, id='f-'+fd.k, val=v[fd.k]==null?'':v[fd.k], cls=((fd.full||fd.t==='area')?'full':'')+(f.errK===fd.k?' err':''), ctl;
     if(fd.t==='area')ctl='<textarea id="'+id+'">'+esc(val)+'</textarea>';
     else if(fd.hold)ctl='<select id="'+id+'"'+(f.errK===fd.k?' aria-invalid="true"':'')+'>'+hOpts(val)+'</select>';
     else if(fd.t==='select'){var ops=(typeof fd.opts==='function'?fd.opts(v):fd.opts).slice();if(val!==''&&ops.indexOf(val)<0)ops.unshift(val);ctl='<select id="'+id+'">'+ops.map(function(o){return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(fd.optl&&fd.optl(o)||o)+'</option>'}).join('')+'</select>'}
     else ctl='<input id="'+id+'" type="'+(fd.t==='number'?'number':fd.t)+'"'+(fd.t==='number'?' inputmode="decimal" step="any"':'')+(fd.mode?' inputmode="'+fd.mode+'"':'')+
-      ((fd.ltr||fd.t==='number'||fd.t==='date')?' class="ltr"':'')+(fd.list?' list="dl-'+fd.k+'"':'')+fieldAttrs(f.coll,fd)+(f.errK===fd.k?' aria-invalid="true"':'')+' value="'+esc(val)+'" autocomplete="off">'+
-      (fd.list?'<datalist id="dl-'+fd.k+'">'+fd.list.map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>':'');
+      ((fd.ltr||fd.t==='number'||fd.t==='date')?' class="ltr"':'')+(fd.list?' data-dl="dl-'+fd.k+'"':'')+fieldAttrs(f.coll,fd)+(f.errK===fd.k?' aria-invalid="true"':'')+' value="'+esc(val)+'" autocomplete="off">'+
+      (fd.list?'<datalist id="dl-'+fd.k+'">'+(typeof fd.list==='function'?fd.list(v):fd.list).map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>':'');
     var hn=HINT[f.coll]&&HINT[f.coll][fd.k];
     var hasS=sgv!==''&&sgv!=null, isMan=f.man&&f.man[fd.k];
     var sl=(hasS&&(isMan||String(sgv)!==String(val)))?'<button type="button" class="sugl" data-act="sug-use" data-k="'+fd.k+'">'+(isMan?'رجّع مقترح البنك ('+sugTxt(fd,sgv)+')':'مقترح البنك: '+sugTxt(fd,sgv)+' · استخدمه')+'</button>':'';
@@ -1356,13 +1392,17 @@
   function trUndo(t){if(t&&t.grp){mvUndo(t.grp);delete t.grp}}
   /* deleting a tranche's entry from the reports cancels the money movement only; the debt keeps the amount */
   function trDetach(grp){['debts','lent'].forEach(function(c){S[c].forEach(function(d){(d.tranches||[]).forEach(function(t){if(t.grp===grp&&t.src!=='paid'){delete t.grp;t.src='old'}})})})}
-  function debtReplan(o,nIn,sdt){var dx2=calcDebt(o);if(!(dx2.rem>0))return;
+  function dpOpt(){var g=function(id){var e=document.getElementById(id);return e?e.value:''};return {mode:g('dp-mode')||'n',n:Math.max(1,Math.round(n(g('dp-n'))||1)),a:n(calcEval(g('dp-a')||'')),every:g('dp-every')||'كل شهر'}}
+  function dpPrev(rem,op){if(op.mode==='a'){if(!(op.a>0))return 'اكتب مبلغ كل دفعة';var a=Math.min(op.a,rem),k=Math.ceil(rem/a-1e-9),last=Math.round((rem-a*(k-1))*100)/100;return k===1?'مرة واحدة: '+fmt(rem):k+' دفعة '+op.every+': '+(k-1)+' × '+fmt(a)+(Math.abs(last-a)>0.01?' + آخر دفعة '+fmt(last):' + '+fmt(last))}
+    var k=op.n;return k>1?k+' دفعة × '+fmt(Math.floor(rem/k*100)/100)+' '+op.every:'مرة واحدة: '+fmt(rem)}
+  function dpStep(d0,q,every){return every==='كل أسبوع'?addDays(d0,7*q):every==='كل أسبوعين'?addDays(d0,14*q):every==='كل 3 شهور'?clampD(d0.getFullYear(),d0.getMonth()+3*q,d0.getDate()):clampD(d0.getFullYear(),d0.getMonth()+q,d0.getDate())}
+  function debtReplan(o,nIn,sdt,opt){opt=opt||{};var dx2=calcDebt(o);if(!(dx2.rem>0))return;
     (o.schedule||[]).forEach(function(s){if(!s.done&&n(s.paidAmt)>0){s.amount=n(s.paidAmt);s.done=true}});
     o.schedule=(o.schedule||[]).filter(function(s){return s.done});
-    var each=Math.floor(dx2.rem/nIn*100)/100, acc=0, d0=parseD(sdt);
+    var ev=opt.every||'كل شهر',each=opt.each>0?Math.round(opt.each*100)/100:Math.floor(dx2.rem/nIn*100)/100, acc=0, d0=parseD(sdt);
     for(var q=0;q<nIn;q++){var a=q===nIn-1?Math.round((dx2.rem-acc)*100)/100:each;acc+=a;
-      o.schedule.push({amount:a,date:iso(clampD(d0.getFullYear(),d0.getMonth()+q,d0.getDate())),note:nIn>1?'قسط '+(q+1)+' من '+nIn:'مرة واحدة',done:false})}
-    o.plan=nIn===1?'الباقي مرة واحدة يوم '+sdt:nIn+' قسط × '+fmt(each)+' كل شهر من '+sdt}
+      o.schedule.push({amount:a,date:iso(dpStep(d0,q,ev)),note:nIn>1?'دفعة '+(q+1)+' من '+nIn:'مرة واحدة',done:false})}
+    o.plan=nIn===1?'الباقي مرة واحدة يوم '+sdt:nIn+' دفعة × '+fmt(each)+' '+ev+' من '+sdt}
   /* ---- add more to a debt (or edit one tranche) ---- */
   function openTr(coll,d,trId,preset){
     var t=trId?trById(d,trId):null, x=calcDebt(d);
@@ -1371,7 +1411,7 @@
     if(preset)for(var k in preset)v[k]=preset[k];
     sheet={mode:'dtr',coll:coll,id:d.id,tr:trId||'',v:v,back:{mode:'detail',coll:coll,id:d.id}};renderSheet();
   }
-  var DT_IDS=['amt','date','spentOn','cat','from','due','note','pn','ps'];
+  var DT_IDS=['amt','date','spentOn','cat','from','due','note','pn','ps','pe'];
   function grabTr(){if(!sheet||sheet.mode!=='dtr')return;DT_IDS.forEach(function(k){var e=document.getElementById('dt-'+k);if(e)sheet.v[k]=e.value})}
   function trHtml(){
     var s=sheet, v=s.v, d=find(s.coll,s.id); if(!d)return '<div class="empty">مش لاقيها</div>';
@@ -1391,7 +1431,7 @@
       '<label for="dt-note">ملاحظة<input id="dt-note" type="text" value="'+esc(v.note)+'"></label></div></div>';
     if(!edit){
       h+='<div class="pick"><div class="pk-h">'+(lent?'اتفاق الرد':'خطة السداد')+'</div><div class="actions">'+[['keep','سيب الخطة زي ما هي'],['new','اعمل خطة جديدة للباقي كله']].map(function(a){return '<button type="button" class="btn sm'+(v.plan===a[0]?' primary':'')+'" data-act="dt-plan" data-p="'+a[0]+'" aria-pressed="'+(v.plan===a[0])+'">'+esc(a[1])+'</button>'}).join('')+'</div>';
-      if(v.plan==='new')h+='<div class="fields"><label for="dt-pn">عدد الدفعات (1 = مرة واحدة)<input id="dt-pn" class="ltr" type="number" inputmode="numeric" min="1" value="'+esc(v.pn)+'"></label><label for="dt-ps">تاريخ أول دفعة<input id="dt-ps" class="ltr" type="date" value="'+esc(v.ps)+'"></label></div><p class="note" style="margin:0">الخطة الجديدة بتحل محل الدفعات اللي لسه ما اتدفعتش، على الباقي كله بعد الزيادة.</p>';
+      if(v.plan==='new')h+='<div class="fields"><label for="dt-pn">عدد الدفعات (1 = مرة واحدة)<input id="dt-pn" class="ltr" type="number" inputmode="numeric" min="1" value="'+esc(v.pn)+'"></label><label for="dt-ps">تاريخ أول دفعة<input id="dt-ps" class="ltr" type="date" value="'+esc(v.ps)+'"></label><label for="dt-pe">كل قد إيه<select id="dt-pe">'+['كل شهر','كل أسبوعين','كل أسبوع','كل 3 شهور'].map(function(e){return '<option'+(v.pe===e?' selected':'')+'>'+e+'</option>'}).join('')+'</select></label></div><p class="note" style="margin:0">الخطة الجديدة بتحل محل الدفعات اللي لسه ما اتدفعتش، على الباقي كله بعد الزيادة.</p>';
       else h+='<p class="note" style="margin:0">لو كتبت ميعاد للجزء ده، هيتضاف للخطة لوحده.</p>';
       h+='</div>';
     }
@@ -1415,14 +1455,15 @@
       sheet={mode:'detail',coll:coll,id:d.id};renderSheet();toast('اتعدّل الجزء ده والأرصدة اتظبطت');aiqAfter();return}
     var t={id:uid()};for(var k2 in rec)t[k2]=rec[k2];
     mutate(function(){d.tranches=(d.tranches||[]).concat([t]);trApply(coll,d,t);debtSync(d);
-      if(v.plan==='new')debtReplan(d,Math.round(n(v.pn)),v.ps);
+      if(v.plan==='new')debtReplan(d,Math.round(n(v.pn)),v.ps,{every:v.pe||'كل شهر'});
       else if(t.due)d.schedule=(d.schedule||[]).concat([{amount:amt,date:t.due,note:'الجزء بتاع '+dTxt(t.date),done:false}])});
     sheet={mode:'detail',coll:coll,id:d.id};renderSheet();toast((coll==='lent'?'اتزودت السلفة ':'اتزودت السلفة ')+fmt(amt)+' · الإجمالي دلوقتي '+fmt(d.amount));aiqAfter();
   }
   /* ---- borrow / lend from the home screen: pick someone you dealt with before, or someone new ---- */
+  var DMERGE='';
   function dPickHtml(coll){var lent=coll==='lent', L=S[coll].slice().sort(function(a,b){return calcDebt(b).rem-calcDebt(a).rem});
     var h='<p class="note" style="margin:0">'+(lent?'سلّفت حد سلّفته قبل كده؟ اختاره وهزوّد على اللي عنده. أو ضيف حد جديد.':'خدت من حد خدت منه قبل كده؟ اختاره وهزوّد على اللي عليك. أو ضيف شخص أو جهة جديدة.')+'</p>';
-    h+='<div class="list"><button class="item" data-act="dp-new" data-coll="'+coll+'"><div class="ava">'+ic('plus',18)+'</div><div class="main"><div class="t">'+(lent?'حد جديد':'شخص أو جهة جديدة')+'</div><div class="s">'+(lent?'سلفة جديدة':'سلفة جديدة منفصلة')+'</div></div></button>';
+    h+='<div class="list"><button class="item" data-act="dp-new" data-coll="'+coll+'"><div class="ava">'+ic('plus',18)+'</div><div class="main"><div class="t">'+(lent?'حد جديد':'شخص أو جهة جديدة')+'</div><div class="s">'+(lent?'اكتب اسمه والمبلغ':'اكتب الاسم والمبلغ')+'</div></div></button>';
     h+=L.map(function(d){var x=calcDebt(d);return '<button class="item" data-act="dp-pick" data-coll="'+coll+'" data-id="'+esc(d.id)+'"><div class="ava">'+ic(coll,18)+'</div><div class="main"><div class="t">'+esc(d.name)+'</div><div class="s">'+
       (x.rem>0?(lent?'لسه عنده ':'لسه عليك ')+fmt(x.rem):(lent?'رجّع كل حاجة':'اتسددت كلها'))+' · '+(d.tranches||[]).length+' مرة</div></div><div class="end"><span class="pill near">زوّد</span></div></button>'}).join('');
     return h+'</div>';
@@ -2309,7 +2350,7 @@
       if(/(دارك|لايت|مظهر|فاتح|غامق|داكن|theme|dark|light)/.test(t))return aiSay('الإعدادات ← 🎨 المظهر: داكن أو فاتح أو "تلقائي" أو Pinky.<div class="actions">'+aiAct('افتح الإعدادات',function(){SET_SEC='theme';aiGo('settings')})+'</div>');
       if(/(لغه|انجليزي|فرنساوي|language|langue)/.test(t))return aiSay('الإعدادات ← 🌐 اللغة: العربية أو English أو Français.<div class="actions">'+aiAct('افتح الإعدادات',function(){SET_SEC='lang';aiGo('settings')})+'</div>');
       if(/(اشعار|notification)/.test(t))return aiSay('الإشعارات بتوصل 10 الصبح بالمطلوب، و11:59 بالليل بملخص اليوم، وقبل أي ميعاد سداد بيومين ويوم السداد نفسه. فعّلها من شاشة الإشعارات.<div class="actions">'+aiAct('افتح الإشعارات',function(){aiGo('notifs')})+'</div>');
-      if(/(سلف|استلف|dette|lend|borrow)/.test(t))return aiSay('فيه نوعين:<br>• <b>فلوس ليك عند حد</b>: سلّفت حد، أو صرفت على حد أو جهة وهيرجعوهالك (زي مصاريف شغل). قولّي مثلًا "سلفت أحمد 500 من الكاش" أو "صرفت 300 على أحمد وهيرجعهم من CIB". المبلغ بيتخصم من رصيدك زي الصرف، ويفضل ليك عنده، ولو سلّفته تاني بيتجمع على اللي عنده. ولما يرجّع قولّي "أحمد رجعلي 200".<br>• <b>فلوس عليك لحد</b>: "استلفت 2000 من محمد دخلوا CIB" أو "محمد سلفني 1000". ولما ترجّعله قولّي "رجعت لمحمد 500".<br>وتسألني "أحمد عليه كام؟" أو "عليا كام لمحمد؟".<div class="actions">'+aiAct('سلّفت حد',function(){openForm('lent',null,{src:DSRC.lent[0][1]})})+aiAct('استلفت',function(){openForm('debts')})+'</div>');
+      if(/(سلف|استلف|dette|lend|borrow)/.test(t))return aiSay('فيه نوعين:<br>• <b>فلوس ليك عند حد</b>: سلّفت حد، أو صرفت على حد أو جهة وهيرجعوهالك (زي مصاريف شغل). قولّي مثلًا "سلفت أحمد 500 من الكاش" أو "صرفت 300 على أحمد وهيرجعهم من CIB". المبلغ بيتخصم من رصيدك زي الصرف، ويفضل ليك عنده، ولو سلّفته تاني بيتجمع على اللي عنده. ولما يرجّع قولّي "أحمد رجعلي 200".<br>• <b>فلوس عليك لحد</b>: "استلفت 2000 من محمد دخلوا CIB" أو "محمد سلفني 1000". ولما ترجّعله قولّي "رجعت لمحمد 500".<br>وتسألني "أحمد عليه كام؟" أو "عليا كام لمحمد؟".<div class="actions">'+aiAct('سلّفت حد',function(){if(S.lent.length){sheet={mode:'pick',k:'dpick',coll:'lent',back:{mode:'ai'}};renderSheet()}else openForm('lent',null,{src:DSRC.lent[0][1]})})+aiAct('استلفت',function(){if(S.debts.length){sheet={mode:'pick',k:'dpick',coll:'debts',back:{mode:'ai'}};renderSheet()}else openForm('debts')})+'</div>');
       if(/(كشف|statement|releve)/.test(t))return aiSay('ابعتلي كشف الحساب PDF هنا بـ 📎، وأنا أطلّع المطلوب والحد الأدنى وآخر ميعاد وأعرض عليك تسجّله. أو من الكارت ← "أدخل الكشف".');
       if(/(اسدد|سدد|ادفع|pay|payer)/.test(t))return aiSay('دوس "سدّد" في الرئيسية، اختار هتدفع إيه (كارت، قسط، سلفة، جمعية…) ومن أنهي حساب أو كاش، والأرصدة بتتظبط لوحدها.<div class="actions">'+aiAct('افتح السداد',function(){openPay();sheet.back={mode:'ai'}})+'</div>');
     }
@@ -2579,7 +2620,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   /* ================= nav ================= */
   var navOpen=false;
   function renderNav(){
-    var MI={home:'🏠',notifs:'🔔',spend:'💸',reports:'📊',budget:'🎯',cards:'💳',loans:'🏦',bnpl:'🧾',gamiyas:'👥',insurance:'🛡️',wallets:'👛',cash:'💵',ewallets:'📱',prepaid:'🎫',otherbal:'🪙',deposits:'📜',assets:'🏠',accounts:'🏛️',debts:'📤',lent:'📥',income:'💰',expenses:'📅',settings:'⚙️'};
+    var MI={home:'🏠',notifs:'🔔',spend:'💸',reports:'📊',budget:'🎯',cards:'💳',loans:'🏦',bnpl:'🧾',gamiyas:'👥',insurance:'🛡️',wallets:'👛',cash:'💵',ewallets:'📱',prepaid:'🎫',otherbal:'🪙',invest:'📒',deposits:'📜',assets:'🏠',accounts:'🏛️',debts:'📤',lent:'📥',income:'💰',expenses:'📅',settings:'⚙️'};
     function a(r,label){return '<a href="#'+r+'" class="mt'+(route===r?' on':'')+'" data-nav="'+r+'"><span class="mi" aria-hidden="true">'+(MI[r]||'•')+'</span><span class="ml">'+label+'</span>'+(r==='notifs'?(loaded&&ntUnread()?'<span class="cnt hot num">'+ntUnread()+'</span>':''):WKR[r]&&loaded?(S.wallets.filter(WKR[r].f).length?'<span class="cnt num">'+S.wallets.filter(WKR[r].f).length+'</span>':''):S[r]&&loaded&&S[r].length?'<span class="cnt num">'+S[r].length+'</span>':'')+'</a>'}
     function g(t){return '</div><div class="grp">'+t+'</div><div class="mtiles">'}
     document.getElementById('nav').innerHTML='<div class="nav-in">'+
@@ -2587,7 +2628,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<div class="mtiles">'+a('home','الرئيسية')+a('notifs','الإشعارات')+a('spend','الصرف والسداد والتحويل')+a('reports','التقارير')+a('budget','الميزانية والأهداف')+
       g('التزاماتي')+a('cards','كروت المشتريات')+a('loans','قروضي')+a('bnpl','تطبيقات وكروت التقسيط')+a('gamiyas','جمعياتي')+a('insurance','وثائق التأمين')+
       g('فلوسي')+a('wallets','كل الأرصدة والمحافظ')+a('accounts','حساباتي البنكية')+a('cash','الكاش')+a('ewallets','المحافظ الإلكترونية')+a('prepaid','الكروت المدفوعة مسبقًا')+a('otherbal','أرصدة تانية')+
-      g('استثماراتي وممتلكاتي')+a('deposits','الودائع والشهادات')+a('assets','الممتلكات والأصول')+
+      g('استثماراتي وممتلكاتي')+a('invest','حسابات الاستثمار ودفاتر التوفير')+a('deposits','الودائع والشهادات')+a('assets','الممتلكات والأصول')+
       g('السلف')+a('debts','سلف عليّ')+a('lent','فلوسي عند الناس')+
       g('شهريًا')+a('income','مصادر الدخل')+a('expenses','المصروفات الثابتة')+g('البرنامج')+a('settings','الإعدادات')+'</div></div>';
     document.getElementById('nav').classList.toggle('open',navOpen);
@@ -2755,7 +2796,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<div class="h3-leg"><button data-act="bd" data-k="balances"><i class="b-have"></i>معاك <b>'+h3Amt(have,MK)+'</b></button>'+(lent?'<button data-act="bd" data-k="lentRem"><i class="b-lent"></i>ليك عند الناس <b>'+h3Amt(lent,MK)+'</b></button>':'')+
       '<button data-act="bd" data-k="allDebt"><i class="b-owe"></i>عليك <b>'+h3Amt(owe,MK)+'</b></button></div></section>'}
   function h3Wallet(MK){var C=S.cards.filter(function(c){var e=typeof cardExp==='function'?cardExp(c):null;return !(e&&e.days<-60)});
-    if(!C.length)return '<section class="h3-sec"><div class="h3-sh"><h2>كروتك</h2></div><button class="h3-empty" data-act="new" data-coll="cards">💳 ضيف أول كارت مشتريات، وهتلاقيه هنا بالمتاح وميعاد السداد</button></section>';
+    if(!C.length)return '<section class="h3-sec"><div class="h3-sh"><h2>كروتك</h2></div><button class="h3-empty" data-act="new-card">💳 ضيف أول كارت مشتريات، وهتلاقيه هنا بالمتاح وميعاد السداد</button></section>';
     var cards=C.map(function(c,i){var x=calcCard(c),sh=hShort('cards',c),col=h3Bank(c),lim=n(c.limit),used=hUsed(c),av=Math.max(lim-used,0),p=lim>0?Math.min(used/lim,1):0,late=x.state==='late',bg=col?'background:linear-gradient(140deg,'+col[0]+' 0%,'+col[1]+' 100%)':faceBg(c,i);
       var due=x.due&&x.rem>0?(late?'<span class="h3-due late">متأخر · ادفع '+(MK?'••':fmt(x.remMin))+'</span>':'<span class="h3-due">السداد '+esc(x.due.toLocaleDateString(LOC(),{day:'numeric',month:'short'}))+' · '+rel(x.days)+'</span>'):'<span class="h3-due ok">مفيش مطلوب دلوقتي</span>';
       return '<button class="h3-card" style="'+bg+'" data-act="open" data-coll="cards" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+'"><span class="h3-sheen"></span>'+
@@ -3954,7 +3995,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     h+='</section>';
     h+='<div class="io2" role="tablist"><button role="tab" aria-selected="'+(side==='in')+'" class="ioc in'+(side==='in'?' on':'')+'" data-act="rp-side" data-s="in"><span class="ar" aria-hidden="true">↓</span><span class="iot"><small>الدخل</small><b class="num">'+fmt(Math.round(inc))+'</b><small><span class="num">'+nIn+'</span> معاملة</small></span></button>'+
       '<button role="tab" aria-selected="'+(side==='out')+'" class="ioc out'+(side==='out'?' on':'')+'" data-act="rp-side" data-s="out"><span class="ar" aria-hidden="true">↑</span><span class="iot"><small>المصروفات</small><b class="num">'+fmt(Math.round(out))+'</b><small><span class="num">'+nOut+'</span> معاملة</small></span></button></div>';
-    if(!all.length)return h+'<div class="list"><div class="empty">مفيش معاملات في الفترة دي. كل صرف أو دفعة أو قبض بتسجله في التطبيق بيظهر هنا لوحده، وتقدر كمان تضيف معاملة بإيدك من الزرار اللي تحت.</div></div>';
+    if(!all.length)return h+'<div class="list"><div class="empty">مفيش معاملات في الفترة دي. كل صرف أو دفعة أو قبض بتسجله في التطبيق بيظهر هنا لوحده، وتقدر كمان تضيف معاملة بإيدك من الزرار اللي تحت.</div></div>'+voidList();
     var C=rpCats(all,side);
     h+='<section class="sec">'+donut(C.rows,C.tot,side==='in'?'الدخل':'المصروفات');
     if(!C.rows.length)h+='<div class="list"><div class="empty">مفيش '+(side==='in'?'دخل':'مصروفات')+' في الفترة دي.</div></div>';
@@ -3970,7 +4011,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var days={},dk=[];all.forEach(function(t){if(!days[t.date]){days[t.date]=[];dk.push(t.date)}days[t.date].push(t)});
     h+='<section class="sec"><h2>المعاملات</h2>'+dk.map(function(d){var L=days[d],o=sum(L.filter(function(t){return txSign(t)<0}),function(t){return t.amount}),i0=sum(L.filter(function(t){return txSign(t)>0}),function(t){return t.amount}),dd=parseD(d);
       return '<div class="dgrp"><div class="dayh"><span class="dh">'+dayHead(d)+'</span><span class="num">'+(o?'<span style="color:var(--bad)">− '+fmt(o)+'</span>':'')+(i0?' <span style="color:var(--ok)">+ '+fmt(i0)+'</span>':'')+'</span></div><div class="list">'+L.map(txRow).join('')+'</div></div>'}).join('')+'<div class="empty rp-none" hidden>مفيش معاملات بالكلام ده.</div></section>';
-    return h;
+    return h+voidList();
   }
   function txRow(t){var sg=txSign(t),cat=txCat(t);
     return '<button class="item" data-act="open" data-coll="reports" data-id="'+esc(t.id)+'" data-s="'+esc(nz((t.name||'')+' '+cat+' '+(t.notes||'')+' '+(t.book||'')+' '+t.amount+' '+t.kind))+'">'+caTile(cat)+'<div class="main"><div class="t">'+esc(t.name||t.kind)+(t.at?' <small class="tm num">'+esc(t.at)+'</small>':'')+(t.book?' <small class="bk">📒 '+esc(t.book)+'</small>':'')+'</div><div class="s">'+esc(txCat(t))+(t.notes?' · '+esc(t.notes):'')+' · '+dShort(t.date)+'</div></div>'+
@@ -4006,7 +4047,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var h= route==='settings'?screenSettings(): route==='home'?screenHome(): route==='budget'?screenBudget(): route==='reports'?screenReports(): route==='spend'?screenSpend(): route==='notifs'?screenNotifs(): route==='cards'?screenCards(): route==='loans'?screenLoans():
            route==='debts'||route==='lent'?screenDebts(route): route==='income'?screenIncome(): route==='deposits'?screenDeposits(): route==='assets'?screenAssets():
            route==='gamiyas'?screenGamiyas(): route==='insurance'?screenInsurance(): route==='bnpl'?screenBnpl():
-           WKR[route]?screenWK(route): route==='accounts'||route==='wallets'?screenBalances(route): screenExpenses();
+           WKR[route]?screenWK(route): route==='invest'?screenInvest(): route==='accounts'||route==='wallets'?screenBalances(route): screenExpenses();
     m.innerHTML=h;
   }
 
@@ -4164,9 +4205,12 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(x.rem>0){
       var nx=addMonth(today()), pn=x.plan.length||1;
       h+='<div class="whatif"><div class="r"><span class="k"><b style="color:var(--ink)">'+(lent?'هيرجّع الباقي إزاي':'هتسدد الباقي إزاي')+' ('+money(x.rem)+')</b></span></div>'+
-        '<div class="fields"><label for="dp-n">عدد الدفعات (1 = مرة واحدة)<input id="dp-n" class="ltr" type="number" inputmode="numeric" min="1" value="'+pn+'"></label>'+
-        '<label for="dp-start">تاريخ '+(pn>1?'أول قسط':'السداد')+'<input id="dp-start" class="ltr" type="date" value="'+(x.next&&x.next.d?iso(x.next.d):iso(nx))+'"></label></div>'+
-        '<p class="note" id="dp-prev">'+(pn>1?pn+' قسط × '+fmt(Math.floor(x.rem/pn*100)/100)+' كل شهر':'مرة واحدة: '+fmt(x.rem))+'</p>'+
+        '<div class="fields"><label for="dp-mode">الخطة<select id="dp-mode"><option value="n">بعدد الدفعات</option><option value="a">بمبلغ الدفعة</option></select></label>'+
+        '<label for="dp-n" id="dp-nl">عدد الدفعات (1 = مرة واحدة)<input id="dp-n" class="ltr" type="number" inputmode="numeric" min="1" value="'+pn+'"></label>'+
+        '<label for="dp-a" id="dp-al" hidden>مبلغ كل دفعة<input id="dp-a" class="ltr" inputmode="decimal" placeholder="مثلًا 500"></label>'+
+        '<label for="dp-every">كل قد إيه<select id="dp-every"><option>كل شهر</option><option>كل أسبوعين</option><option>كل أسبوع</option><option>كل 3 شهور</option></select></label>'+
+        '<label for="dp-start">تاريخ أول دفعة<input id="dp-start" class="ltr" type="date" value="'+(x.next&&x.next.d?iso(x.next.d):iso(nx))+'"></label></div>'+
+        '<p class="note" id="dp-prev">'+dpPrev(x.rem,{mode:'n',n:pn,every:'كل شهر'})+'</p><p class="fine" style="padding:0 2px">وبعد ما تتعمل، تقدر تعدّل أي دفعة (المبلغ والميعاد) بـ ✏️ أو تضيف دفعة بالمبلغ والتاريخ اللي انت عايزهم.</p>'+
         '<div class="actions"><button class="btn primary sm" data-act="debt-plan">اعمل الخطة</button>'+
         '<button class="btn sm" data-act="debt-all">'+(lent?'رجعلي الباقي كله':'ادفع الباقي كله')+' ('+fmt(x.rem)+')</button></div>'+
         '<p class="note">الخطة الجديدة بتحل محل الدفعات اللي لسه ما اتدفعتش. وتقدر تسجل أي دفعة جزئية في أي وقت من تحت.</p></div>';
@@ -4212,6 +4256,53 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(o.notes)h+='<p class="note">'+esc(o.notes)+'</p>';
     return h+'<div class="actions"><button class="btn sm" data-act="edit">تعديل</button>'+delBtn(coll,o.id)+'</div>';
   }
+
+  /* ================= cancel / delete a transaction: you choose what happens to the balances and to the record ================= */
+  function txGroup(t){return t.grp?S.reports.filter(function(x){return x.grp===t.grp}):[t]}
+  function txLinks(t){var G=txGroup(t),E={},L=[];G.forEach(function(x){(x.eff||[]).forEach(function(e){var o=find(e.coll,e.id);if(!o)return;var k=e.coll+':'+e.id;E[k]=E[k]||{n:hName(e.coll,o),d:0};E[k].d+=n(e.delta)})});
+    var eff=Object.keys(E).map(function(k){return E[k]}).filter(function(e){return Math.abs(e.d)>0.004});
+    if(G.length>1)L.push(G.length+' معاملات مرتبطة ببعض (زي العمولة أو الكاش باك أو التحويل) هيتعمل فيهم نفس الاختيار');
+    if(t.dtr||G.some(function(x){return x.dtr}))L.push('جزء من سلفة');
+    if(t.mv==='pay'||G.some(function(x){return x.mv==='pay'}))L.push('سداد لـ '+esc(t.name||'')+' (الدفعة جوّه البند هتتلغي لو رجّعت الأرصدة)');
+    (S.gamiyas||[]).forEach(function(g){if(g.recvs&&Object.keys(g.recvs).some(function(k){return g.recvs[k]&&(g.recvs[k].tx===t.id||(t.grp&&g.recvs[k].grp===t.grp))}))L.push('قبض جمعية '+esc(g.name))});
+    (S.assets||[]).forEach(function(a){if(t.grp&&((a.trades||[]).some(function(x){return x.grp===t.grp})||(a.divs||[]).some(function(x){return x.grp===t.grp})))L.push('عملية في '+esc(a.name))});
+    return {G:G,eff:eff,L:L}}
+  function txDelHtml(){var t=find('reports',sheet.id);if(!t)return '';var X=txLinks(t),has=X.eff.length>0;
+    var h='<p class="note" style="margin-top:0">'+esc(t.kind)+' · '+esc(t.name||'')+' · '+money(t.amount)+' · '+dShort(t.date)+'</p>';
+    h+='<div class="rows"><h3>المعاملة دي مربوطة بإيه</h3>'+(has?X.eff.map(function(e){return r('رصيد '+esc(e.n),(e.d>=0?'+':'−')+' '+money(Math.abs(e.d))+' <span class="fine">(اتغيّر بيها)</span>')}).join(''):r('الأرصدة','<span class="fine">ما غيّرتش أي رصيد في البرنامج</span>'))+
+      X.L.map(function(l){return '<div class="r"><span class="k">🔗 '+l+'</span></div>'}).join('')+'</div>';
+    h+='<div class="rows"><h3>الأرصدة</h3>'+(has?'<label class="r" style="cursor:pointer"><span class="k"><input type="radio" name="td-bal" value="back" checked> رجّع الأرصدة زي ما كانت قبلها</span></label><label class="r" style="cursor:pointer"><span class="k"><input type="radio" name="td-bal" value="keep"> سيب الأرصدة زي ما هي دلوقتي</span></label>':'<div class="r"><span class="k fine">مفيش رصيد هيتغيّر</span></div>')+'</div>';
+    h+='<div class="rows"><h3>المعاملة نفسها</h3><label class="r" style="cursor:pointer"><span class="k"><input type="radio" name="td-rec" value="del" checked> امسحها من التقارير والإجماليات وكل مكان</span></label>'+
+      '<label class="r" style="cursor:pointer"><span class="k"><input type="radio" name="td-rec" value="void"> سيبها في سجل "المعاملات الملغية" تحت التقارير (ظاهرة بس مش محسوبة في أي إجمالي)</span></label></div>';
+    return h+'<div class="actions"><button class="btn danger" data-act="td-go">نفّذ</button><button class="btn" data-act="sheet-back">رجوع</button></div>'}
+  function txMetaHtml(){var t=find('reports',sheet.id)||{},cats=allKinds(),out=txSign(t)<0;
+    return '<p class="note" style="margin-top:0">التعديل هنا بيغيّر الوصف والتاريخ بس، ومش بيلمس أي رصيد أو مبلغ.</p><div class="fields"><label>التاريخ<input id="tm-d" type="date" value="'+esc(t.date||'')+'"></label>'+
+      '<label>البيان<input id="tm-n" value="'+esc(t.name||'')+'"></label>'+(out&&t.kind!=='كشف'?'<label>التصنيف<select id="tm-c">'+['',].concat(cats).map(function(c){return '<option value="'+esc(c)+'"'+((t.cat||'')===c?' selected':'')+'>'+esc(c||'زي ما هو')+'</option>'}).join('')+'</select></label>':'')+
+      '<label class="full">ملاحظات<textarea id="tm-x">'+esc(t.notes||'')+'</textarea></label></div><div class="actions"><button class="btn primary" data-act="tm-save">احفظ</button><button class="btn" data-act="sheet-back">رجوع</button></div>'}
+  function voidList(){var V=S.voidTx||[];if(!V.length)return '';
+    return '<section class="sec"><details><summary class="fine" style="cursor:pointer;padding:8px 2px">🗂️ معاملات ملغية (مش محسوبة) · '+V.length+'</summary><div class="list">'+V.slice().reverse().map(function(t){
+      return '<div class="item" style="opacity:.75"><div class="ava">🚫</div><div class="main"><div class="t" style="text-decoration:line-through">'+esc(t.name||t.kind)+'</div><div class="s">'+esc(t.kind)+' · '+dShort(t.date)+' · اتلغت '+dShort(t.voidAt)+(t.voidBal==='keep'?' · الرصيد ما اتغيّرش':' · الرصيد رجع')+'</div></div>'+
+        '<div class="end"><div class="v" style="text-decoration:line-through">'+money(t.amount)+'</div>'+(t.voidBal==='keep'?'<button class="btn sm" data-act="vt-back" data-i="'+esc(t.id)+'">رجّعها</button>':'')+'<button class="btn sm danger" data-act="vt-del" data-i="'+esc(t.id)+'">امسح</button></div></div>'}).join('')+'</div></details></section>'}
+  function txDelAction(act,t){
+    if(act==='tx-del'){sheet={mode:'txdel',id:sheet.id};renderSheet();return true}
+    if(act==='tx-meta'){sheet={mode:'txmeta',id:sheet.id};renderSheet();return true}
+    if(act==='tm-save'){var x=find('reports',sheet.id),d=(document.getElementById('tm-d')||{}).value,nm=(document.getElementById('tm-n')||{}).value,ce=document.getElementById('tm-c'),nt=(document.getElementById('tm-x')||{}).value;
+      if(!vDate(d)){toast('اكتب تاريخ صحيح');return true}
+      mutate(function(){txGroup(x).forEach(function(y){y.date=d});x.name=String(nm||'').trim()||x.name;x.notes=nt||'';if(ce&&ce.value)x.cat=ce.value});sheet={mode:'detail',coll:'reports',id:x.id};renderSheet();toast('اتعدّل البيان والتاريخ، والأرصدة زي ما هي');return true}
+    if(act==='td-go'){var t0=find('reports',sheet.id);if(!t0)return true;var bb=document.querySelector('input[name=td-bal]:checked'),rr=document.querySelector('input[name=td-rec]:checked'),
+        back=!!(bb&&bb.value==='back'),vd=!!(rr&&rr.value==='void'),G=txGroup(t0),snap=JSON.parse(JSON.stringify(G)),grp=t0.grp;
+      mutate(function(){
+        if(back){G.forEach(function(y){gTxGone(y.id)});
+          if(grp){trDetach(grp);payDetach(grp);mvUndo(grp);(S.assets||[]).forEach(function(a){var ch=false;if(a.trades&&a.trades.some(function(y){return y.grp===grp})){a.trades=a.trades.filter(function(y){return y.grp!==grp});ch=true}
+            if(a.divs&&a.divs.some(function(y){return y.grp===grp}))a.divs=a.divs.filter(function(y){return y.grp!==grp});if(ch)stkSync(a)})}
+          else S.reports=S.reports.filter(function(y){return y.id!==t0.id})}
+        else{var ids=G.map(function(y){return y.id});S.reports=S.reports.filter(function(y){return ids.indexOf(y.id)<0})}
+        if(vd)S.voidTx=(S.voidTx||[]).concat(snap.map(function(y){delete y.eff;delete y.grp;delete y.snap;delete y.inp;y.voidAt=iso(today());y.voidBal=back?'back':'keep';return y}))});
+      sheet=null;renderSheet();toast((back?'الأرصدة رجعت':'الأرصدة زي ما هي')+' · '+(vd?'المعاملة في سجل الملغية تحت التقارير':'المعاملة اتمسحت من كل مكان'));return true}
+    if(act==='vt-del'){var vi=t.getAttribute('data-i');mutate(function(){S.voidTx=(S.voidTx||[]).filter(function(y){return y.id!==vi})});toast('اتمسحت نهائي');return true}
+    if(act==='vt-back'){var vj=t.getAttribute('data-i'),vt=(S.voidTx||[]).filter(function(y){return y.id===vj})[0];if(!vt)return true;
+      mutate(function(){S.voidTx=S.voidTx.filter(function(y){return y.id!==vj});var c=JSON.parse(JSON.stringify(vt));delete c.voidAt;delete c.voidBal;S.reports.push(c)});toast('رجعت للتقارير ومحسوبة تاني');return true}
+    return false}
   function detailTx(tx){
     var src=tx.ref&&tx.coll&&tx.coll!=='reports'?find(tx.coll,tx.ref):null, plus=TX_IN.indexOf(tx.kind)>=0, info=tx.kind==='كشف'||tx.kind==='تحويل'||tx.kind==='تسوية رصيد';
     var h='<div class="tiles">'+tile(esc(tx.kind),'<span style="color:var('+(info?'--ink':plus?'--ok':'--bad')+')">'+(info?'':plus?'+ ':'− ')+money(tx.amount)+'</span>',1)+tile('التاريخ',dShort(tx.date))+'</div>';
@@ -4222,7 +4313,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(tx.dtr)h+='<p class="note">دي جزء من سلفة. "تعديل" بيفتح الجزء ده من السلفة وأي تغيير بيظبط الرصيد والتقارير. المسح بيلغي حركة الفلوس بس والسلفة نفسها بتفضل.</p>';
     else if(tx.grp)h+='<p class="note">"تعديل" بيفتح العملية بنفس بياناتها: غيّر المبلغ أو المصدر أو التاريخ أو العمولة وكل الأرصدة هتتظبط. المسح بيلغيها ويرجّع الأرصدة زي ما كانت (ومعاها العمولة لو فيه).</p>';
     else if(!tx.manual)h+='<p class="note">مسح المعاملة دي بيشيلها من التقارير بس، ومش بيلغي الدفعة نفسها. عشان تلغي دفعة، الغيها من جوّه البند.</p>';
-    return h+'<div class="actions">'+(txEditable(tx)?'<button class="btn sm" data-act="tx-edit">تعديل</button>':'')+delBtn('reports',tx.id)+'</div>';
+    return h+'<div class="actions">'+(txEditable(tx)?'<button class="btn sm" data-act="tx-edit">تعديل</button>':'')+'<button class="btn sm" data-act="tx-meta">تعديل البيان والتاريخ بس</button><button class="btn sm danger" data-act="tx-del">إلغاء أو حذف</button></div>';
   }
 
   function payBlock(coll,o,title){
@@ -4403,7 +4494,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   var aiWasOpen=false;
   /* every page opened from another page remembers it, so back returns there (not to the home screen).
    Pages that are one-off steps (forms, payment, results) are skipped: back from what follows them goes to the page before them */
-var SH_LAST=null,SH_TMP={stk:1,stkdiv:1,asprice:1,form:1,move:1,pay:1,gmove:1,eppf:1,dtr:1,salgot:1,salset:1,salend:1,depgot:1,depend:1,assell:1,asprice:1,crepl:1,creplrev:1,stmtrev:1,acpw:1,devname:1,glink:1,fb:1,mvdone:1,goal:1,bud:1};
+var SH_LAST=null,SH_TMP={txdel:1,txmeta:1,stk:1,stkdiv:1,asprice:1,form:1,move:1,pay:1,gmove:1,eppf:1,dtr:1,salgot:1,salset:1,salend:1,depgot:1,depend:1,assell:1,asprice:1,crepl:1,creplrev:1,stmtrev:1,acpw:1,devname:1,glink:1,fb:1,mvdone:1,goal:1,bud:1};
 function shKey(x){return x?[x.mode,x.coll||'',x.id||'',x.k||'',x.key||'',x.c||''].join('|'):''}
 function shChain(){var p=SH_LAST;SH_LAST=sheet;if(sheet&&(!p||shKey(p)!==shKey(sheet)))try{vzKick()}catch(e){}if(!sheet||!p||sheet===p||sheet.back||p.back===sheet)return;
   var b=SH_TMP[p.mode]||shKey(p)===shKey(sheet)?p.back:p;while(b&&shKey(b)===shKey(sheet))b=b.back;if(!b)return;
@@ -4431,13 +4522,14 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     else if(sheet.mode==='bud'){title='🎯 ميزانية الصرف الشهرية';body=budHtml()}
     else if(sheet.mode==='goal'){var gg=sheet.id?(S.goals||[]).filter(function(x){return x.id===sheet.id})[0]:null;title=gg?'تعديل الهدف':'هدف ادخار جديد';body=goalForm(gg)}
     else if(sheet.mode==='gmove'){var gm=(S.goals||[]).filter(function(x){return x.id===sheet.id})[0];if(!gm){sheet=null;el.innerHTML='';return}title=(sheet.sub?'سحب من ':'ادخار لـ ')+gm.name;body=goalMoveHtml(gm,sheet.sub)}
-    else if(sheet.mode==='pick'&&sheet.k!=='dpick'){title='جمعية جديدة';
+    else if(sheet.mode==='pick'&&sheet.k!=='dpick'&&sheet.k!=='invk'){title='جمعية جديدة';
       body='<p class="note">اختار نوع الجمعية:</p><div class="otiles" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
         otile('🔄','جمعية Money Fellows','data-act="new-gam" data-kind="Money Fellows"','رسوم وخصم من القبض. الدفع من 25 لـ 5 وغرامة بعد يوم 10')+
         otile('👥','جمعية أفراد','data-act="new-gam" data-kind="جمعية أفراد"','من غير رسوم. الدفع من 1 لـ 10 من غير غرامات')+'</div>'}
     else if(sheet.mode==='move'){title=sheet.edit?'تعديل العملية':sheet.t==='spend'?'اصرف':sheet.v.from==='ext'?'فلوس من بره':'تحويل بين كروتك';body=(sheet.edit?editNote():'')+withUndo(moveHtml)}
     else if(sheet.mode==='ai'){title='مساعدك عبهادي';body=aiHtml()}
     else if(sheet.mode==='dtr'){var dd0=find(sheet.coll,sheet.id);title=(sheet.tr?'تعديل جزء من السلفة':sheet.coll==='lent'?'سلّفته تاني':'زوّد السلفة')+(dd0?' · '+dd0.name:'');body=trHtml()}
+    else if(sheet.mode==='pick'&&sheet.k==='invk'){title='نماذج حسابات الاستثمار والتوفير';body=invPickHtml()}
     else if(sheet.mode==='pick'&&sheet.k==='dpick'){title=sheet.coll==='lent'?'سلّفت حد':'استلفت';body=dPickHtml(sheet.coll)}
     else if(sheet.mode==='cat'){title=catIc(sheet.c)+' '+sheet.c+(sheet.side==='in'?' (دخل)':'');body=catHtml()}
     else if(sheet.mode==='mvdone'){title=sheet.t==='pay'?'اتسجل الدفع':'الرصيد بعد العملية';body=mvDoneHtml()}
@@ -4450,6 +4542,8 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     else if(sheet.mode==='homecust'){title='⚙️ تخصيص الشاشة الرئيسية';body=homeCustHtml()}
     else if(sheet.mode==='fb'){title=sheet.v.type==='c'?'⚠️ تقديم شكوى':'💡 تقديم اقتراح';body=fbFormHtml()}
     else if(sheet.mode==='asprice'){title='حدّث السعر';body=asPriceHtml()}
+    else if(sheet.mode==='txdel'){title='إلغاء أو حذف المعاملة';body=txDelHtml()}
+    else if(sheet.mode==='txmeta'){title='تعديل البيان والتاريخ';body=txMetaHtml()}
     else if(sheet.mode==='stk'){title=sheet.side==='sell'?'بعت أسهم':'اشتريت أسهم';body=stkFormHtml()}
     else if(sheet.mode==='stkdiv'){title='توزيعات أرباح';body=stkDivHtml()}
     else if(sheet.mode==='assell'){title='بعتها';body=asSellHtml()}
@@ -4514,6 +4608,10 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
           if(T1.length===1&&(n(T1[0].amount)!==n(tgt.amount)||String(T1[0].date||'')!==String(tgt.date||''))){if(T1[0].grp){trUndo(T1[0]);T1[0].amount=n(tgt.amount);T1[0].date=tgt.date;trApply(f.coll,tgt,T1[0])}else{T1[0].amount=n(tgt.amount);T1[0].date=tgt.date}}
           else if(!T1.length&&n(tgt.amount)>0)T1.push({id:'t0',amount:n(tgt.amount),date:tgt.date||'',src:'old0',note:''});
           debtSync(tgt)}if(f.coll==='deposits')depSaved(tgt,false);if((f.coll==='accounts'||f.coll==='wallets')&&hCur(f.coll,tgt)!=='EGP'){if(n(tgt.fxRate)>0){tgt.egp=Math.round(n(tgt.balance)*n(tgt.fxRate)*100)/100;tgt.rateAt=iso(today())}else setTimeout(function(){fxFill(f.coll,tgt.id)},50)}if(f.coll==='income'&&salFromIncome(tgt))setTimeout(function(){toast('اتسجل كمرتب ثابت: هسألك كل شهر نزل ولا لسه')},300);if(f.onSave)f.onSave(tgt);sheet={mode:'detail',coll:f.coll,id:f.id}}
+      else if(isD&&dMatch(f.coll,rec.name)){var ex=dMatch(f.coll,rec.name);if(!rec.date)rec.date=iso(today());DMERGE=ex.name;
+        var nt2={id:uid(),amount:n(rec.amount),date:rec.date,src:dsx.src,to:dsx.src==='hold'?dsx.to:'',spentOn:dsx.src==='spent'?dsx.spentOn:'',cat:dsx.src==='spent'?dsx.cat:'',from:dsx.src==='xfer'?dsx.from:'',due:dsx.due||'',note:String(rec.notes||'').trim().slice(0,80)};
+        if(nt2.amount>0){ex.tranches=(ex.tranches||[]).concat([nt2]);trApply(f.coll,ex,nt2);if(nt2.due)ex.schedule=(ex.schedule||[]).concat([{amount:nt2.amount,date:nt2.due,note:'ميعاد السداد',done:false}])}
+        debtSync(ex);if(f.onSave)f.onSave(ex);sheet={mode:'detail',coll:f.coll,id:ex.id}}
       else{rec.id=uid();if(isD){rec.payments=[];if(!rec.date)rec.date=iso(today());var nt={id:uid(),amount:n(rec.amount),date:rec.date,src:dsx.src,to:dsx.src==='hold'?dsx.to:'',spentOn:dsx.src==='spent'?dsx.spentOn:'',cat:dsx.src==='spent'?dsx.cat:'',from:dsx.src==='xfer'?dsx.from:'',due:dsx.due||'',note:f.coll==='lent'?String(rec.notes||'').trim().slice(0,80):''};
           rec.tranches=nt.amount>0?[nt]:[];rec.schedule=nt.due&&nt.amount>0?[{amount:nt.amount,date:nt.due,note:'ميعاد السداد',done:false}]:[];if(nt.amount>0)trApply(f.coll,rec,nt)}if(f.coll==='bnpl')rec.plans=[];
         if(f.coll==='reports')rec.manual=true;
@@ -4522,7 +4620,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
         if(f.coll==='gamiyas'){var st=parseD(rec.start);rec.paidCount=st?gCountPast(rec):0;rec.received=false}
         if(f.coll==='deposits')depSaved(rec,true);if(f.coll==='assets'){if(rec.from&&n(rec.buyPrice)>0)moveHold(rec.from,-n(rec.buyPrice),'شراء '+(rec.kind||'')+': '+rec.name);delete rec.from;delete rec._new}S[f.coll].push(rec);if(f.onSave)f.onSave(rec);if((f.coll==='accounts'||f.coll==='wallets')&&hCur(f.coll,rec)!=='EGP'&&!(n(rec.fxRate)>0))setTimeout(function(){fxFill(f.coll,rec.id)},50);if(f.coll==='income'&&salFromIncome(rec))setTimeout(function(){toast('اتسجل كمرتب ثابت: هسألك كل شهر نزل ولا لسه')},300);sheet={mode:'detail',coll:f.coll,id:rec.id}}
     });
-    renderSheet(); toast('اتحفظ'); aiqAfter();
+    renderSheet(); toast(DMERGE?'اتزوّدت على '+DMERGE+' · شوف الخطة تحت لو عايز تعدّلها':'اتحفظ'); DMERGE=''; aiqAfter();
   }
 
   /* ================= daily payment notification ================= */
@@ -4813,7 +4911,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
       '<div class="full"><span class="fl">التصنيف</span>'+catGrid(v.kind,'mv-cat',allKinds(),1)+'<input type="hidden" id="mv-kind" value="'+esc(v.kind)+'"></div>'+
       '<label class="full" for="mv-note">على إيه<input id="mv-note" type="text" value="'+esc(v.note)+'" placeholder="سوبرماركت، بنزين، فاتورة…"></label>'+
       '<label for="mv-date">التاريخ<input id="mv-date" class="ltr" type="date" value="'+esc(v.date)+'"></label>'+
-      '<label class="full" for="mv-book">الدفتر (اختياري)<input id="mv-book" type="text" list="dl-books" maxlength="40" value="'+esc(v.book||'')+'" placeholder="رحلة الساحل، مشروع، فرح…"><datalist id="dl-books">'+booksList().map(function(b){return '<option value="'+esc(b)+'">'}).join('')+'</datalist></label></div>'+calcPad()+'</div>';
+      '<label class="full" for="mv-book">الدفتر (اختياري)<input id="mv-book" type="text" data-dl="dl-books" maxlength="40" value="'+esc(v.book||'')+'" placeholder="رحلة الساحل، مشروع، فرح…"><datalist id="dl-books">'+booksList().map(function(b){return '<option value="'+esc(b)+'">'}).join('')+'</datalist></label></div>'+calcPad()+'</div>';
     p.rows.forEach(function(x,i){var o=x.h.o,c=x.h.coll,cr=c==='cards',s=x.s;
       h+='<div class="whatif"><div class="r"><span class="k"><b style="color:var(--ink)">'+(multi?'من ':'')+esc(hName(c,o))+'</b></span><span>'+hBalTxt(c,o)+'</span></div><div class="fields">'+
         (multi?'<label for="mv-sa-'+i+'">المبلغ من هنا'+'<input id="mv-sa-'+i+'" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(s.a)+'"'+(x.auto?' placeholder="الباقي: '+fmt(x.a)+'"':'')+'></label>':'')+
@@ -5063,9 +5161,13 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
   /* ================= interest on bank accounts ================= */
   function intOn(o){return o&&(o.intMode==='عائد بنسبة'&&n(o.intRate)>0||o.intMode==='عائد بقيمة ثابتة'&&n(o.intFixed)>0)}
   function intStep(o){return {'ربع سنوي':3,'نص سنوي':6,'سنوي':12}[o.intFreq]||1}
+  function intDaysStep(o){return o.intFreq==='يومي'?1:o.intFreq==='أسبوعي'?7:o.intFreq==='كل عدد أيام'?Math.max(1,Math.round(n(o.intEvery))||30):0}
+  function intAnchor(o){return parseD(o.intSince)||today()}
+  function intYearRate(o){return n(o.intRate)/100*(o.intRateP==='شهرية'?12:o.intRateP==='يومية'?365:1)}
   function intPayDate(o,y,m){var d=Math.round(n(o.intDay));return d>=1&&d<=31?clampD(y,m,d):new Date(y,m+1,0)}
   /* payout dates after `from` up to `to` (calendar-aligned: quarterly = Mar/Jun/Sep/Dec …) */
-  function intDates(o,from,to){var st=intStep(o),L=[],y=from.getFullYear(),m=from.getMonth()-1;
+  function intDates(o,from,to){var ds=intDaysStep(o);if(ds){var a=intAnchor(o),L0=[],k0=Math.max(1,Math.floor((from-a)/864e5/ds));for(var q=k0;q<k0+400&&L0.length<60;q++){var dq=addDays(a,q*ds);if(dq<=from)continue;if(dq>to)break;L0.push(dq)}return L0}
+    var st=intStep(o),L=[],y=from.getFullYear(),m=from.getMonth()-1;
     for(var k=0;k<400&&L.length<60;k++){m++;var dd=new Date(y,m,1),mm=dd.getMonth();if((mm+1)%st!==0)continue;var pd=intPayDate(o,dd.getFullYear(),mm);if(pd<=from)continue;if(pd>to)break;L.push(pd)}return L}
   function intNext(o){var t=today();return intDates(o,new Date(t.getFullYear(),t.getMonth(),t.getDate()-1),new Date(t.getFullYear()+2,t.getMonth(),1))[0]||null}
   function acctDelta(t,id){var e=(t.eff||[]).filter(function(x){return x.coll==='accounts'&&x.id===id});if(e.length)return sum(e,function(x){return n(x.delta)});
@@ -5081,27 +5183,68 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     var res={days:B.length,above:above,min:Math.min.apply(null,B.map(function(x){return x.b})),avg:sum(B,function(x){return x.b})/B.length,end:B[B.length-1].b,amt:0,why:''};
     if(need>0&&above<need){res.why='الرصيد ما فضلش فوق '+fmt(mn)+' ج غير '+above+' يوم من '+need+' مطلوبين';return res}
     if(o.intMode==='عائد بقيمة ثابتة'){if(mn&&!need&&res.min<mn){res.why='الرصيد نزل تحت الحد الأدنى '+fmt(mn)+' ج';return res}res.amt=n(o.intFixed);return res}
-    var rt=n(o.intRate)/100,bs=o.intBase||INT_B[0],a=0;
+    var rt=intYearRate(o),bs=o.intBase||INT_B[0],a=0;
     if(bs==='الرصيد اليومي'){a=sum(B.filter(function(x){return x.b>=mn&&x.b>0}),function(x){return x.b*rt/365});if(!a)res.why=mn?'الرصيد كان أقل من الحد الأدنى '+fmt(mn)+' ج طول الفترة':'مفيش رصيد'}
     else{var base=bs==='متوسط الرصيد في الفترة'?res.avg:bs==='الرصيد يوم نزول العائد'?res.end:res.min;if(base<mn){res.why=(bs==='متوسط الرصيد في الفترة'?'متوسط الرصيد':bs==='الرصيد يوم نزول العائد'?'الرصيد يوم النزول':'أقل رصيد')+' ('+fmt(base)+') أقل من الحد الأدنى '+fmt(mn)+' ج';return res}a=Math.max(base,0)*rt*B.length/365}
     res.amt=Math.round(a*100)/100;return res}
-  function intStart(o,pd){var st=intStep(o),pv=intPayDate(o,pd.getFullYear(),pd.getMonth()-st),s0=new Date(pv.getFullYear(),pv.getMonth(),pv.getDate()+1),since=parseD(o.intSince);return since&&since>s0?since:s0}
-  function intCredit(o,pd,amt,note){var g=uid(),t=txById(logTx('دخل','accounts',o,amt,note||('عائد الحساب حتى '+dShort(iso(pd))),iso(pd)));o.balance=Math.round((n(o.balance)+amt)*100)/100;
+  function intStart(o,pd){var ds=intDaysStep(o);if(ds){var s1=addDays(pd,1-ds),sn=parseD(o.intSince);return sn&&sn>s1?sn:s1}var st=intStep(o),pv=intPayDate(o,pd.getFullYear(),pd.getMonth()-st),s0=new Date(pv.getFullYear(),pv.getMonth(),pv.getDate()+1),since=parseD(o.intSince);return since&&since>s0?since:s0}
+  function intCredit(o,pd,amt,note){var g=uid(),h=o.intComp==='بيتحوّل على حساب أو كاش تاني'&&o.intTo?hGet(o.intTo):null,nt=note||('عائد '+hName('accounts',o)+' حتى '+dShort(iso(pd)));
+    if(h){var t2=txById(logTx('دخل',h.coll,h.o,amt,nt,iso(pd)));hSet(h.coll,h.o,Math.round((hBal(h.coll,h.o)+amt)*100)/100);t2.cat='استثمار وعائد';t2.grp=g;t2.eff=[{coll:h.coll,id:h.o.id,delta:amt,paid:0}];return g}
+    var t=txById(logTx('دخل','accounts',o,amt,nt,iso(pd)));o.balance=Math.round((n(o.balance)+amt)*100)/100;
     t.cat='استثمار وعائد';t.grp=g;t.eff=[{coll:'accounts',id:o.id,delta:amt,paid:0}];return g}
   function intTick(){if(!loaded||!S.accounts)return;var t=today(),y=new Date(t.getFullYear(),t.getMonth(),t.getDate()),news=[],ch=false;
     S.accounts.forEach(function(o){if(!intOn(o))return;if(!o.intSince){o.intSince=iso(y);ch=true;return}var since=parseD(o.intSince),log=o.intLog||[];
       intDates(o,new Date(since.getFullYear(),since.getMonth(),since.getDate()-1),y).forEach(function(pd){var k=iso(pd);if(log.some(function(x){return x.d===k})||(o.intAsk&&o.intAsk.d===k))return;
         var c=intCalc(o,intStart(o,pd),pd);ch=true;
-        if(c.amt>0&&o.intAuto!=='اسألني الأول'){var g=intCredit(o,pd,c.amt);o.intLog=(o.intLog||[]).concat([{d:k,amt:c.amt,grp:g}]);news.push({o:o,amt:c.amt,auto:1})}
+        if(c.amt>0&&o.intAuto!=='اسألني الأول'){var g=intCredit(o,pd,c.amt);o.intLog=(o.intLog||[]).concat([{d:k,amt:c.amt,grp:g}]).slice(-500);news.push({o:o,amt:c.amt,auto:1})}
         else if(c.amt>0){o.intAsk={d:k,amt:c.amt};news.push({o:o,amt:c.amt})}
         else o.intLog=(o.intLog||[]).concat([{d:k,amt:0,why:c.why}])})});
     if(!ch)return;mutate(function(){});
-    news.forEach(function(x){var m={kind:'int',key:'int-'+x.o.id+'-'+Date.now(),at:new Date().toISOString(),title:x.auto?'📈 نزل عائد الحساب':'📈 عائد الحساب المفروض نزل',body:hName('accounts',x.o)+': '+fmt(x.amt)+' ج'+(x.auto?' اتضافوا للرصيد':'، أكّد المبلغ من صفحة الحساب')};ntAdd(m);try{ntShow(m)}catch(e){}});
-    if(news.length){save();toast('📈 '+news.map(function(x){return hName('accounts',x.o)+': عائد '+fmt(x.amt)}).join(' · '))}}
+    var NG={};news.forEach(function(x){var k=x.o.id+(x.auto?'a':'q');if(!NG[k])NG[k]={o:x.o,amt:0,auto:x.auto,c:0};NG[k].amt=Math.round((NG[k].amt+x.amt)*100)/100;NG[k].c++});news=Object.keys(NG).map(function(k){return NG[k]});
+    news.forEach(function(x){var m={kind:'int',key:'int-'+x.o.id+'-'+Date.now(),at:new Date().toISOString(),title:x.auto?'📈 نزل عائد الحساب':'📈 عائد الحساب المفروض نزل',body:hName('accounts',x.o)+': '+fmt(x.amt)+' ج'+(x.c>1?' ('+x.c+' مرات)':'')+(x.auto?' اتضافوا':'، أكّد المبلغ من صفحة الحساب')};ntAdd(m);try{ntShow(m)}catch(e){}});
+    if(news.length){save();toast('📈 '+news.map(function(x){return hName('accounts',x.o)+': عائد '+fmt(x.amt)+(x.c>1?' ('+x.c+' مرات)':'')}).join(' · '))}}
   setInterval(function(){try{intTick()}catch(e){}},10*60*1000);
+
+
+  /* ready-made investment accounts and savings books (every number stays editable) */
+  var INV_T=[
+    {i:'🟡',t:'ماي فوري · فوري يومي (عائد يومي)',s:'صندوق نقدي من خلال تطبيق myfawry · العائد بيتغيّر كل يوم (آخر سنة حوالي 19.8%)',
+     v:{bank:'ماي فوري (Fawry)',name:'فوري يومي · صندوق نقدي',intMode:'عائد بنسبة',intRate:19.8,intRateP:'سنوية',intBase:'الرصيد اليومي',intFreq:'يومي',intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'صندوق استثمار فوري النقدي للسيولة (فوري يومي)، بتديره سي آي لإدارة الأصول. العائد يومي تراكمي ومتغيّر (آخر سنة حوالي 19.8% حسب SNDUK في نوفمبر 2026، وفوري بتعلن لحد 21%). أقل إيداع 10 ج، ولحد 100,000 ج من غير إثبات دخل. الإيداع من فرع فوري بلس أو InstaPay أو كارت بنك، والسحب في أي وقت من غير رسوم على كارت ماي فوري الأصفر، بعدد وثائق كاملة، ومفيش سحب في الإجازات الرسمية. حدّث النسبة كل فترة من التطبيق.'}},
+    {i:'📮',t:'البريد المصري · يوم على يوم',s:'عائد يومي 12.5% سنويًا · فتح الحساب من 50,000 ج',
+     v:{bank:'البريد المصري',name:'دفتر توفير يوم على يوم',intMode:'عائد بنسبة',intRate:12.5,intRateP:'سنوية',intBase:'الرصيد اليومي',intFreq:'يومي',intMin:250000,intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'دفتر توفير البريد المصري "يوم على يوم": عائد 12.5% سنويًا بينزل يوميًا. فتح الحساب من 50,000 ج، والحد الأدنى لاحتساب العائد 250,000 ج (حسب صدى البلد يناير 2026). راجع الشروط والنسبة مع مكتب البريد.'}},
+    {i:'📮',t:'البريد المصري · سوبر توفير (شهري)',s:'14% سنويًا بينزل كل شهر · الحد الأدنى للعائد 50,000 ج',
+     v:{bank:'البريد المصري',name:'دفتر سوبر توفير',intMode:'عائد بنسبة',intRate:14,intRateP:'سنوية',intBase:'أقل رصيد في الفترة',intFreq:'شهري',intMin:50000,intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'حساب سوبر توفير من البريد المصري: عائد 14% سنويًا بيتصرف شهري. فتح الحساب من 300 ج، والحد الأدنى لاحتساب العائد 50,000 ج (حسب اليوم السابع أكتوبر 2026 وصدى البلد). البرنامج بيحسبه على أقل رصيد في الشهر، غيّرها لو مكتب البريد قالك غير كده.'}},
+    {i:'📮',t:'البريد المصري · التوفير العادي (شهري)',s:'6% سنويًا بينزل كل شهر · فتح من 300 ج',
+     v:{bank:'البريد المصري',name:'دفتر توفير عادي',intMode:'عائد بنسبة',intRate:6,intRateP:'سنوية',intBase:'أقل رصيد في الفترة',intFreq:'شهري',intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'دفتر التوفير العادي بعائد شهري من البريد المصري: 6% سنويًا، فتح الحساب من 300 ج (حسب صدى البلد يناير 2026). راجع النسبة مع مكتب البريد.'}},
+    {i:'📮',t:'البريد المصري · التوفير بعائد ربع سنوي',s:'6.25% سنويًا بينزل كل 3 شهور · فتح من 300 ج',
+     v:{bank:'البريد المصري',name:'دفتر توفير ربع سنوي',intMode:'عائد بنسبة',intRate:6.25,intRateP:'سنوية',intBase:'أقل رصيد في الفترة',intFreq:'ربع سنوي',intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'التوفير بعائد ربع سنوي من البريد المصري: 6.25% سنويًا، فتح الحساب من 300 ج (حسب صدى البلد يناير 2026).'}},
+    {i:'📮',t:'البريد المصري · التوفير السنوي',s:'7% بينزل مرة في السنة · فتح من 100 ج',
+     v:{bank:'البريد المصري',name:'دفتر توفير سنوي',intMode:'عائد بنسبة',intRate:7,intRateP:'سنوية',intBase:'أقل رصيد في الفترة',intFreq:'سنوي',intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده',
+       notes:'التوفير السنوي من البريد المصري: 7% بيتصرف مرة في السنة، فتح الحساب من 100 ج (حسب صدى البلد يناير 2026).'}},
+    {i:'➕',t:'حساب استثمار أو دفتر توفير تاني',s:'تكتب كل التفاصيل بنفسك',v:{name:'دفتر توفير',intMode:'عائد بنسبة',intRateP:'سنوية',intFreq:'شهري',intBase:'الرصيد اليومي',intComp:'تراكمي: بيتضاف على نفس الحساب ويتحسب عليه عائد بعد كده',intAuto:'يتضاف للرصيد لوحده'}}];
+  function invPickHtml(){return '<p class="note" style="margin-top:0">اختار نموذج وكل حاجة فيه هتتملى (النسبة، وبيتحسب على إيه، وبينزل إمتى، والحد الأدنى)، وتقدر تعدّل أي رقم قبل الحفظ أو بعده.</p><div class="list">'+
+    INV_T.map(function(x,i){return '<button class="item" data-act="invk-use" data-i="'+i+'"><div class="ava">'+x.i+'</div><div class="main"><div class="t">'+esc(x.t)+'</div><div class="s">'+esc(x.s)+'</div></div></button>'}).join('')+'</div><p class="fine">النسب من مصادر منشورة (نوفمبر 2026) وبتتغيّر، فراجعها مع البريد أو تطبيق فوري.</p>'}
+  /* ================= investment accounts and savings books ================= */
+  function isInv(o){return intOn(o)||/استثمار|دفتر|توفير|ادخار|saving|invest/i.test(String(o.name||''))}
+  function invEst(o){if(!intOn(o))return null;var nx=intNext(o);if(!nx)return null;var st=intStart(o,nx),t=today(),c=intCalc(o,st,t),tot=Math.max(1,Math.round((nx-st)/864e5)+1),el=Math.max(1,Math.round((t-st)/864e5)+1);
+    return {next:nx,sofar:c.amt,why:c.why,full:o.intMode==='عائد بقيمة ثابتة'?n(o.intFixed):Math.round(c.amt*tot/el*100)/100}}
+  function screenInvest(){var A=S.accounts.filter(isInv),tot=sum(A,egpVal),got=sum(A,function(o){return sum(o.intLog||[],function(x){return n(x.amt)})}),nxt=sum(A,function(o){var e=invEst(o);return e?e.full:0});
+    var h='<section class="tiles">'+tile('إجمالي الأرصدة',money(tot),1)+tile('العائد اللي نزل لحد دلوقتي',money(got))+tile('العائد الجاي (تقريبي)',money(nxt))+'</section>';
+    if(!A.length)return h+emptyList('ضيف حساب الاستثمار أو دفتر التوفير: البنك، والرصيد، ونسبة العائد أو قيمته، وبيتحسب على إيه، وبينزل كل قد إيه (يومي، أسبوعي، شهري، ربع سنوي، سنوي، أو كل عدد أيام)، والحد الأدنى للرصيد والمدة اللي لازم يفضلها. البرنامج هيحسب العائد ويضيفه في ميعاده.');
+    h+='<div class="list">'+A.map(function(o){var e=invEst(o),rt=o.intMode==='عائد بنسبة'?fmt(o.intRate)+'% '+(o.intRateP||'سنوية'):o.intMode==='عائد بقيمة ثابتة'?fmt(o.intFixed)+' ج كل مرة':'من غير عائد';
+      return '<button class="item" data-act="open" data-coll="accounts" data-id="'+esc(o.id)+'"><div class="ava">📒</div><div class="main"><div class="t">'+esc(hName('accounts',o))+'</div><div class="s">'+esc(rt)+(intOn(o)?' · '+esc(o.intFreq||'شهري'):'')+
+        (e?' · الجاي '+dShort(iso(e.next))+(e.full?' ≈ '+fmt(e.full):''):'')+(e&&e.why?' · ⚠️ '+esc(e.why):'')+'</div></div><div class="end"><div class="v">'+money(egpVal(o))+'</div></div></button>'}).join('')+'</div>';
+    return h+'<p class="note">العائد التراكمي بيتضاف على الحساب في ميعاده، والعائد اللي بعده بيتحسب على الرصيد بعد الزيادة. الأرقام الجاية تقريبية لحد ما الفترة تخلص، وبتتحسب من حركة الحساب اللي متسجلة.</p>'}
   function intInfo(o){if(!intOn(o)&&!(o.intLog||[]).length)return '';var h='<div class="rows"><h3>📈 فوايد الحساب</h3>';
     if(intOn(o)){var nx=intNext(o),c=nx?intCalc(o,intStart(o,nx),today()):null;
-      h+=r('العائد',o.intMode==='عائد بنسبة'?fmt(o.intRate)+'% سنويًا على '+esc(o.intBase||INT_B[0]):money(o.intFixed)+' كل مرة')+r('بينزل',esc(o.intFreq||'شهري')+(n(o.intDay)?' يوم '+fmt(o.intDay):' آخر الشهر'))+
+      h+=r('العائد',o.intMode==='عائد بنسبة'?fmt(o.intRate)+'% '+(o.intRateP||'سنوية')+(o.intRateP&&o.intRateP!=='سنوية'?' (≈ '+fmt(Math.round(intYearRate(o)*10000)/100)+'% في السنة)':'')+' على '+esc(o.intBase||INT_B[0]):money(o.intFixed)+' كل مرة')+
+        r('بينزل',intDaysStep(o)?(o.intFreq==='كل عدد أيام'?'كل '+fmt(intDaysStep(o))+' يوم':esc(o.intFreq)):esc(o.intFreq||'شهري')+(n(o.intDay)?' يوم '+fmt(o.intDay):' آخر الشهر'))+
+        r('العائد لما ينزل',o.intComp==='بيتحوّل على حساب أو كاش تاني'&&o.intTo&&hGet(o.intTo)?'بيتحوّل على '+esc(hName(hGet(o.intTo).coll,hGet(o.intTo).o)):'تراكمي: بيتضاف على الحساب والعائد الجاي بيتحسب على الرصيد بعد الزيادة')+
         (n(o.intMin)?r('الحد الأدنى',money(o.intMin)+(n(o.intMinDays)?' لمدة '+fmt(o.intMinDays)+' يوم على الأقل في الفترة':'')):'')+
         (nx?r('الميعاد الجاي',dl(nx)+(c?' · لحد النهاردة ≈ <b>'+money(c.amt)+'</b>'+(c.why?' <span class="fine">('+esc(c.why)+')</span>':''):'')):'')}
     var L=(o.intLog||[]).slice(-4).reverse();if(L.length)h+=L.map(function(x){return r(dShort(x.d),x.amt>0?'+ '+money(x.amt):'<span class="fine">مفيش · '+esc(x.why||'')+'</span>')}).join('');
@@ -5216,15 +5359,18 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     if(route==='cash'){openForm('wallets',null,{kind:'كاش',currency:'EGP',balance:''},'كاش جديد');return}
     if(route==='prepaid'){sheet={mode:'pick',k:'prov',kind:'كارت مدفوع مسبقًا'};renderSheet();return}
     if(route==='ewallets'||route==='otherbal'){sheet={mode:'pick',k:'wallet'};renderSheet();return}
+    if(route==='invest'){sheet={mode:'pick',k:'invk'};renderSheet();return}
     if(route==='spend'){sheet=null;openMove('spend');return}
     if(route==='notifs'){ntRun(true);toast('اتبعتت رسالة النهاردة');return}
+    if((route==='debts'||route==='lent')&&S[route].length){sheet={mode:'pick',k:'dpick',coll:route};renderSheet();return}
     if(COLLS[route])openForm(route,null,route==='cards'?{rate:'',feePct:'',paid:0}:route==='reports'?{date:iso(today())}:null)});
   /* re-draw the form when a field that changes which other fields apply (gamiya type) changes */
   document.getElementById('app').addEventListener('input',function(e){
     if(sheet&&sheet.mode==='move'&&/^mv-/.test(e.target.id)){grabMove();var mp=document.getElementById('mv-prev');if(mp)mp.innerHTML=withUndo(movePreview);cbRefresh();var pa=document.getElementById('pts-auto');if(pa){var R1=ptsRows();pa.textContent=fmt(sum(R1,function(x){return ptsFor(ptsRule(x.h.o),x.a||0)}))+' نقطة'}return}
     if(sheet&&sheet.mode==='pay'&&/^py-(amt|cbv|ta-\d+)$/.test(e.target.id)){grabPay();var pt=document.getElementById('py-tot');if(pt)pt.textContent=fmt(n(sheet.v.amt))+' ج';cbRefresh();return}
-    if(e.target.id==='dp-n'&&sheet&&sheet.mode==='detail'){var o=find(sheet.coll,sheet.id);if(!o)return;var rem=calcDebt(o).rem,k=Math.max(1,Math.round(n(e.target.value)||1));
-      var pv=document.getElementById('dp-prev');if(pv)pv.textContent=k>1?k+' قسط × '+fmt(Math.floor(rem/k*100)/100)+' كل شهر':'مرة واحدة: '+fmt(rem)}
+    if(/^dp-(n|a|mode|every)$/.test(e.target.id)&&sheet&&sheet.mode==='detail'){var o=find(sheet.coll,sheet.id);if(!o)return;var op=dpOpt();
+      var nl=document.getElementById('dp-nl'),al=document.getElementById('dp-al');if(nl)nl.hidden=op.mode==='a';if(al)al.hidden=op.mode!=='a';
+      var pv=document.getElementById('dp-prev');if(pv)pv.textContent=dpPrev(calcDebt(o).rem,op)}
   });
   document.getElementById('app').addEventListener('input',function(e){
     if(e.target.id!=='gd-q')return;var q=e.target.value.trim().toLowerCase(),any=false;
@@ -5233,6 +5379,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     var nn=document.querySelector('.gd-none');if(nn)nn.hidden=any;
   });
   document.getElementById('app').addEventListener('change',function(e){
+    if(/^dp-(mode|every)$/.test(e.target.id)){e.target.dispatchEvent(new Event('input',{bubbles:true}));return}
     if(e.target.id==='nt-hour'){S.notifyHour=+e.target.value;save();ntWritePlan();renderMain();toast('الإشعار هيوصل كل يوم الساعة '+e.target.value+':00');return}
     if(e.target.id==='rp-from'||e.target.id==='rp-to'){RP[e.target.id==='rp-from'?'from':'to']=e.target.value;renderMain();return}
     if(sheet&&sheet.mode==='move'&&(e.target.id==='mv-from'||e.target.id==='mv-to')){grabMove();renderSheet();return}
@@ -5281,6 +5428,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     var t=e.target.closest('[data-act]'); if(!t)return;
     var act=t.getAttribute('data-act');
     if(settingsAction(act))return;
+    if(txDelAction(act,t))return;
     if(salAction(act,t))return;
     if(depAction(act,t))return;
     if(assetAction(act,t))return;
@@ -5415,6 +5563,8 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     if(act==='dt-sep'&&sheet&&sheet.mode==='dtr'){grabTr();var sd=find(sheet.coll,sheet.id);if(!sd)return;var sv=sheet.v,sc=sheet.coll;
       openForm(sc,null,{name:sd.name,kind:sd.kind||'شخص',amount:sv.amt,date:sv.date});sheet.back=null;renderSheet();return}
     if(act==='mv-pick'&&sheet&&sheet.mode==='dtr'){grabTr();sheet.v[t.getAttribute('data-f')]=t.getAttribute('data-k');renderSheet();scrollSel();return}
+    if(act==='invk-use'){var it=INV_T[+t.getAttribute('data-i')];if(it){openForm('accounts',null,Object.assign({currency:'EGP'},it.v),it.t);sheet.back={mode:'pick',k:'invk'}}return}
+    if(act==='new-card'){openForm('cards',null,{rate:'',feePct:'',paid:0});return}
     if(act==='borrow-new'||act==='lend-new'){var bc=act==='borrow-new'?'debts':'lent';sheet={mode:'pick',k:'dpick',coll:bc};renderSheet();return}
     if(act==='dp-new'){openForm(t.getAttribute('data-coll'));sheet.back={mode:'pick',k:'dpick',coll:t.getAttribute('data-coll')};return}
     if(act==='dp-pick'){var pc=t.getAttribute('data-coll'),pd=find(pc,t.getAttribute('data-id'));if(pd){openTr(pc,pd);sheet.back={mode:'pick',k:'dpick',coll:pc};renderSheet()}return}
@@ -5507,10 +5657,12 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
       mutate(function(){var sg=act==='bal-add'?1:-1;o.balance=Math.round((n(o.balance)+sg*ba)*100)/100;o.balanceAt=iso(today());
         logTx(act==='bal-add'?'دخل':'مصروف',coll,o,ba,(bs||(act==='bal-add'?'إضافة رصيد':'صرف من الرصيد'))+(other2?' ('+cur2+')':''))});
       toast((act==='bal-add'?'اتضاف ':'اتخصم ')+fmt(ba)+' · الرصيد دلوقتي '+fmt(o.balance));return}
-    if(act==='debt-plan'){var dx2=calcDebt(o), nIn=Math.max(1,Math.round(n(document.getElementById('dp-n').value)||1)), sdt=document.getElementById('dp-start').value;
+    if(act==='debt-plan'){var dx2=calcDebt(o),op=dpOpt(),sdt=document.getElementById('dp-start').value;
       if(!(dx2.rem>0)){toast('مفيش باقي');return} if(!parseD(sdt)){toast('حدد التاريخ');return}
-      mutate(function(){debtReplan(o,nIn,sdt)});
-      toast(nIn===1?'اتعملت الخطة: مرة واحدة':'اتعملت الخطة: '+nIn+' قسط');return}
+      if(op.mode==='a'&&!(op.a>0)){toast('اكتب مبلغ كل دفعة');return}if(op.mode==='a'&&op.a>dx2.rem)op.a=dx2.rem;
+      var nIn=op.mode==='a'?Math.ceil(dx2.rem/op.a-1e-9):Math.max(1,op.n);if(nIn>360){toast('الدفعات كتير أوي (أكتر من 360)، كبّر المبلغ');return}
+      mutate(function(){debtReplan(o,nIn,sdt,{every:op.every,each:op.mode==='a'?op.a:0})});
+      toast(nIn===1?'اتعملت الخطة: مرة واحدة':'اتعملت الخطة: '+nIn+' دفعة '+op.every);return}
     if(act==='debt-all'){var dx3=calcDebt(o);if(!(dx3.rem>0))return;
       mutate(function(){var li=lentIn(coll,o,dx3.rem,coll==='lent'?'رجعلي الباقي كله':'سداد الباقي كله',iso(today()));o.payments=(o.payments||[]).concat([{amount:dx3.rem,date:iso(today()),note:'سداد الباقي كله',alloc:allocDebt(o,dx3.rem),
         txId:li.txId,grp:li.grp,to:li.to}])});
