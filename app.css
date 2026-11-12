@@ -373,7 +373,9 @@ button.item:hover{background:var(--surface2)}
 .face .chip{width:34px;height:25px;border-radius:5px;background:linear-gradient(135deg,#e9cf8a,#b8954a)}
 .face .pan{font-size:18px;letter-spacing:.08em;direction:ltr;text-align:left;font-variant-numeric:tabular-nums;position:relative;z-index:1}
 .face .avl{display:flex;align-items:baseline;gap:8px;direction:ltr;position:relative;z-index:1;align-self:flex-start;background:rgba(255,255,255,.12);border:0;border-radius:10px;padding:4px 10px;color:inherit;font:inherit;font-size:13px;cursor:pointer}
-.face div.avl{cursor:default}.face .avl b{font-size:10px;opacity:.75;font-weight:500;letter-spacing:.04em}.face .avl .v{font-size:16px;font-weight:700}.face .avl.neg{background:rgba(232,84,96,.32)}.face .avl .ed{opacity:.7;font-size:13px}
+.face div.avl{cursor:default}.face .avl b{font-size:10px;opacity:.75;font-weight:500;letter-spacing:.04em}.face .avl .v{font-size:16px;font-weight:700}.face .avl.neg{background:rgba(232,84,96,.32)}.face .avl .ed{opacity:.7;font-size:13px}.face .avl .olp{font-style:normal;font-size:10px;opacity:.8;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:0 4px}
+.txas{display:flex;flex-direction:column;gap:8px}.txa{display:flex;gap:12px;align-items:center;text-align:start;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card,transparent);color:inherit;font:inherit;cursor:pointer}.txa .ti{font-size:22px}.txa b{display:block}.txa small{display:block;opacity:.7;font-size:12px;margin-top:2px}
+.htx .chips{margin:6px 0}.htx .htr .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:start;cursor:pointer}.htx .htr .v{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .cav{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px;display:flex;flex-direction:column;gap:6px}.cav #cav-amt{flex:1;min-width:120px}
 .face .meta{display:flex;justify-content:space-between;gap:10px;font-size:12px;direction:ltr;position:relative;z-index:1}
 .face .meta span b{display:block;font-size:10px;opacity:.7;font-weight:500;letter-spacing:.04em}
