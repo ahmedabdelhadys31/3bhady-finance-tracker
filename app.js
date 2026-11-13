@@ -2937,7 +2937,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   }
 
   /* home: what to show (everything by default) and hiding the big totals behind an eye */
-  var HOME_SECS=[['hello','👋','رسالة الترحيب'],['salary','💼','سؤال المرتب نزل ولا لسه'],['deps','📈','عائد الشهادات والودائع'],['worth','💎','صافي فلوسك'],['wallet','💳','كروتك (كروت المشتريات)'],['today','⏰','مطلوب منك النهاردة والأسبوع ده'],['balances','👛','أرصدتك'],['budgetc','🎯','ميزانية الصرف'],['debts','🧾','إجمالي المديونيات'],['after','💼','المتبقي من الدخل'],['actions','⚡','أزرار اصرف وسدّد وحوّل'],['overview','📊','الصورة العامة'],['monthly','📅','الميزانية الشهرية'],['updates','📝','التحديث الشهري من الكشوف'],['payorder','⏰','ترتيب الدفع والمواعيد']];
+  var HOME_SECS=[['hello','👋','رسالة الترحيب'],['salary','💼','سؤال المرتب نزل ولا لسه'],['deps','📈','عائد الشهادات والودائع'],['worth','💎','صافي فلوسك'],['pulse','✨','لمحة سريعة (النهاردة والمرتب والميزانية والأسعار)'],['wallet','💳','كروتك (كروت المشتريات)'],['today','⏰','مطلوب منك النهاردة والأسبوع ده'],['balances','👛','أرصدتك'],['budgetc','🎯','ميزانية الصرف'],['debts','🧾','إجمالي المديونيات'],['after','💼','المتبقي من الدخل'],['actions','⚡','أزرار اصرف وسدّد وحوّل'],['overview','📊','الصورة العامة'],['monthly','📅','الميزانية الشهرية'],['updates','📝','التحديث الشهري من الكشوف'],['payorder','⏰','ترتيب الدفع والمواعيد']];
 
   /* ================= home v3 (dark): header, metal hero, card wallet, what's due, dock — then the rest in the same identity ================= */
   var H3_BANK={cib:['#1f5fae','#0a2346'],nbe:['#127a57','#063826'],bm:['#a3203a','#4a0b18'],adcb:['#c0162f','#4e0613'],qnb:['#6a2d93','#28103a'],hsbc:['#b0102a','#3d0410'],adib:['#0f6e52','#04291e'],
@@ -2955,8 +2955,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     return '<section class="h3-hero'+(neg?' neg':'')+'"><div class="h3-hl"><span>صافي فلوسك</span><button class="h3-link" data-act="bd" data-k="worth">التفاصيل</button></div>'+
       '<button class="h3-big" data-act="bd" data-k="worth" aria-label="صافي فلوسك">'+(MK?'<span class="h3-mask">••••••••</span>':'<span class="num" data-count="'+Math.round(cv(W.total))+'">'+fmt(Math.round(cv(W.total)))+'</span>')+'<small>'+h3Cur()+'</small></button>'+
       '<div class="h3-bar" aria-hidden="true">'+seg(have,'b-have')+seg(lent,'b-lent')+seg(owe,'b-owe')+'</div>'+
-      '<div class="h3-leg"><button data-act="bd" data-k="balances"><i class="b-have"></i>معاك <b>'+h3Amt(have,MK)+'</b></button>'+(lent?'<button data-act="bd" data-k="lentRem"><i class="b-lent"></i>ليك عند الناس <b>'+h3Amt(lent,MK)+'</b></button>':'')+
-      '<button data-act="bd" data-k="allDebt"><i class="b-owe"></i>عليك <b>'+h3Amt(owe,MK)+'</b></button></div></section>'}
+      '<div class="h3-leg"><button data-act="bd" data-k="balances"><span class="lg-k"><i class="b-have"></i>معاك</span><b>'+h3Amt(have,MK)+'</b></button>'+(lent?'<button data-act="bd" data-k="lentRem"><span class="lg-k"><i class="b-lent"></i>ليك عند الناس</span><b>'+h3Amt(lent,MK)+'</b></button>':'')+
+      '<button data-act="bd" data-k="allDebt"><span class="lg-k"><i class="b-owe"></i>عليك</span><b>'+h3Amt(owe,MK)+'</b></button></div>'+h3Flow(MK)+'</section>'}
   function h3Wallet(MK){var C=S.cards.filter(function(c){var e=typeof cardExp==='function'?cardExp(c):null;return !(e&&e.days<-60)});
     if(!C.length)return '<section class="h3-sec"><div class="h3-sh"><h2>كروتك</h2></div><button class="h3-empty" data-act="new-card">💳 ضيف أول كارت مشتريات، وهتلاقيه هنا بالمتاح وميعاد السداد</button></section>';
     var cards=C.map(function(c,i){var x=calcCard(c),sh=hShort('cards',c),col=h3Bank(c),lim=n(c.limit),used=hUsed(c),av=Math.max(lim+(olModeOf(c)==='incl'?olCap(c):0)-used,0),p=lim>0?Math.min(used/lim,1):0,late=x.state==='late',bg=col?'background:linear-gradient(140deg,'+col[0]+' 0%,'+col[1]+' 100%)':faceBg(c,i);
@@ -2975,13 +2975,47 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       return '<section class="h3-sec"><div class="h3-ok"><span class="h3-okc">✓</span><div><b>مفيش دفع مستحق الأسبوع ده</b>'+(nx?'<small>أقرب ميعاد: '+esc(nx.name)+' '+rel(nx.days)+' · '+(MK?'••••':money(nx.amt))+'</small>':'')+'</div></div></section>'}
     return '<section class="h3-sec"><div class="h3-sh"><h2>مطلوب منك</h2>'+(dsum>0?'<span class="h3-tot">النهاردة '+(MK?'••••':money(dsum))+'</span>':'<span class="h3-tot ok">مفيش حاجة النهاردة</span>')+'</div><div class="h3-due-row">'+
       it.map(function(i){var cl=i.days<0?'late':i.days===0?'today':'soon';return '<button class="h3-pay '+cl+'" data-act="open" data-coll="'+i.coll+'" data-id="'+esc(i.id)+'"><span class="h3-pd">'+(i.days<0?'متأخر '+(-i.days)+' يوم':i.days===0?'النهاردة':rel(i.days))+'</span><b>'+esc(i.name)+'</b><span class="h3-pa">'+(MK?'••••':money(i.amt))+'</span></button>'}).join('')+'</div></section>'}
+  /* ================= home: "لمحة" rail — round rings you tap, each one a short story about today ================= */
+  function plNextPay(){var s=S.salary;if(!s||!s.has)return null;var pd=Math.min(Math.max(+s.payDay||1,1),28),t=today(),nx=new Date(t.getFullYear(),t.getMonth(),pd);if(nx<t)nx=new Date(t.getFullYear(),t.getMonth()+1,pd);
+    var days=Math.round((nx-t)/864e5),prev=new Date(nx.getFullYear(),nx.getMonth()-1,pd),len=Math.max(Math.round((nx-prev)/864e5),1);return {days:days,p:1-days/len,date:nx}}
+  function plBubble(o){var attr=o.href?'href="'+o.href+'"':'data-act="'+o.act+'"'+(o.k?' data-k="'+esc(o.k)+'"':'');var tag=o.href?'a':'button';
+    return '<'+tag+' class="pl-b" '+attr+(o.id?' id="'+o.id+'"':'')+' style="--c:'+o.c+';--p:'+Math.max(0,Math.min(1,o.p==null?1:o.p)).toFixed(3)+'"><span class="pl-r"><span class="pl-i" aria-hidden="true">'+o.i+'</span></span><small>'+o.t+'</small><b class="num">'+o.v+'</b></'+tag+'>'}
+  function plPxV(k){return PXD&&pxEgp(k)>0?pxFmt(pxEgp(k))+' ج':'…'}
+  var PLPX=0;
+  function homePulse(MK){var L=[],mm=function(v){return MK?'••••':fmt(Math.round(cv(v)))};
+    var it=agendaItems().filter(function(i){return i.amt>0&&i.state!=='paid'&&i.state!=='wait'}),due=it.filter(function(i){return i.days<=0}),dsum=sum(due,function(i){return i.amt}),wk=it.filter(function(i){return i.days>0&&i.days<=7});
+    L.push(dsum>0?{i:'⏰',t:'مطلوب النهاردة',v:mm(dsum),c:'#ef5d5d',p:1,act:'bd',k:'today'}:{i:'✅',t:'النهاردة',v:wk.length?wk.length+' خلال أسبوع':'مفيش مطلوب',c:'#34c38f',p:1,act:'bd',k:'w7min'});
+    var sp=plNextPay();if(sp)L.push({i:'💼',t:'المرتب',v:sp.days===0?'النهاردة':'بعد '+sp.days+' يوم',c:'#e3bb55',p:sp.p,act:'bd',k:'afterSalary'});
+    var b=typeof budInfo==='function'?budInfo():null;if(b&&b.tot>0)L.push({i:'🎯',t:b.rem>=0?'فاضل من الميزانية':'زيادة عن الميزانية',v:mm(Math.abs(b.rem)),c:b.p>=1?'#ef5d5d':b.p>=0.8?'#f0a33a':'#34c38f',p:b.p,act:'go-budget'});
+    var C=S.cards.filter(function(c){return n(c.limit)>0});if(C.length){var lim=sum(C,function(c){return n(c.limit)}),used=sum(C,function(c){return Math.max(hUsed(c),0)}),u=lim?used/lim:0,av=sum(C,function(c){var v=cardAvail(c);return v>0?v:0});
+      L.push({i:'💳',t:'متاح في كروتك',v:mm(av),c:u>=0.9?'#ef5d5d':u>=0.7?'#f0a33a':'#4c84e0',p:1-u,href:'#cards'})}
+    var m=monthNet();if(m.i||m.o)L.push({i:m.net>=0?'📈':'📉',t:'صافي الشهر ده',v:(m.net>=0?'+':'−')+mm(Math.abs(m.net)),c:m.net>=0?'#34c38f':'#ef5d5d',p:m.i?Math.min(m.o/m.i,1):1,act:'go-tx'});
+    L.push({i:'💵',t:'الدولار',v:plPxV('c:USD'),c:'#3fb98a',p:1,act:'px-open',k:'c:USD',id:'pl-usd'});
+    L.push({i:'🟡',t:'دهب عيار 21',v:plPxV('g21'),c:'#e3bb55',p:1,act:'px-open',k:'g21',id:'pl-g21'});
+    if(!PLPX&&(!PXD||Date.now()-(PXD.at||0)>60*60000)){PLPX=1;setTimeout(function(){try{pxLoad()}catch(e){}},1200)}
+    return '<section class="h3-sec pl"><div class="pl-rail" role="list">'+L.map(plBubble).join('')+'</div></section>'}
+  function plPxRefresh(){[['pl-usd','c:USD'],['pl-g21','g21']].forEach(function(x){var e=document.getElementById(x[0]);if(e){var b=e.querySelector('b');if(b)b.textContent=plPxV(x[1])}})}
+  /* hero: this month's money in and out, under the net worth */
+  function h3Flow(MK){var m=monthNet();if(!m.i&&!m.o)return '';var mx=Math.max(m.i,m.o,1),mm=function(v){return MK?'••••':fmt(Math.round(cv(v)))};
+    return '<button class="h3-flow" data-act="go-tx" aria-label="معاملات الشهر ده"><span class="fl-h"><span>الشهر ده</span><span class="fl-n '+(m.net>=0?'ok':'bad')+'">'+(m.net>=0?'+':'−')+mm(Math.abs(m.net))+' '+h3Cur()+'</span></span>'+
+      '<span class="fl-r"><span class="fl-k">⬇ داخل</span><span class="fl-t"><i class="fl-in" style="width:'+(m.i/mx*100).toFixed(1)+'%"></i></span><b class="num">'+mm(m.i)+'</b></span>'+
+      '<span class="fl-r"><span class="fl-k">⬆ خارج</span><span class="fl-t"><i class="fl-out" style="width:'+(m.o/mx*100).toFixed(1)+'%"></i></span><b class="num">'+mm(m.o)+'</b></span></button>'}
+  /* the monthly budget as bars against your income; the empty lines fold into one */
+  function homeMonthly(){var inc=breakdown('inc').total,net=breakdown('net').total,R=[['📅','المصروفات والالتزامات الثابتة','exp'],['🏦','أقساط القروض','inst'],['💳','الحد الأدنى للكروت (آخر كشف)','mins'],['🧾','أقساط كروت وتطبيقات التقسيط','bn'],['👥','أقساط الجمعيات','gam'],['🛡️','أقساط التأمين','ins']];
+    var V=R.map(function(r){return {r:r,v:breakdown(r[2]).total}}),nz0=V.filter(function(x){return x.v>0}),z=V.filter(function(x){return !(x.v>0)}),base=Math.max(inc,sum(nz0,function(x){return x.v}),1),out=sum(nz0,function(x){return x.v});
+    var row=function(em,label,key,v,cls,minus){return '<button class="mb-r" data-act="bd" data-k="'+key+'"><span class="mb-k"><span aria-hidden="true">'+em+'</span> '+label+'</span><span class="mb-v">'+(minus?'− ':'')+money(v)+'</span><span class="mb-t"><i class="'+cls+'" style="width:'+Math.max(v/base*100,v>0?1.5:0).toFixed(1)+'%"></i></span></button>'};
+    return '<section class="sec"><div class="sec-head"><h2>الميزانية الشهرية</h2><span class="fine">'+(inc>0?'الالتزامات '+Math.round(out/inc*100)+'% من الدخل':'دوس على أي بند')+'</span></div><div class="gcard g-budget mb">'+
+      row('💰','الدخل','inc',inc,'mb-in')+nz0.map(function(x){return row(x.r[0],x.r[1],x.r[2],x.v,'mb-out',1)}).join('')+
+      (z.length?'<p class="mb-z">مفيش حاجة في: '+z.map(function(x){return x.r[1].replace(/ \(.*\)/,'')}).join('، ')+'</p>':'')+
+      '<button class="mb-r mb-net" data-act="bd" data-k="net"><span class="mb-k"><b>الصافي</b></span><span class="mb-v" style="color:var('+(net<0?'--bad':'--ok')+')">'+money(net)+'</span></button></div>'+
+      (inc===0?'<p class="note">ضيف مصادر الدخل والمصروفات الثابتة من القائمة عشان الصافي يبقى مظبوط.</p>':'')+'</section>'}
   function homeV3(h,hin){var parts=h.split(/<!--hs:([a-z_]+)-->/),M={};for(var i=1;i<parts.length;i+=2)M[parts[i]]=(M[parts[i]]||'')+parts[i+1];
     var HH=homeHidden(),on=function(k){return HH.indexOf(k)<0},MK=homeMasked(),B={};
-    B.hello=on('hello')?h3Head(MK):'';B.salary=M.salary||'';B.deps=M.deps||'';B.worth=on('worth')?h3Hero(MK):'';B.wallet=on('wallet')?h3Wallet(MK):'';
+    B.hello=on('hello')?h3Head(MK):'';B.salary=M.salary||'';B.deps=M.deps||'';B.worth=on('worth')?h3Hero(MK):'';B.pulse=on('pulse')?homePulse(MK):'';B.wallet=on('wallet')?h3Wallet(MK):'';
     B.actions=M.actions?'<div class="h3-dock">'+M.actions+'</div>':'';B.today=on('today')?h3Today(MK):'';
     ['balances','budgetc','debts','after','overview','monthly','updates','payorder'].forEach(function(k){B[k]=M[k]||''});
     Object.keys(M).forEach(function(k){if(k.indexOf('x_')===0)B[k]=M[k]});
-    var custom=Array.isArray(S.homeOrder)&&S.homeOrder.length,order=custom?homeOrderKeys():['hello','worth','wallet','actions','salary','deps','today','debts','after','balances','budgetc','overview','monthly','updates','payorder'].concat(Object.keys(B).filter(function(k){return k.indexOf('x_')===0}));
+    var custom=Array.isArray(S.homeOrder)&&S.homeOrder.length,order=custom?homeOrderKeys():['hello','worth','pulse','wallet','actions','salary','deps','today','debts','after','balances','budgetc','overview','monthly','updates','payorder'].concat(Object.keys(B).filter(function(k){return k.indexOf('x_')===0}));
     var out='';order.forEach(function(k){if(B[k])out+=B[k]});
     if(hin)setTimeout(h3Count,60);
     setTimeout(h3Stuck,0);
@@ -3062,7 +3096,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     /* total debts */
     var D=breakdown('allDebt');h+=hs('debts');
     if(!on('debts')){}else if(D.total>0)h+='<div class="gcard g-debt">'+eyeBtn(MK)+'<button class="gc-main" data-act="bd" data-k="allDebt"><span class="gc-row"><span class="gi" aria-hidden="true">🧾</span><span class="gk">إجمالي المديونيات كلها</span></span>'+
-      '<span class="gc-big">'+mm(D.total)+'</span></button><div class="gchips">'+
+      '<span class="gc-big">'+mm(D.total)+'</span></button>'+(D.rows.length>1?'<div class="h3-bar dbar" aria-hidden="true">'+D.rows.map(function(r){var w=r.amt/D.total*100,c={'الكروت':'#e5534b','القروض':'#8a6fe0','التقسيط':'#f0a33a','السلف':'#36a9c9'}[r.name]||'#9aa3b2';return w>0.5?'<i style="width:'+w.toFixed(2)+'%;background:'+c+'"></i>':''}).join('')+'</div>':'')+'<div class="gchips">'+
       D.rows.map(function(r){var em={'الكروت':'💳','القروض':'🏦','التقسيط':'🧾','السلف':'🤝'}[r.name]||'•';return '<button class="gchip" data-act="bd" data-k="'+r.bd+'"><span aria-hidden="true">'+em+'</span> '+esc(r.name)+' <b class="num">'+(MK?'••••':fmt(r.amt))+'</b></button>'}).join('')+'</div></div>';
     else h+='<div class="gcard g-good"><div class="gc-main" style="cursor:default"><span class="gc-row"><span class="gi" aria-hidden="true">✅</span><span class="gk">مفيش عليك أي مديونيات</span></span></div></div>';
     /* due today incl. late */
@@ -3079,21 +3113,17 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     /* overview */
     var w7=breakdown('w7min'), w7f=breakdown('w7full'), bal=breakdown('balances'), lent=breakdown('lentRem');
     h+=hs('overview');
-    if(on('overview'))h+='<section class="sec"><div class="sec-head"><h2>الصورة العامة</h2><span class="fine">دوس على أي رقم تشوف تفاصيله</span></div><div class="gtiles">'+
-      gt('t-red','⏰','مطلوب النهاردة (شامل المتأخر)',money(tdue),'today',late.length?'متأخر '+fmt(lateSum):'',1)+
-      gt('t-amber','📅','مطلوب خلال 7 أيام (حد أدنى)',money(w7.total),'w7min')+
-      gt('t-sand','🗓️','مطلوب خلال 7 أيام (كامل)',money(w7f.total),'w7full')+
-      gt(bal.total<0?'t-wine':'t-teal','👛','أرصدة الحسابات والمحافظ',money(bal.total),'balances')+gt('t-green','💵','الكاش',money(breakdown('cash').total),'cash')+
+    if(on('overview'))h+='<section class="sec"><div class="sec-head"><h2>الصورة العامة</h2><span class="fine">دوس على أي رقم تشوف تفاصيله</span></div><div class="gtiles gmini">'+
+      gt('t-red','⏰','مطلوب النهاردة',money(tdue),'today',late.length?'منه متأخر '+fmt(lateSum):'شامل المتأخر')+
+      gt('t-amber','📅','خلال 7 أيام',money(w7.total),'w7min','الحد الأدنى')+
+      gt('t-sand','🗓️','خلال 7 أيام',money(w7f.total),'w7full','المطلوب كامل')+
+      gt(bal.total<0?'t-wine':'t-teal','👛','الحسابات والمحافظ',money(bal.total),'balances')+gt('t-green','💵','الكاش',money(breakdown('cash').total),'cash')+
       gt('t-violet','📥','فلوسي عند الناس',money(lent.total),'lentRem')+'</div></section>';
     /* monthly budget */
     var inc=breakdown('inc').total, net=breakdown('net').total;
     function B(em,label,key,minus){return '<button class="r tap" data-act="bd" data-k="'+key+'"><span class="k"><span aria-hidden="true">'+em+'</span> '+label+'</span><span class="v">'+(minus?'− ':'')+money(breakdown(key).total)+'</span></button>'}
     h+=hs('monthly');
-    if(on('monthly'))h+='<section class="sec"><h2>الميزانية الشهرية</h2><div class="gcard g-budget"><div class="rows clear">'+
-      B('💰','الدخل','inc')+B('📅','المصروفات والالتزامات الثابتة','exp',1)+B('🏦','أقساط القروض','inst',1)+B('💳','الحد الأدنى للكروت (آخر كشف)','mins',1)+
-      B('🧾','أقساط كروت وتطبيقات التقسيط','bn',1)+B('👥','أقساط الجمعيات','gam',1)+B('🛡️','أقساط التأمين','ins',1)+
-      '<button class="r tap net" data-act="bd" data-k="net"><span class="k"><b>الصافي</b></span><span class="v" style="color:var('+(net<0?'--bad':'--ok')+')">'+money(net)+'</span></button></div></div>'+
-      (inc===0?'<p class="note">ضيف مصادر الدخل والمصروفات الثابتة من القائمة عشان الصافي يبقى مظبوط.</p>':'')+'</section>';
+    if(on('monthly'))h+=homeMonthly();
     /* monthly statement prompts */
     var stm=S.cards.filter(cardStmtNeed), lu=S.loans.filter(loanUpdNeed), exs=S.cards.filter(cardExpSoon);
     h+=hs('updates');
@@ -3131,7 +3161,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(P.rng==='custom'){var f=parseD(P.from),e=parseD(P.to);lo=f?Math.round((f-t)/864e5):-36500;hi=e?Math.round((e-t)/864e5):31}
     var items=items0.map(function(i){var c=Object.assign({},i);c.amt=poAmt(i,P.amt);return c}).filter(function(i){return i.days>=lo&&i.days<=hi});
     var sel=function(id,L,v){return '<select class="in" id="'+id+'" style="flex:1;min-width:130px">'+L.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===v?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>'};
-    var h='<section class="sec"><div class="sec-head"><h2>ترتيب الدفع</h2><span class="fine">'+esc((PO_SORT.filter(function(x){return x[0]===P.sort})[0]||[])[1]||'')+'</span></div>'+
+    var h='<section class="sec po-sec"><div class="sec-head"><h2>ترتيب الدفع</h2><span class="fine">'+esc((PO_SORT.filter(function(x){return x[0]===P.sort})[0]||[])[1]||'')+'</span></div>'+
       '<div class="actions po-ctl">'+sel('po-sort',PO_SORT,P.sort)+sel('po-amt',PO_AMT,P.amt)+sel('po-rng',PO_RNG,P.rng)+'</div>'+
       (P.rng==='custom'?'<div class="actions"><label class="fine" for="po-from">من</label><input class="in" id="po-from" type="date" style="direction:ltr" value="'+esc(P.from)+'"><label class="fine" for="po-to">لـ</label><input class="in" id="po-to" type="date" style="direction:ltr" value="'+esc(P.to||iso(addDays(t,31)))+'"></div>':'');
     var pay=items.filter(function(i){return i.amt>0&&i.state!=='paid'}),tot=sum(pay,function(i){return i.amt});
@@ -4261,7 +4291,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     ['ADA','كاردانو','cardano'],['TRX','ترون','tron'],['AVAX','أفالانش','avalanche-2'],['LINK','تشين لينك','chainlink'],['DOT','بولكادوت','polkadot'],['LTC','لايتكوين','litecoin'],['BCH','بيتكوين كاش','bitcoin-cash'],
     ['XLM','ستيلار','stellar'],['SHIB','شيبا','shiba-inu'],['USDT','تيثر (دولار رقمي)','tether'],['USDC','USD كوين','usd-coin']];
   var PXG=[[24,'عيار 24'],[22,'عيار 22'],[21,'عيار 21'],[18,'عيار 18'],[14,'عيار 14'],[12,'عيار 12']],PXSV=[[999,'عيار 999'],[958,'عيار 958 (بريتانيا)'],[925,'عيار 925'],[900,'عيار 900'],[800,'عيار 800']];
-  var OZ=31.1035,PXD=null,PXS={tab:'fx',q:'',cmp:[],busy:false,err:'',ch:{k:'g24',d:30},chd:null,cv:{a:'1',f:'c:USD',t:'c:EGP'},zk:{g:'',k:'21',s:'',c:''}};
+  var OZ=31.1035,PXD=null,PXS={tab:'hub',q:'',cmp:[],busy:false,err:'',ch:{k:'g24',d:30},chd:null,cv:{a:'1',f:'c:USD',t:'c:EGP'},zk:{g:'',k:'21',s:'',c:''}};
   function pxJ(k,d){try{var v=JSON.parse(lsGet(k)||'null');return v==null?d:v}catch(e){return d}}
   function pxCal(){return pxJ('3bh_pxcal',{gp:0,sp:0,gs:0.65,ss:3.4,at:''})}
   function pxFav(){return pxJ('3bh_pxfav',['USD','EUR','SAR','g21','BTC'])}
@@ -4277,7 +4307,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       var nowT=Date.now(),okG=!!(gb&&gb.usd>0||gc&&gc.usd>0),okS=!!(sc&&sc.usd>0),okC=Object.keys(cr).length>2;
       PXD={at:nowT,fxT:PX.fxT||(PXD&&PXD.fxT)||0,fxAt:nowT,gT:okG?nowT:(PXD&&PXD.gT)||0,sT:okS?nowT:(PXD&&PXD.sT)||0,cT:okC?nowT:(PXD&&PXD.cT)||0,fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
         silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0}:(PXD&&PXD.silver)||null,cr:okC?cr:(PXD&&PXD.cr)||cr};
-      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();try{pxAssetSync()}catch(e){}PXS.busy=false;if(route==='prices')renderMain()},
+      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();if(route==='home')try{plPxRefresh()}catch(e){}try{pxAssetSync()}catch(e){}PXS.busy=false;if(route==='prices')renderMain()},
       function(){PXS.busy=false;PXS.err='مش قادر أجيب الأسعار دلوقتي. اتأكد من الإنترنت وجرّب تاني.'+(PXD?' بعرضلك آخر أسعار اتجابت.':'');if(route==='prices')renderMain()})}
   /* a daily snapshot on this phone, to show the change since the day before */
   function pxSnap(){var h=pxJ('3bh_pxh',{}),k=iso(today()),v={};PXC.forEach(function(c){var x=pxEgp('c:'+c[0]);if(x)v['c:'+c[0]]=x});var g=pxEgp('g24');if(g)v.g24=g;var s=pxEgp('s999');if(s)v.s999=s;
@@ -4542,7 +4572,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       if(/شهر|شهور/.test(u))return iso(new Date(td.getFullYear(),td.getMonth()-k,td.getDate()));return iso(new Date(td.getFullYear()-k,td.getMonth(),td.getDate()))}
     return null}
   function pxReady(){if(PXD&&Date.now()-(PXD.at||0)<15*60000)return Promise.resolve();pxLoad(true);return new Promise(function(res){var n0=0,tm=setInterval(function(){if((!PXS.busy&&PXD)||++n0>40){clearInterval(tm);res()}},300)})}
-  function pxOpen(tab){return aiAct('افتح بكام النهاردة',function(){PXS.tab=tab||'fx';navTo('prices');sheet=null;renderSheet()})}
+  function pxOpen(tab){return aiAct('افتح بكام النهاردة',function(){PXS.tab=tab||'hub';PXS.keep=route!=='prices';navTo('prices');sheet=null;renderSheet()})}
   function pxU(k,v){return pxFmt(v)+' '+(k==='c:EGP'?'ج':esc(pxCode(k)))}
   function pxAI(raw){var t=nz(raw).toLowerCase().replace(/[؟?!]/g,' ').replace(/\s+/g,' ').trim();if(!t)return false;
     if(/(صرفت|دفعت|حولت|سجل|سجلت|ضيف|اضيف|سلفت|استلفت|رجعلي|قبضت|شحنت|عليا|معايا|عندي|عندى|فلوسي|محفظتي|كارت|بطاق|قسط|فايد|فوايد|رسوم|عمول|غرام|رصيدي|حسابي|ميزاني|اشتريت|بعت\s)/.test(t)&&!/(كام جنيه|بكام|يساوي|يعني كام|(^|\s)حول\s|كان بكام)/.test(t))return false;
@@ -4798,12 +4828,65 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       [].forEach.call(document.querySelectorAll('.pxd-r .chip'),function(b){b.classList.toggle('on',b===t)});if(el)el.innerHTML=pxdChart(sheet.k,sheet.d);return true}
     if(act==='pxh'){if(!sheet||sheet.mode!=='pxd')return true;sheet={mode:'pxh',k:sheet.k,op:t.getAttribute('data-v'),back:{mode:'pxd',k:sheet.k,d:sheet.d||365}};renderSheet();return true}
     if(act==='ph-save'){if(sheet&&sheet.mode==='pxh')pxhSave();return true}
-    if(act==='pxd-conv'){var c=pxCv(),k2=sheet&&sheet.k;if(k2){c.f=k2;c.t=k2==='c:EGP'?'c:USD':'c:EGP';c.a='1';pxCvSave()}sheet=null;renderSheet();PXS.tab='conv';navTo('prices');return true}
+    if(act==='pxd-conv'){var c=pxCv(),k2=sheet&&sheet.k;if(k2){c.f=k2;c.t=k2==='c:EGP'?'c:USD':'c:EGP';c.a='1';pxCvSave()}sheet=null;renderSheet();PXS.tab='conv';PXS.keep=route!=='prices';navTo('prices');if(route==='prices')renderMain();return true}
     return false}
+  /* ================= "بكام النهاردة" front page: live tickers, section tiles, favourites, what you own ================= */
+  var PXSEC=[['fx','💵','العملات','#3fb98a'],['conv','🔁','محوّل العملات','#4c84e0'],['gold','🟡','الدهب','#e3bb55'],['silver','⚪','الفضة','#aab4c3'],['bars','🧱','سبايك وجنيهات','#d08a3a'],
+    ['crypto','₿','العملات الرقمية','#f0a33a'],['fuel','⛽','الوقود','#e5534b'],['day','📅','أسعار يوم معيّن','#8a6fe0'],['tools','🧰','أدواتي','#36a9c9']];
+  var PXHUBK=['c:USD','g21','k:BTC','f:b92'],PXSPK={};
+  function pxFavKey(x){return PXC.some(function(c){return c[0]===x})?'c:'+x:PXK.some(function(c){return c[0]===x})?'k:'+x:x}
+  function pxSecSub(id){var E=pxEgp('c:USD'),c;
+    if(id==='fx')return PXC.length+' عملة · الدولار '+pxFmt(E);
+    if(id==='conv')return 'أي عملة أو دهب أو رقمية';
+    if(id==='gold')return 'عيار 21: '+pxFmt(pxEgp('g21'))+' ج';
+    if(id==='silver')return 'عيار 999: '+pxFmt(pxEgp('s999'))+' ج';
+    if(id==='bars')return 'الجنيه الدهب: '+pxFmt(pxEgp('gpound'))+' ج';
+    if(id==='crypto'){c=PXD&&PXD.cr&&PXD.cr.BTC;return PXK.length+' عملة'+(c&&c.usd?' · BTC $'+pxFmt(c.usd):'')}
+    if(id==='fuel')return 'بنزين 92: '+pxFmt(pxEgp('f:b92'))+' ج';
+    if(id==='day')return 'أي يوم من 1970 لحد النهاردة';
+    return 'زكاة · مصنعية · رسم · تنبيهات'}
+  function pxSpark(P,up){if(!P||P.length<2)return '';var W=120,H=36,ys=P.map(function(p){return p[1]}),mn=Math.min.apply(null,ys),mx=Math.max.apply(null,ys),t0=P[0][0],t1=P[P.length-1][0];
+    var X=function(t){return (t-t0)/(t1-t0||1)*(W-2)+1},Y=function(v){return H-3-(v-mn)/((mx-mn)||1)*(H-8)},col=up?'#34c38f':'#f46a6a',id='sp'+Math.random().toString(36).slice(2,7);
+    var line=P.map(function(p,i){return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)}).join(' ');
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col+'" stop-opacity=".35"/><stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
+      '<path d="'+line+' L'+(W-1)+' '+H+' L1 '+H+' Z" fill="url(#'+id+')"/><path d="'+line+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>'}
+  function pxTickInner(k){var v=pxEgp(k),P=PXSPK[k],ch=P&&P.length>1?(P[P.length-1][1]/P[0][1]-1)*100:null,up=ch==null?true:ch>=0,cr=/^k:/.test(k)&&PXD&&PXD.cr&&PXD.cr[k.slice(2)];
+    if(!P&&!PXSPK['_'+k]){PXSPK['_'+k]=1;pxSeries(k,30).then(function(Q){PXSPK[k]=Q||[];var el=document.getElementById('pxt-'+k.replace(/\W/g,''));if(el&&route==='prices'&&PXS.tab==='hub')el.innerHTML=pxTickInner(k)},function(){PXSPK[k]=[]})}
+    return '<div class="pxk-h"><span class="pxk-i">'+pxFlag(k)+'</span><span class="pxk-n">'+esc(k==='g21'?'عيار 21':k==='f:b92'?'بنزين 92':pxName(k))+'</span></div>'+
+      '<div class="pxk-v"><b class="num">'+(cr?'$'+pxFmt(cr.usd):pxFmt(v))+'</b>'+(cr?'':' <small>ج</small>')+'</div>'+
+      '<div class="pxk-c">'+(ch==null?'<span class="fine">'+(P?'—':'…')+'</span>':Math.abs(ch)<0.005?'<span class="fine">ثابت من شهر</span>':'<span class="pxch '+(up?'up':'dn')+'">'+(up?'▲':'▼')+' '+nf(Math.abs(ch),2)+'%</span> <span class="fine">في شهر</span>')+'</div>'+
+      '<div class="pxk-s">'+pxSpark(P,up)+'</div>'}
+  function pxStatusBar(){var t=PXD&&PXD.at;
+    return '<div class="pxst2"><span class="pxdot'+(PXS.busy?' busy':PXS.err?' err':'')+'"></span><span>'+(PXS.busy?'بيحدّث الأسعار…':t?'آخر تحديث '+new Date(t).toLocaleTimeString(LOC(),{hour:'numeric',minute:'2-digit'}):'لسه ما اتحدثتش')+'</span>'+
+      '<button class="pxref" data-act="px-ref" aria-label="حدّث الأسعار"'+(PXS.busy?' disabled':'')+'>↻</button></div>'}
+  function pxHubHtml(){var td=today(),h='<section class="pxhub">';
+    h+='<div class="pxhero"><div class="pxhero-t"><small>'+esc(td.toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</small><b>أسعار النهاردة</b></div>'+pxStatusBar()+'</div>';
+    if(PXS.err)h+='<p class="note" style="color:var(--bad)">'+PXS.err+'</p>';
+    if(!PXD)return h+(PXS.busy?'<div class="empty">بيجيب الأسعار…</div>':'<div class="empty">مفيش أسعار لسه. اتأكد من الإنترنت ودوس ↻.</div>')+pxSecGrid()+'</section>';
+    h+='<div class="pxticks">'+PXHUBK.map(function(k){return '<button class="pxk" data-act="px-open" data-k="'+esc(k)+'" id="pxt-'+k.replace(/\W/g,'')+'">'+pxTickInner(k)+'</button>'}).join('')+'</div>';
+    h+=pxSecGrid();
+    var F=pxFav().map(pxFavKey).filter(function(k){return pxDetailable(k)&&pxEgp(k)>0});
+    if(F.length)h+='<div class="pxhs"><div class="pxhs-h"><b>⭐ المفضلة</b><span class="fine">دوس على أي واحدة تشوف تفاصيلها</span></div><div class="pxfav">'+F.map(function(k){var c=pxCh(k);
+      return '<button class="pxfv" data-act="px-open" data-k="'+esc(k)+'"><span class="pxfv-i">'+pxFlag(k)+'</span><span class="pxfv-n">'+esc(pxName(k))+'</span><b class="num">'+pxFmt(pxEgp(k))+'</b>'+(c!=null&&Math.abs(c)>=0.005?'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+nf(Math.abs(c),2)+'%</span>':'<span class="fine">ج</span>')+'</button>'}).join('')+'</div></div>';
+    var A=(S.assets||[]).filter(function(a){return pxKeyOfAsset(a)}),val=sum(A,function(a){return pxQtyOf(a,pxKeyOfAsset(a))*(pxKeyOfAsset(a)==='gpound'?pxEgp('g21','buy')*8:pxGetPrice(pxKeyOfAsset(a)))}),cost=sum(A,function(a){return n(a.buyPrice)}),g=cost?val-cost:null;
+    h+='<div class="pxhs"><div class="pxhs-h"><b>💼 اللي معاك</b>'+(A.length?'<a class="fine" href="#assets">كل ممتلكاتك ›</a>':'')+'</div>'+(A.length?'<div class="pxown"><div><small>قيمته النهاردة</small><b class="num">'+money(val)+'</b></div>'+(g!=null?'<div><small>'+(g>=0?'مكسب':'خسارة')+'</small><b class="num" style="color:var('+(g>=0?'--ok':'--bad')+')">'+(g>=0?'+':'−')+money(Math.abs(g))+'</b></div>':'')+'</div>'+
+      '<div class="pxfav">'+A.map(function(a){var k=pxKeyOfAsset(a);return '<button class="pxfv" data-act="px-open" data-k="'+esc(k)+'"><span class="pxfv-i">'+(AKI[a.kind]||pxFlag(k))+'</span><span class="pxfv-n">'+esc(a.name)+'</span><b class="num">'+pxQtyTxt(k,pxQtyOf(a,k)).replace(/<\/?b[^>]*>/g,'')+'</b></button>'}).join('')+'</div>':
+      '<p class="note" style="margin:0">عندك دولارات أو دهب أو عملات رقمية؟ افتح صفحتها ودوس "معايا رصيد" أو "اشتريت"، وهتتابع قيمتها هنا كل يوم.</p>')+'</div>';
+    var AL=pxAlerts();h+='<div class="pxhs pxal2" data-act="px-tab" data-v="tools" role="button" tabindex="0"><div class="pxhs-h"><b>🔔 تنبيهات الأسعار</b><span class="fine">'+(AL.length?AL.length+' تنبيه شغال ›':'دوس 🔔 جنب أي سعر ›')+'</span></div></div>';
+    return h+'</section>'}
+  function pxSecGrid(){return '<div class="pxhs"><div class="pxhs-h"><b>الأقسام</b></div><div class="pxsecs">'+PXSEC.map(function(x){
+      return '<button class="pxsec" data-act="px-tab" data-v="'+x[0]+'" style="--c:'+x[3]+'"><span class="pxsec-i" aria-hidden="true">'+x[1]+'</span><span class="pxsec-t">'+x[2]+'</span><span class="pxsec-s">'+(PXD||x[0]==='fuel'||x[0]==='day'?esc(pxSecSub(x[0])):'')+'</span></button>'}).join('')+'</div></div>'}
+  /* inside a section: back to the front page + a strip of section icons */
+  function pxSecHead(T){var cur=PXSEC.filter(function(x){return x[0]===T})[0]||PXSEC[0];
+    return '<div class="pxsh"><button class="pxback" data-act="px-tab" data-v="hub">‹ بكام النهاردة</button>'+pxStatusBar()+'</div>'+
+      '<div class="pxnav" role="tablist">'+PXSEC.map(function(x){return '<button role="tab" class="pxnv'+(T===x[0]?' on':'')+'" data-act="px-tab" data-v="'+x[0]+'" aria-selected="'+(T===x[0])+'" style="--c:'+x[3]+'"><span aria-hidden="true">'+x[1]+'</span><small>'+x[2].replace('أسعار ','').replace('العملات الرقمية','الرقمية')+'</small></button>'}).join('')+'</div>'+
+      '<h2 class="pxsec-h" style="--c:'+cur[3]+'"><span>'+cur[1]+'</span>'+cur[2]+'</h2>'}
+  window.addEventListener('hashchange',function(){if(location.hash==='#prices'){if(PXS.keep)PXS.keep=false;else if(PXS.tab!=='hub'){PXS.tab='hub';PXS.q='';renderMain()}}});
+  document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('#bnav a[href="#prices"],#nav a[href="#prices"]');if(a&&route==='prices'&&PXS.tab!=='hub'){PXS.tab='hub';PXS.q='';setTimeout(function(){renderMain();window.scrollTo(0,0)},0)}});
   function screenPrices(){if(!PXD||Date.now()-(PXD.at||0)>5*60000)setTimeout(function(){pxLoad()},0);var T=PXS.tab;
-    var tabs=[['fx','💵 العملات'],['conv','🔁 محوّل العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['bars','🧱 سبايك وجنيهات'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود'],['day','📅 يوم معيّن'],['tools','🧰 أدواتي']];
-    var h='<section class="sec pxs"><div class="pxtabs" role="tablist">'+tabs.map(function(x){return '<button role="tab" class="pxt'+(T===x[0]?' on':'')+'" data-act="px-tab" data-v="'+x[0]+'" aria-selected="'+(T===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
-      '<div class="pxbar"><span class="fine">'+(PXS.busy?'بيحدّث الأسعار…':'الأسعار بتتحدّث لوحدها كل ما تفتح الصفحة')+'</span><button class="btn sm" data-act="px-ref"'+(PXS.busy?' disabled':'')+'>↻ حدّث</button></div>'+
+    if(T==='hub'||!PXSEC.some(function(x){return x[0]===T})){PXS.tab='hub';return pxHubHtml()}
+    setTimeout(function(){var o=document.querySelector('.pxnv.on'),nv=o&&o.parentNode;if(nv){var r=o.getBoundingClientRect(),q=nv.getBoundingClientRect();if(r.left<q.left||r.right>q.right)nv.scrollLeft+=r.left+r.width/2-(q.left+q.width/2)}},0);
+    var h='<section class="sec pxs">'+pxSecHead(T)+
       (PXS.err?'<p class="note" style="color:var(--bad)">'+PXS.err+'</p>':'')+
       (T==='fx'||T==='crypto'||T==='gold'?'<input class="in pxq" id="px-q" type="search" placeholder="دوّر: دولار، ريال، عيار 21، بيتكوين…" value="'+esc(PXS.q)+'" aria-label="دوّر">':'');
     if(!PXD&&T!=='fuel'&&T!=='day')return h+(PXS.busy?'<div class="empty">بيجيب الأسعار…</div>':'<div class="empty">مفيش أسعار لسه. اتأكد من الإنترنت ودوس حدّث.</div>')+'</section>';
@@ -4819,7 +4902,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<div class="actions"><button class="btn primary" data-act="pc-save">احفظ</button><button class="btn" data-act="close-sheet-btn">إلغاء</button></div>'}
   function pxAction(act,t){
     if(act==='go-px'){navTo('prices');return true}
-    if(act==='px-tab'){PXS.tab=t.getAttribute('data-v');PXS.q='';renderMain();return true}
+    if(act==='px-tab'){PXS.tab=t.getAttribute('data-v');PXS.q='';renderMain();window.scrollTo(0,0);return true}
     if(act==='px-ref'){pxLoad(true);return true}
     if(act==='px-fav'){var k=t.getAttribute('data-k').replace(/^c:/,'').replace(/^k:/,''),f=pxFav(),i=f.indexOf(k);if(i>=0)f.splice(i,1);else f.push(k);lsSet('3bh_pxfav',JSON.stringify(f));renderMain();if(sheet&&sheet.mode==='pxd')renderSheet();return true}
     if(act==='px-cmp'){var k2=t.getAttribute('data-k'),j=PXS.cmp.indexOf(k2);if(j>=0)PXS.cmp.splice(j,1);else{if(PXS.cmp.length>=3){toast('تقدر تقارن 3 حاجات بالكتير');return true}PXS.cmp.push(k2)}renderMain();return true}
