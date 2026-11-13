@@ -3978,7 +3978,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   /* ---- prices from the internet (JSON numbers only; nothing about you is sent) ---- */
   var PX={fx:null,at:0},COINID={BTC:'bitcoin',ETH:'ethereum',USDT:'tether',USDC:'usd-coin',BNB:'binancecoin',SOL:'solana',XRP:'ripple',TON:'the-open-network',DOGE:'dogecoin',TRX:'tron',ADA:'cardano'};
   function pxGet(u){return fetch(u,{cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'}).then(function(r){if(!r.ok)throw new Error('net');return r.json()})}
-  function fxRates(){if(PX.fx&&Date.now()-PX.at<60000)return Promise.resolve(PX.fx);return pxGet('https://open.er-api.com/v6/latest/USD').then(function(j){if(!j||!j.rates||!(+j.rates.EGP>0))throw new Error('bad');PX.fx=j.rates;PX.at=Date.now();return j.rates})}
+  function fxRates(){if(PX.fx&&Date.now()-PX.at<60000)return Promise.resolve(PX.fx);return pxGet('https://open.er-api.com/v6/latest/USD').then(function(j){if(!j||!j.rates||!(+j.rates.EGP>0))throw new Error('bad');PX.fx=j.rates;PX.at=Date.now();PX.fxT=+(j.time_last_update_unix||0)*1000;return j.rates})}
   function egpPer(cur){cur=String(cur||'').toUpperCase();if(cur==='USDT'||cur==='USDC')cur='USD';return fxRates().then(function(R){var x=+R[cur];if(!(x>0))throw new Error('cur');return Math.round(R.EGP/x*10000)/10000})}
   function cgUsd(ids){return pxGet('https://api.coingecko.com/api/v3/simple/price?ids='+ids.join(',')+'&vs_currencies=usd')}
   function assetOnline(a){var k=akOf(a);
@@ -4229,7 +4229,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   var PXK=[['BTC','بيتكوين','bitcoin'],['ETH','إيثريوم','ethereum'],['BNB','بينانس كوين','binancecoin'],['SOL','سولانا','solana'],['XRP','ريبل','ripple'],['TON','تون','the-open-network'],['DOGE','دوجكوين','dogecoin'],
     ['ADA','كاردانو','cardano'],['TRX','ترون','tron'],['AVAX','أفالانش','avalanche-2'],['LINK','تشين لينك','chainlink'],['DOT','بولكادوت','polkadot'],['LTC','لايتكوين','litecoin'],['BCH','بيتكوين كاش','bitcoin-cash'],
     ['XLM','ستيلار','stellar'],['SHIB','شيبا','shiba-inu'],['USDT','تيثر (دولار رقمي)','tether'],['USDC','USD كوين','usd-coin']];
-  var PXG=[[24,'عيار 24'],[22,'عيار 22'],[21,'عيار 21'],[18,'عيار 18'],[14,'عيار 14'],[12,'عيار 12']],PXSV=[[999,'عيار 999'],[925,'عيار 925'],[900,'عيار 900'],[800,'عيار 800']];
+  var PXG=[[24,'عيار 24'],[22,'عيار 22'],[21,'عيار 21'],[18,'عيار 18'],[14,'عيار 14'],[12,'عيار 12']],PXSV=[[999,'عيار 999'],[958,'عيار 958 (بريتانيا)'],[925,'عيار 925'],[900,'عيار 900'],[800,'عيار 800']];
   var OZ=31.1035,PXD=null,PXS={tab:'fx',q:'',cmp:[],busy:false,err:'',ch:{k:'g24',d:30},chd:null,cv:{a:'1',f:'c:USD',t:'c:EGP'},zk:{g:'',k:'21',s:'',c:''}};
   function pxJ(k,d){try{var v=JSON.parse(lsGet(k)||'null');return v==null?d:v}catch(e){return d}}
   function pxCal(){return pxJ('3bh_pxcal',{gp:0,sp:0,gs:0.65,ss:3.4,at:''})}
@@ -4243,9 +4243,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       PXK.forEach(function(k){var b=B[k[0]],c=C[k[2]];if(k[0]==='USDT'||k[0]==='USDC'){cr[k[0]]={usd:c&&c.usd||1,ch:c&&c.usd_24h_change||0};return}
         if(b&&b.usd>0)cr[k[0]]={usd:b.usd,ch:b.ch};else if(c&&c.usd>0)cr[k[0]]={usd:c.usd,ch:c.usd_24h_change||0}});
       var gb=B.PAXG,gc=C['pax-gold'],sc=C['kinesis-silver'];
-      PXD={at:Date.now(),fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
-        silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0}:(PXD&&PXD.silver)||null,cr:cr};
-      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();PXS.busy=false;if(route==='prices')renderMain()},
+      var nowT=Date.now(),okG=!!(gb&&gb.usd>0||gc&&gc.usd>0),okS=!!(sc&&sc.usd>0),okC=Object.keys(cr).length>2;
+      PXD={at:nowT,fxT:PX.fxT||(PXD&&PXD.fxT)||0,fxAt:nowT,gT:okG?nowT:(PXD&&PXD.gT)||0,sT:okS?nowT:(PXD&&PXD.sT)||0,cT:okC?nowT:(PXD&&PXD.cT)||0,fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
+        silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0}:(PXD&&PXD.silver)||null,cr:okC?cr:(PXD&&PXD.cr)||cr};
+      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();PXS.busy=false;if(route==='prices')renderMain()},
       function(){PXS.busy=false;PXS.err='مش قادر أجيب الأسعار دلوقتي. اتأكد من الإنترنت وجرّب تاني.'+(PXD?' بعرضلك آخر أسعار اتجابت.':'');if(route==='prices')renderMain()})}
   /* a daily snapshot on this phone, to show the change since the day before */
   function pxSnap(){var h=pxJ('3bh_pxh',{}),k=iso(today()),v={};PXC.forEach(function(c){var x=pxEgp('c:'+c[0]);if(x)v['c:'+c[0]]=x});var g=pxEgp('g24');if(g)v.g24=g;var s=pxEgp('s999');if(s)v.s999=s;
@@ -4253,7 +4254,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxPrev(key){var h=pxJ('3bh_pxh',{}),k=iso(today()),ks=Object.keys(h).filter(function(x){return x<k}).sort();var p=ks.length?h[ks[ks.length-1]]:null;return p&&p[key]||null}
   function pxUsd(){return PXD&&PXD.fx&&+PXD.fx.EGP||0}
   /* value of one unit in EGP: c:USD, g24…g12, gpound, s999…, k:BTC */
-  function pxEgp(key,side){if(!PXD)return 0;var E=pxUsd(),cal=pxCal();if(!(E>0))return 0;var m;
+  function pxEgp(key,side){var fm=String(key).match(/^f:(\w+)$/);if(fm){var fa=fuelAt(fm[1]);return fa?fa.v:0}if(!PXD)return 0;if(key==='gpound')return pxEgp('g21',side)*8;var E=pxUsd(),cal=pxCal();if(!(E>0))return 0;var m;
     if((m=key.match(/^c:(\w+)$/))){if(m[1]==='EGP')return 1;var r=+PXD.fx[m[1]];return r>0?E/r:0}
     if((m=key.match(/^k:(\w+)$/))){var c=PXD.cr&&PXD.cr[m[1]];return c&&c.usd>0?c.usd*E:0}
     if((m=key.match(/^g(\d+)$/))&&PXD.gold){var g=PXD.gold.oz*E/OZ*(1+n(cal.gp)/100)*(+m[1])/24;return side==='buy'?g*(1-n(cal.gs)/100):g}
@@ -4263,14 +4264,14 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var now=pxEgp(key.replace(/^g\d+$/,'g24').replace(/^s\d+$/,'s999')),p=pxPrev(key.replace(/^g\d+$/,'g24').replace(/^s\d+$/,'s999'));return now&&p?(now/p-1)*100:null}
   function pxName(key){var m;if((m=key.match(/^c:(\w+)$/))){var c=PXC.filter(function(x){return x[0]===m[1]})[0];return m[1]==='EGP'?'جنيه مصري':c?c[2]:m[1]}
     if((m=key.match(/^k:(\w+)$/))){var k=PXK.filter(function(x){return x[0]===m[1]})[0];return k?k[1]:m[1]}
-    if((m=key.match(/^g(\d+)$/)))return 'جرام دهب عيار '+m[1];if((m=key.match(/^s(\d+)$/)))return 'جرام فضة عيار '+m[1];return key}
+    if(key==='gpound')return 'جنيه الدهب';if((m=key.match(/^f:(\w+)$/)))return fuelName(m[1]);if((m=key.match(/^g(\d+)$/)))return 'جرام دهب عيار '+m[1];if((m=key.match(/^s(\d+)$/)))return 'جرام فضة عيار '+m[1];return key}
   function pxFmt(v){v=+v;return !(v>0)?'—':v>=1000?nf(v,0):v>=10?nf(v,2):nf(v,v>=1?3:6)}
-  function pxChTxt(c){return c==null||!isFinite(c)?'':'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+' '+nf(Math.abs(c),2)+'%</span>'}
+  function pxChTxt(c){return c==null||!isFinite(c)||Math.abs(c)<0.005?'':'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+' '+nf(Math.abs(c),2)+'%</span>'}
   function pxRow(key,label,sub,sell,buy,extra){var fav=pxFav().indexOf(key.replace(/^c:/,'').replace(/^k:/,''))>=0,cmp=PXS.cmp.indexOf(key)>=0;
     return '<div class="pxr'+(cmp?' cmp':'')+'"><button class="pxst" data-act="px-fav" data-k="'+esc(key)+'" aria-label="'+(fav?'شيل من المفضلة':'ضيف للمفضلة')+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button>'+
       '<div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
       '<div class="pxv">'+(typeof sell==='string'?sell:buy!=null?'<span class="pxb"><small>بيع</small><b class="num">'+pxFmt(sell)+'</b></span><span class="pxb"><small>شراء</small><b class="num">'+pxFmt(buy)+'</b></span>':'<b class="num">'+pxFmt(sell)+'</b>')+(extra||'')+'</div>'+
-      '<button class="pxcm'+(cmp?' on':'')+'" data-act="px-cmp" data-k="'+esc(key)+'" aria-label="قارن" aria-pressed="'+cmp+'">⚖️</button></div>'}
+      '<span class="pxact"><button class="pxcm'+(cmp?' on':'')+'" data-act="px-cmp" data-k="'+esc(key)+'" aria-label="قارن" aria-pressed="'+cmp+'">⚖️</button><button class="pxcm'+(pxAlerts().some(function(a){return a.k===key})?' on':'')+'" data-act="px-al" data-k="'+esc(key)+'" aria-label="نبّهني بالسعر">🔔</button></span></div>'}
   function pxQ(s){var q=nz(PXS.q||'').trim();return !q||nz(s).indexOf(q)>=0}
   function pxTabFx(){var E=pxUsd(),fav=pxFav(),L=PXC.filter(function(c){return pxQ(c[0]+' '+c[2])});L.sort(function(a,b){return (fav.indexOf(b[0])>=0)-(fav.indexOf(a[0])>=0)});
     var cal=pxCal(),gd=cal.gp&&E?E*(1+n(cal.gp)/100):0;
@@ -4281,31 +4282,35 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxTabGold(){if(!PXD||!PXD.gold)return '<div class="empty">سعر الدهب مش متاح دلوقتي.</div>';var cal=pxCal(),g24=pxEgp('g24'),g21=pxEgp('g21');
     var h='<div class="pxtop"><div><small>الأونصة عالميًا</small><b class="num">$'+nf(PXD.gold.oz,2)+'</b>'+pxChTxt(PXD.gold.ch)+'</div><div><small>دولار '+(cal.gp?'الصاغة':'رسمي')+'</small><b class="num">'+nf(pxUsd()*(1+n(cal.gp)/100),2)+'</b></div></div>';
     h+='<div class="pxhd"><span>العيار (للجرام)</span><span>بيع · شراء</span></div>'+PXG.filter(function(g){return pxQ(g[1])}).map(function(g){var k='g'+g[0];return pxRow(k,g[1],g[0]===21?'الأكثر انتشارًا في مصر':g[0]===24?'دهب خالص (سبايك)':'',pxEgp(k),pxEgp(k,'buy'))}).join('');
-    h+='<div class="pxgrid">'+[['جنيه الدهب',g21*8,'8 جرام عيار 21'],['الأونصة',g24*OZ,'31.1 جرام عيار 24'],['كيلو الدهب',g24*1000,'عيار 24']].map(function(x){return '<div class="pxbox"><small>'+x[0]+'</small><b class="num">'+pxFmt(x[1])+'</b><span>'+x[2]+'</span></div>'}).join('')+'</div>';
-    return h+pxCalNote('gold')}
+    h+=pxRow('gpound','🪙 جنيه الدهب','8 جرام عيار 21',g21*8,pxEgp('g21','buy')*8);
+    h+='<div class="pxgrid">'+[['نص جنيه',g21*4,'4 جرام عيار 21'],['الأونصة',g24*OZ,'31.1 جرام عيار 24'],['كيلو الدهب',g24*1000,'عيار 24']].map(function(x){return '<div class="pxbox"><small>'+x[0]+'</small><b class="num">'+pxFmt(x[1])+'</b><span>'+x[2]+'</span></div>'}).join('')+'</div>';
+    return h+pxCalNote('gold')+pxGoldExtra()}
   function pxCalNote(w){var cal=pxCal();return '<p class="note">'+(w==='gold'?(cal.gp?'الأسعار مظبوطة على سعر الصاغة اللي كتبته'+(cal.at?' يوم '+dShort(cal.at):'')+' (+'+nf(cal.gp,2)+'% عن السعر العالمي). ':'دي أسعار الدهب العالمية محسوبة بالجنيه وبسعر الدولار الرسمي. محلات الصاغة في مصر بتسعّر أعلى شوية. ')
       :(cal.sp?'الفضة مظبوطة على السعر اللي كتبته (+'+nf(cal.sp,2)+'%). ':'دي أسعار الفضة العالمية بالجنيه. '))+'الأسعار من غير مصنعية، والشراء تقريبي.</p><div class="actions"><button class="btn sm" data-act="px-cal" data-v="'+w+'">✏️ ظبّط على سعر محل الصاغة</button></div>'}
   function pxTabSilver(){if(!PXD||!PXD.silver)return '<div class="empty">سعر الفضة مش متاح دلوقتي.</div>';var s=pxEgp('s999');
     var h='<div class="pxtop"><div><small>الأونصة عالميًا</small><b class="num">$'+nf(PXD.silver.oz,2)+'</b>'+pxChTxt(PXD.silver.ch)+'</div><div><small>نسبة الدهب للفضة</small><b class="num">'+(PXD.gold?nf(PXD.gold.oz/PXD.silver.oz,1):'—')+'</b></div></div>';
-    h+='<div class="pxhd"><span>العيار (للجرام)</span><span>بيع · شراء</span></div>'+PXSV.map(function(g){var k='s'+g[0];return pxRow(k,g[1],g[0]===925?'الفضة الإسترليني (المشغولات)':'',pxEgp(k),pxEgp(k,'buy'))}).join('');
+    h+='<div class="pxnis">⚖️ نصاب زكاة الفضة = 595 جرام فضة خالصة = <b class="num">'+pxFmt(s*595)+'</b> ج <button class="btn sm" data-act="px-tab" data-v="tools">احسب زكاتك</button></div>';
+    h+='<div class="pxhd"><span>العيار (للجرام)</span><span>بيع · شراء</span></div>'+PXSV.map(function(g){var k='s'+g[0];return pxRow(k,g[1],g[0]===925?'الفضة الإسترليني (المشغولات)':g[0]===999?'الفضة الخالصة (سبايك)':g[0]===900?'العملات الفضية':g[0]===800?'مشغولات قديمة':'',pxEgp(k),pxEgp(k,'buy'))}).join('');
     h+='<div class="pxgrid">'+[['جنيه الفضة',s*8,'8 جرام عيار 999'],['الأونصة',s*OZ,'31.1 جرام'],['كيلو الفضة',s*1000,'عيار 999']].map(function(x){return '<div class="pxbox"><small>'+x[0]+'</small><b class="num">'+pxFmt(x[1])+'</b><span>'+x[2]+'</span></div>'}).join('')+'</div>';
     return h+pxCalNote('silver')}
-  function pxTabBars(){if(!PXD||!PXD.gold)return '<div class="empty">الأسعار مش متاحة دلوقتي.</div>';var wk=n(lsGet('3bh_pxwk')),m=PXS.bm||'gold',g24=pxEgp('g24'),g21=pxEgp('g21'),s=pxEgp('s999');
+  function pxTabBars(){if(!PXD||!PXD.gold)return '<div class="empty">الأسعار مش متاحة دلوقتي.</div>';var co=PXS.co||lsGet('3bh_pxco')||'other',WM=pxWkMap(),wk=n(WM[co]!=null?WM[co]:lsGet('3bh_pxwk')),m=PXS.bm||'gold',g24=pxEgp('g24'),g21=pxEgp('g21'),s=pxEgp('s999');
     var W=m==='gold'?[[1,'سبيكة 1 جرام'],[2.5,'سبيكة 2.5 جرام'],[5,'سبيكة 5 جرام'],[10,'سبيكة 10 جرام'],[20,'سبيكة 20 جرام'],[OZ,'سبيكة أونصة (31.1 جرام)'],[50,'سبيكة 50 جرام'],[100,'سبيكة 100 جرام'],[116.65,'سبيكة 10 تولة (116.65 جرام)'],[1000,'سبيكة كيلو']]:
       [[OZ,'سبيكة فضة أونصة'],[50,'سبيكة فضة 50 جرام'],[100,'سبيكة فضة 100 جرام'],[250,'سبيكة فضة 250 جرام'],[500,'سبيكة فضة 500 جرام'],[1000,'سبيكة فضة كيلو']];
     var h='<div class="chips">'+['gold','silver'].map(function(x){return '<button class="chip'+(m===x?' on':'')+'" data-act="px-bm" data-v="'+x+'">'+(x==='gold'?'🟡 دهب':'⚪ فضة')+'</button>'}).join('')+'</div>'+
-      '<div class="actions"><label class="fine" for="px-wk">مصنعية الجرام (اختياري)</label><input class="in num-in" id="px-wk" type="number" inputmode="decimal" min="0" step="any" dir="ltr" value="'+(wk||'')+'" placeholder="0"><button class="btn sm" data-act="px-wk">احسب</button></div>';
+      '<div class="fine" style="margin:6px 0 2px">الشركة (عشان أحفظلك مصنعيتها):</div><div class="chips">'+PXCO.map(function(x){return '<button class="chip'+(co===x[0]?' on':'')+'" data-act="px-co" data-v="'+x[0]+'">'+esc(x[1])+(n(WM[x[0]])>0?' · '+fmt(WM[x[0]]):'')+'</button>'}).join('')+'</div>'+
+      '<div class="actions"><label class="fine" for="px-wk">مصنعية الجرام عند '+esc((PXCO.filter(function(x){return x[0]===co})[0]||['',''])[1])+'</label><input class="in num-in" id="px-wk" type="number" inputmode="decimal" min="0" step="any" dir="ltr" value="'+(wk||'')+'" placeholder="0"><button class="btn sm" data-act="px-wk">احسب</button></div>';
     var unit=m==='gold'?g24:s;
-    h+='<div class="pxhd"><span>السبيكة</span><span>السعر'+(wk?' + المصنعية':'')+'</span></div>'+W.map(function(x){return '<div class="pxr"><span></span><div class="pxn"><b>'+x[1]+'</b><small>'+(m==='gold'?'عيار 24':'عيار 999')+'</small></div><div class="pxv"><b class="num">'+pxFmt(x[0]*(unit+wk))+'</b></div><span></span></div>'}).join('');
+    var ub=m==='gold'?pxEgp('g24','buy'):pxEgp('s999','buy');
+    h+='<div class="pxhd"><span>السبيكة</span><span>تشتريها'+(wk?' (بالمصنعية)':'')+' · تبيعها</span></div>'+W.map(function(x){return '<div class="pxr"><span></span><div class="pxn"><b>'+x[1]+'</b><small>'+(m==='gold'?'عيار 24':'عيار 999')+'</small></div><div class="pxv"><span class="pxb"><small>شراء منهم</small><b class="num">'+pxFmt(x[0]*(unit+wk))+'</b></span><span class="pxb"><small>بيع ليهم</small><b class="num">'+pxFmt(x[0]*ub)+'</b></span></div><span></span></div>'}).join('');
     if(m==='gold')h+='<div class="pxhd"><span>الجنيهات الدهب (عيار 21)</span><span>السعر</span></div>'+[[2,'ربع جنيه'],[4,'نص جنيه'],[8,'جنيه دهب'],[40,'خمسة جنيه']].map(function(x){return '<div class="pxr"><span></span><div class="pxn"><b>'+x[1]+'</b><small>'+x[0]+' جرام</small></div><div class="pxv"><b class="num">'+pxFmt(x[0]*(g21+wk))+'</b></div><span></span></div>'}).join('');
-    return h+'<p class="note">الأسعار محسوبة من سعر الجرام النهاردة. كل شركة سبايك ليها مصنعية مختلفة، اكتبها فوق عشان تتضاف.</p>'}
+    return h+'<p class="note">الأسعار محسوبة من سعر الجرام النهاردة. كل شركة سبايك ليها مصنعية مختلفة: اختار الشركة واكتب مصنعيتها من موقعها أو من المحل، وأنا بحفظها لها. "بيع ليهم" تقريبي ومن غير مصنعية.</p>'}
   function pxTabCrypto(){if(!PXD||!PXD.cr)return '<div class="empty">الأسعار مش متاحة دلوقتي.</div>';var fav=pxFav(),L=PXK.filter(function(k){return PXD.cr[k[0]]&&pxQ(k[0]+' '+k[1])}),so=PXS.cs||'fav';
     L.sort(function(a,b){var A=PXD.cr[a[0]],B=PXD.cr[b[0]];return so==='up'?B.ch-A.ch:so==='dn'?A.ch-B.ch:so==='hi'?B.usd-A.usd:((fav.indexOf(b[0])>=0)-(fav.indexOf(a[0])>=0))});
     return '<div class="chips">'+[['fav','المفضلة الأول'],['up','الأكثر ارتفاعًا'],['dn','الأكثر انخفاضًا'],['hi','الأغلى']].map(function(x){return '<button class="chip'+(so===x[0]?' on':'')+'" data-act="px-cs" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
       '<div class="pxhd"><span>العملة</span><span>بالدولار · بالجنيه</span></div>'+L.map(function(k){var c=PXD.cr[k[0]];return pxRow('k:'+k[0],k[1],k[0],'<b class="num">$'+pxFmt(c.usd)+'</b><small class="num pxe">'+pxFmt(c.usd*pxUsd())+' ج</small>'+pxChTxt(c.ch),null,'')}).join('')+
       '<p class="note">التغيير خلال آخر 24 ساعة. السعر بالجنيه محسوب بالدولار الرسمي، وسعر الـ P2P في مصر ممكن يكون أعلى.</p>'}
   function pxOpts(sel){var o='<option value="c:EGP"'+(sel==='c:EGP'?' selected':'')+'>🇪🇬 جنيه مصري</option>'+PXC.map(function(c){return '<option value="c:'+c[0]+'"'+(sel==='c:'+c[0]?' selected':'')+'>'+c[1]+' '+c[2]+' ('+c[0]+')</option>'}).join('')+
-      PXG.map(function(g){return '<option value="g'+g[0]+'"'+(sel==='g'+g[0]?' selected':'')+'>🟡 جرام دهب '+g[1]+'</option>'}).join('')+PXSV.map(function(g){return '<option value="s'+g[0]+'"'+(sel==='s'+g[0]?' selected':'')+'>⚪ جرام فضة '+g[1]+'</option>'}).join('')+
+      PXG.map(function(g){return '<option value="g'+g[0]+'"'+(sel==='g'+g[0]?' selected':'')+'>🟡 جرام دهب '+g[1]+'</option>'}).join('')+'<option value="gpound"'+(sel==='gpound'?' selected':'')+'>🪙 جنيه دهب (8 جرام 21)</option>'+FUEL.map(function(f){return '<option value="f:'+f[0]+'"'+(sel==='f:'+f[0]?' selected':'')+'>'+f[1]+' ('+f[2]+')</option>'}).join('')+PXSV.map(function(g){return '<option value="s'+g[0]+'"'+(sel==='s'+g[0]?' selected':'')+'>⚪ جرام فضة '+g[1]+'</option>'}).join('')+
       PXK.map(function(k){return '<option value="k:'+k[0]+'"'+(sel==='k:'+k[0]?' selected':'')+'>₿ '+k[1]+' ('+k[0]+')</option>'}).join('');return o}
   function pxTabTools(){var cv=PXS.cv,fk=cv.f,tk=cv.t,a=n(cv.a),vf=pxEgp(fk),vt=pxEgp(tk),res=vf&&vt?a*vf/vt:0;
     var h='<div class="rows pxtool"><h3>🧮 الحاسبة</h3><div class="fields"><label for="px-ca">المبلغ أو الوزن<input id="px-ca" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(cv.a)+'"></label>'+
@@ -4320,9 +4325,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<div class="actions"><button class="btn sm" data-act="px-zfill">املا الفلوس من أرصدتي</button><button class="btn primary sm" data-act="px-zcalc">احسب الزكاة</button></div>'+
       (tot>0?'<div class="pxres">الإجمالي <b class="num">'+pxFmt(tot)+'</b> ج · '+(tot>=nis?'وصل النصاب، والزكاة <b class="num">'+pxFmt(tot*0.025)+'</b> ج':'أقل من النصاب، مفيش زكاة')+'</div>':'')+'</div>';
     /* chart */
-    var CH=[['g24','🟡 جرام دهب 24 بالجنيه'],['s999','⚪ جرام فضة بالجنيه'],['c:USD','💵 الدولار بالجنيه'],['k:BTC','₿ بيتكوين بالجنيه'],['k:ETH','إيثريوم بالجنيه']],ch=PXS.ch;
+    var CH=[['g24','🟡 جرام دهب 24'],['g21','🟡 جرام دهب 21'],['s999','⚪ جرام فضة'],['c:USD','💵 الدولار'],['c:EUR','💶 اليورو'],['c:SAR','🇸🇦 الريال'],['k:BTC','₿ بيتكوين'],['k:ETH','إيثريوم'],['f:b92','⛽ بنزين 92']],ch=PXS.ch;
     h+='<div class="rows pxtool"><h3>📈 رسم بياني</h3><div class="chips">'+CH.map(function(x){return '<button class="chip'+(ch.k===x[0]?' on':'')+'" data-act="px-chk" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
-      '<div class="chips">'+[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[365,'سنة']].map(function(x){return '<button class="chip'+(ch.d===x[0]?' on':'')+'" data-act="px-chd" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><div id="px-chart">'+pxChartHtml()+'</div></div>';
+      '<div class="chips">'+[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[365,'سنة'],[730,'سنتين']].map(function(x){return '<button class="chip'+(ch.d===x[0]?' on':'')+'" data-act="px-chd" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><div id="px-chart">'+pxChartHtml()+'</div></div>';
+    var AL=pxAlerts();h+='<div class="rows pxtool"><h3>🔔 تنبيهات الأسعار</h3>'+(AL.length?AL.map(function(a){return '<div class="r"><span class="k">'+esc(pxName(a.k))+(a.dir==='up'?' يطلع لـ ':' ينزل لـ ')+'<b class="num">'+pxFmt(a.v)+'</b> ج</span><span class="v"><button class="btn sm" data-act="pa-del" data-id="'+esc(a.id)+'">امسح</button></span></div>'}).join(''):'<p class="fine" style="margin:6px 0">دوس 🔔 جنب أي سعر (عملة، أو عيار، أو عملة رقمية) وأنا أنبّهك لما يوصل للسعر اللي عايزه.</p>')+'</div>';
     /* what I hold, valued today */
     var A=(S.assets||[]).filter(function(a){var k=akOf(a);return k==='gold'||k==='silver'||k==='crypto'||k==='fx'});
     if(A.length)h+='<div class="rows pxtool"><h3>💼 محفظتي (من ممتلكاتي)</h3>'+A.map(function(a){return r(esc(a.name||'—'),money(assetVal(a)))}).join('')+r('<b>الإجمالي</b>','<b>'+money(sum(A,assetVal))+'</b>')+'<div class="actions"><a class="btn sm" href="#assets" data-nav="assets">افتح ممتلكاتي</a></div></div>';
@@ -4331,7 +4337,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxChartLoad(){var ch=PXS.ch,id=PXCH_ID[ch.k];if(!id)return;PXS.chd={k:ch.k,d:ch.d,busy:1};
     pxGet('https://api.coingecko.com/api/v3/coins/'+id+'/market_chart?vs_currency=egp&days='+ch.d).then(function(j){var P=(j&&j.prices||[]).map(function(p){var v=+p[1];if(ch.k==='g24'){v=v/OZ*(1+n(pxCal().gp)/100)}else if(ch.k==='s999'){v=v/OZ*(1+n(pxCal().sp)/100)}return [p[0],v]}).filter(function(p){return p[1]>0});
       PXS.chd={k:ch.k,d:ch.d,p:P};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()},function(){PXS.chd={k:ch.k,d:ch.d,err:1};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()})}
-  function pxChartHtml(){var c=PXS.chd,ch=PXS.ch;if(!c||c.k!==ch.k||c.d!==ch.d){setTimeout(pxChartLoad,0);return '<div class="empty">بيحمّل الرسم…</div>'}
+  function pxChartHtml(){var c=PXS.chd,ch=PXS.ch;if(!c||c.k!==ch.k||c.d!==ch.d){setTimeout(pxChartLoad2,0);return '<div class="empty">بيحمّل الرسم…</div>'}
     if(c.busy)return '<div class="empty">بيحمّل الرسم…</div>';if(c.err||!c.p||c.p.length<2)return '<div class="empty">الرسم مش متاح دلوقتي. جرّب كمان شوية.</div>';
     var P=c.p,mn=Math.min.apply(null,P.map(function(p){return p[1]})),mx=Math.max.apply(null,P.map(function(p){return p[1]})),W=330,H=140,t0=P[0][0],t1=P[P.length-1][0];
     var pts=P.map(function(p){return ((p[0]-t0)/(t1-t0||1)*(W-8)+4).toFixed(1)+','+(H-6-(p[1]-mn)/((mx-mn)||1)*(H-24)).toFixed(1)}).join(' ');
@@ -4340,14 +4346,133 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<div class="pxchs"><span>أعلى <b class="num">'+pxFmt(mx)+'</b></span><span>أقل <b class="num">'+pxFmt(mn)+'</b></span><span>دلوقتي <b class="num">'+pxFmt(last)+'</b></span>'+pxChTxt(chg)+'</div>'}
   function pxCmpHtml(){var L=PXS.cmp.filter(function(k){return pxEgp(k)>0});if(!L.length)return '';var b=pxEgp(L[0]);
     return '<div class="pxcmpbar"><div class="pxch-h"><b>⚖️ مقارنة</b><button class="btn sm" data-act="px-cmpx">امسح</button></div><div class="pxcg">'+L.map(function(k,i){var v=pxEgp(k);return '<div class="pxbox"><small>'+esc(pxName(k))+'</small><b class="num">'+pxFmt(v)+' ج</b>'+pxChTxt(pxCh(k))+(i?'<span>= '+pxFmt(v/b)+' × '+esc(pxName(L[0]))+'</span>':'<span>الأساس</span>')+'</div>'}).join('')+'</div></div>'}
+  /* when each part was last updated */
+  function pxWhen(ts){if(!ts)return '—';var d=new Date(ts);return d.toLocaleDateString(LOC(),{weekday:'long'})+' '+dShort(iso(d))+' · الساعة '+d.toLocaleTimeString(LOC(),{hour:'numeric',minute:'2-digit'})}
+  function pxStamp(k){if(!PXD)return '';var t=k==='fx'||k==='conv'?PXD.fxAt:k==='crypto'?PXD.cT:k==='silver'?PXD.sT:PXD.gT;
+    return '<p class="pxstamp">🕒 آخر تحديث: <b>'+pxWhen(t||PXD.at)+'</b>'+((k==='fx'||k==='conv')&&PXD.fxT?'<br><span class="fine">سعر العملات نفسه اتنشر من المصدر: '+pxWhen(PXD.fxT)+' (بيتحدّث مرة في اليوم)</span>':'')+(k==='crypto'?'<br><span class="fine">التغيير خلال آخر 24 ساعة</span>':'')+'</p>'}
+  /* price alerts: checked every time prices load while the app is open */
+  function pxAlerts(){return pxJ('3bh_pxal',[])}
+  function pxAlertCheck(){var A=pxAlerts();if(!A.length)return;var keep=[],hit=[];A.forEach(function(a){var v=pxEgp(a.k);if(!(v>0)){keep.push(a);return}if(a.dir==='up'?v>=a.v:v<=a.v)hit.push({a:a,v:v});else keep.push(a)});
+    if(!hit.length)return;lsSet('3bh_pxal',JSON.stringify(keep));
+    try{mutate(function(){hit.forEach(function(x){var m={kind:'px',key:'px-'+x.a.k+'-'+Date.now(),at:new Date().toISOString(),title:'🔔 '+pxName(x.a.k)+(x.a.dir==='up'?' وصل لـ ':' نزل لـ ')+pxFmt(x.a.v)+' ج',body:'السعر دلوقتي '+pxFmt(x.v)+' ج'};ntAdd(m);try{ntShow(m)}catch(e){}})})}catch(e){}
+    toast(hit.map(function(x){return '🔔 '+pxName(x.a.k)+': '+pxFmt(x.v)+' ج'}).join(' · '))}
+  function pxAlHtml(){var k=sheet.k,v=pxEgp(k),A=pxAlerts().filter(function(a){return a.k===k});
+    return '<p class="note">'+esc(pxName(k))+' دلوقتي <b class="num">'+pxFmt(v)+'</b> ج. اكتب السعر اللي عايزني أنبّهك لما يوصله (أعلى أو أقل).</p><div class="fields"><label for="pa-v">نبّهني لما يوصل لـ (ج)<input id="pa-v" class="ltr" type="number" inputmode="decimal" min="0" step="any" placeholder="'+(v?Math.round(v*1.02*100)/100:'')+'"></label></div>'+
+      '<div class="actions"><button class="btn primary" data-act="pa-save">نبّهني</button><button class="btn" data-act="close-sheet-btn">إلغاء</button></div>'+
+      (A.length?'<div class="rows"><h3>تنبيهات السعر ده</h3>'+A.map(function(a){return '<div class="r"><span class="k">'+(a.dir==='up'?'لما يطلع لـ ':'لما ينزل لـ ')+'<b class="num">'+pxFmt(a.v)+'</b> ج</span><span class="v"><button class="btn sm" data-act="pa-del" data-id="'+esc(a.id)+'">امسح</button></span></div>'}).join('')+'</div>':'')+
+      '<p class="fine">التنبيه بيشتغل لما تفتح البرنامج وتتجاب الأسعار، وبيوصلك إشعار مرة واحدة.</p>'}
+  /* the currency converter: from / to with a swap, quick amounts, and 6 more currencies at a glance */
+  function pxCv(){var d={a:'1',f:'c:EGP',t:'c:USD',g:['c:USD','c:EUR','c:SAR','c:AED','c:KWD','c:QAR']};var v=pxJ('3bh_pxcv',null);return PXS.cv2=PXS.cv2||(v&&v.g?v:d)}
+  function pxCvSave(){lsSet('3bh_pxcv',JSON.stringify(PXS.cv2))}
+  function pxFlag(k){var m=k.match(/^c:(\w+)$/);if(m){if(m[1]==='EGP')return '🇪🇬';var c=PXC.filter(function(x){return x[0]===m[1]})[0];return c?c[1]:'💱'}return /^f:/.test(k)?'⛽':/^g/.test(k)?'🟡':/^s/.test(k)?'⚪':'₿'}
+  function pxCode(k){var fm=k.match(/^f:(\w+)$/);if(fm){var ff=FUEL.filter(function(x){return x[0]===fm[1]})[0];return ff?ff[2]+' '+fuelName(fm[1]).replace(/\s*\(.*\)/,''):k}var m=k.match(/^[ck]:(\w+)$/);return m?m[1]:/^g(\d+)$/.test(k)?'جم '+k.slice(1):/^s(\d+)$/.test(k)?'جم فضة '+k.slice(1):k}
+  function pxTabConv(){var c=pxCv(),a=n(c.a),vf=pxEgp(c.f),vt=pxEgp(c.t),res=vf&&vt?a*vf/vt:0;
+    var h='<div class="pxcv"><div class="pxcvr"><label for="px-f2">من<select id="px-f2" class="in">'+pxOpts(c.f)+'</select></label><button class="pxsw" data-act="px-sw2" aria-label="اعكس">⇄</button><label for="px-t2">إلى<select id="px-t2" class="in">'+pxOpts(c.t)+'</select></label></div>'+
+      '<input id="px-a2" class="in pxamt num-in" type="text" inputmode="decimal" dir="ltr" value="'+esc(c.a)+'" aria-label="المبلغ">'+
+      '<div class="chips" style="justify-content:center">'+[1,10,100,1000,10000].map(function(x){return '<button class="chip'+(n(c.a)===x?' on':'')+'" data-act="px-q2" data-v="'+x+'">'+nf(x,0)+'</button>'}).join('')+'</div>'+
+      '<div class="pxbig" id="px-res2" dir="ltr">'+(res?nf(a)+' '+pxFlag(c.f)+' '+esc(pxCode(c.f))+' = <b class="num">'+pxFmt(res)+'</b> '+pxFlag(c.t)+' '+esc(pxCode(c.t)):'—')+'</div>'+
+      '<div class="pxrate" dir="ltr"><span>1 '+esc(pxCode(c.t))+' = '+(vt&&vf?pxFmt(vt/vf):'—')+' '+esc(pxCode(c.f))+'</span><span>1 '+esc(pxCode(c.f))+' = '+(vt&&vf?pxFmt(vf/vt):'—')+' '+esc(pxCode(c.t))+'</span></div></div>';
+    h+='<div class="pxhd"><span>'+esc(c.a||'0')+' '+esc(pxCode(c.f))+' تساوي</span><span>غيّر أي عملة من القايمة</span></div><div class="pxcards" id="px-cards">'+c.g.map(function(k,i){var v=pxEgp(k),r=vf&&v?a*vf/v:0;
+      return '<div class="pxcard"><select class="in" data-i="'+i+'" id="px-g'+i+'" aria-label="العملة">'+pxOpts(k)+'</select><div><b class="num">'+pxFmt(r)+'</b><small>'+esc(pxName(k))+'</small></div></div>'}).join('')+'</div>';
+    return h}
+  function pxConvRefresh(){var c=pxCv(),a=n(c.a),vf=pxEgp(c.f),vt=pxEgp(c.t),res=vf&&vt?a*vf/vt:0,e=document.getElementById('px-res2');
+    if(e)e.innerHTML=res?nf(a)+' '+pxFlag(c.f)+' '+esc(pxCode(c.f))+' = <b class="num">'+pxFmt(res)+'</b> '+pxFlag(c.t)+' '+esc(pxCode(c.t)):'—';
+    c.g.forEach(function(k,i){var sel=document.getElementById('px-g'+i);if(!sel)return;var b=sel.parentNode.querySelector('div b'),v=pxEgp(k);if(b)b.textContent=pxFmt(vf&&v?a*vf/v:0)});
+    var hd=document.querySelector('.pxs .pxhd span');if(hd)hd.textContent=(c.a||'0')+' '+pxCode(c.f)+' تساوي';
+    [].forEach.call(document.querySelectorAll('[data-act=px-q2]'),function(b){b.classList.toggle('on',n(c.a)===n(b.getAttribute('data-v')))})}
+  /* gold: workmanship calculator */
+  var PXCO=[['BTC','BTC'],['SAM','SAM'],['GoldEra','Gold Era'],['Swiss','Swiss Gold'],['Selema','Selema Gold'],['Elgalla','Elgalla Gold'],['Lazurde','L\'azurde'],['GFG','G.F.G'],['other','شركة تانية']];
+  function pxWkMap(){return pxJ('3bh_pxwkc',{})}
+  function pxGoldExtra(){var cal=pxCal(),g24=pxEgp('g24'),E=pxUsd(),gd=E*(1+n(cal.gp)/100),wc=PXS.wc=PXS.wc||{g:'',k:'21',w:'',t:''};
+    var gv=n(wc.g)*pxEgp('g'+wc.k),wk=n(wc.g)*n(wc.w),tx=wk*n(wc.t)/100,buy=n(wc.g)*pxEgp('g'+wc.k,'buy');
+    return '<div class="pxnis"><b>💛 دولار الدهب: <span class="num">'+nf(gd,2)+'</span> ج</b>'+(cal.gp?'':' <span class="fine">(= الرسمي، لحد ما تظبطه على سعر الصاغة)</span>')+
+      '<br>⚖️ نصاب زكاة الدهب = 85 جرام عيار 24 = <b class="num">'+pxFmt(g24*85)+'</b> ج <button class="btn sm" data-act="px-tab" data-v="tools">احسب زكاتك</button></div>'+
+      '<div class="rows pxtool"><h3>🧮 حاسبة مصنعية الدهب</h3><div class="fields"><label for="wc-g">الوزن (جرام)<input id="wc-g" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(wc.g)+'"></label>'+
+      '<label for="wc-k">العيار<select id="wc-k" class="in">'+PXG.map(function(x){return '<option value="'+x[0]+'"'+(String(wc.k)===String(x[0])?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'+
+      '<label for="wc-w">مصنعية الجرام (ج)<input id="wc-w" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(wc.w)+'"></label><label for="wc-t">ضريبة على المصنعية ٪ (لو فيه)<input id="wc-t" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(wc.t)+'"></label></div>'+
+      '<div class="actions"><button class="btn primary sm" data-act="wc-go">احسب</button></div>'+
+      (n(wc.g)>0?r('سعر الدهب نفسه',money(gv))+r('المصنعية'+(tx?' + الضريبة':''),money(wk+tx))+r('<b>هتدفع تقريبًا</b>','<b>'+money(gv+wk+tx)+'</b>')+r('لو بعته النهاردة (شراء المحل)',money(buy)+' <span class="fine">(المصنعية مش بترجع)</span>'):'')+'</div>'}
+  /* ================= fuel prices in Egypt (set by the pricing committee; dated history) ================= */
+  var FUEL=[['b95','⛽ بنزين 95','لتر'],['b92','⛽ بنزين 92','لتر'],['b80','⛽ بنزين 80','لتر'],['sol','🛢️ سولار','لتر'],['cng','🔵 غاز طبيعي للعربيات','متر مكعب'],['bh','🧯 أنبوبة بوتاجاز منزلي (12.5 كجم)','أنبوبة'],['bc','🧯 أنبوبة بوتاجاز تجاري (25 كجم)','أنبوبة']];
+  var FUELH=[['2019-07-05',{b80:6.75,b92:8,b95:9,sol:6.75}],['2019-10-03',{b80:6.5,b92:7.75,b95:8.75}],['2020-04-10',{b80:6.25,b92:7.5,b95:8.5}],['2021-04-23',{b80:6.5,b92:7.75,b95:8.75}],
+    ['2021-07-23',{b80:6.75,b92:8,b95:9}],['2021-10-08',{b80:7,b92:8.25,b95:9.25}],['2022-02-04',{b80:7.25,b92:8.5,b95:9.5}],['2022-04-15',{b80:7.5,b92:8.75,b95:9.75}],['2022-07-13',{b80:8,b92:9.25,b95:10.75,sol:7.25}],
+    ['2023-03-02',{b80:8.75,b92:10.25,b95:11.25}],['2023-11-03',{b80:10,b92:11.5,b95:12.5,sol:8.25}],['2024-03-22',{b80:11,b92:12.5,b95:13.5,sol:10}],['2024-07-25',{b80:12.25,b92:13.75,b95:15,sol:11.5}],
+    ['2024-09-18',{bh:150,bc:300}],['2024-10-18',{b80:13.75,b92:15.25,b95:17,sol:13.5,cng:7}],['2025-04-11',{b80:15.75,b92:17.25,b95:19,sol:15.5,bh:200,bc:400}],
+    ['2025-10-17',{b80:17.75,b92:19.25,b95:21,sol:17.5,cng:10,bh:225,bc:450}],['2026-03-10',{b80:20.75,b92:22.25,b95:24,sol:20.5,cng:13,bh:275,bc:550}]];
+  var FUEL_REVIEW='2026-10-15';
+  function fuelAt(k,d){var v=null,at=null;d=d||iso(today());FUELH.forEach(function(h){if(h[0]<=d&&h[1][k]!=null){v=h[1][k];at=h[0]}});return v==null?null:{v:v,at:at}}
+  function fuelHist(k){var L=[];FUELH.forEach(function(h){if(h[1][k]!=null)L.push({d:h[0],v:h[1][k]})});return L}
+  function fuelName(k){var f=FUEL.filter(function(x){return x[0]===k})[0];return f?f[1].replace(/^\S+\s/,''):k}
+  function pxTabFuel(){var fav=pxFav(),fc=PXS.fc=PXS.fc||{k:'b92',l:'',km:'',cons:'',bud:''},op=PXS.fo||'';
+    var h='<p class="pxstamp">🕒 آخر قرار للجنة التسعير: <b>'+pxWhen(new Date(FUEL_REVIEW+'T12:00:00').getTime()).replace(/ · الساعة.*/,'')+'</b> (تثبيت الأسعار)<br><span class="fine">آخر تغيير فعلي للأسعار: '+dShort('2026-03-10')+'. اللجنة بتراجع الأسعار كل 3 شهور تقريبًا، والبرنامج بيتحدث بالأسعار الجديدة مع كل تحديث.</span></p>';
+    h+='<div class="pxhd"><span>المنتج</span><span>السعر النهاردة</span></div>'+FUEL.map(function(f){var c=fuelAt(f[0]),H=fuelHist(f[0]),prev=H.length>1?H[H.length-2]:null,ch=prev?(c.v/prev.v-1)*100:null;
+      return pxRow('f:'+f[0],f[1],'لكل '+f[2]+' · من '+dShort(c.at),c.v,null,pxChTxt(ch)+'<button class="btn sm" data-act="fu-h" data-v="'+f[0]+'">'+(op===f[0]?'اقفل السجل':'📜 السجل')+'</button>')+
+        (op===f[0]?'<div class="rows">'+H.slice().reverse().map(function(x,i,A){var p=A[i+1];return '<div class="r"><span class="k">'+dShort(x.d)+'</span><span class="v"><b class="num">'+pxFmt(x.v)+'</b> ج'+(p?' '+pxChTxt((x.v/p.v-1)*100):' <span class="fine">(أقدم سعر عندي)</span>')+'</span></div>'}).join('')+'</div>':'')}).join('');
+    /* step chart of 92 and diesel */
+    var P=FUELH.filter(function(h){return h[0]>='2019-07-05'}),t0=new Date(P[0][0]).getTime(),t1=Date.now(),W=330,H2=150,mx=25;
+    var line=function(k,col){var pts=[],last=null;P.forEach(function(h){if(h[1][k]==null)return;var x=4+(new Date(h[0]).getTime()-t0)/(t1-t0)*(W-8),y=H2-8-h[1][k]/mx*(H2-20);if(last!=null)pts.push(x.toFixed(1)+','+last.toFixed(1));pts.push(x.toFixed(1)+','+y.toFixed(1));last=y});
+      pts.push((W-4)+','+last.toFixed(1));return '<polyline fill="none" stroke="'+col+'" stroke-width="2" points="'+pts.join(' ')+'"/>'};
+    h+='<div class="rows pxtool"><h3>📈 رحلة الأسعار من 2019</h3><svg viewBox="0 0 '+W+' '+H2+'" width="100%" role="img" aria-label="رسم أسعار البنزين والسولار" style="direction:ltr;display:block">'+line('b95','#e8a33d')+line('b92','var(--accent)')+line('sol','var(--ok)')+line('b80','#9aa3b2')+'</svg>'+
+      '<div class="pxchs"><span style="color:#e8a33d">— 95</span><span style="color:var(--accent)">— 92</span><span style="color:#9aa3b2">— 80</span><span style="color:var(--ok)">— سولار</span><span>بنزين 92: '+pxFmt(fuelHist('b92')[0].v)+' ← '+pxFmt(fuelAt('b92').v)+' ج (×'+nf(fuelAt('b92').v/fuelHist('b92')[0].v,1)+')</span></div></div>';
+    /* calculators */
+    var pr=(fuelAt(fc.k)||{v:0}).v,L=n(fc.l),km=n(fc.km),cons=n(fc.cons),bud=n(fc.bud),mL=km&&cons?km*cons/100:0;
+    h+='<div class="rows pxtool"><h3>🧮 حاسبة البنزين</h3><div class="fields"><label for="fc-k">النوع<select id="fc-k" class="in">'+FUEL.map(function(f){return '<option value="'+f[0]+'"'+(fc.k===f[0]?' selected':'')+'>'+f[1]+'</option>'}).join('')+'</select></label>'+
+      '<label for="fc-l">كمية (لتر)<input id="fc-l" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(fc.l)+'"></label>'+
+      '<label for="fc-b">أو معاك كام (ج)<input id="fc-b" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(fc.bud)+'"></label>'+
+      '<label for="fc-km">بتمشي كام كيلو في الشهر<input id="fc-km" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(fc.km)+'"></label>'+
+      '<label for="fc-c">عربيتك بتصرف كام لتر لكل 100 كم<input id="fc-c" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(fc.cons)+'" placeholder="7"></label></div>'+
+      '<div class="actions"><button class="btn primary sm" data-act="fc-go">احسب</button></div>'+
+      (L?r(nf(L)+' '+(FUEL.filter(function(f){return f[0]===fc.k})[0]||['','',''])[2],money(L*pr)):'')+(bud&&pr?r(money(bud)+' تجيب','<b class="num">'+nf(bud/pr,2)+'</b> '+(FUEL.filter(function(f){return f[0]===fc.k})[0]||['','',''])[2]):'')+
+      (mL?r('في الشهر هتحتاج','<b class="num">'+nf(mL,1)+'</b> لتر = '+money(mL*pr))+r('في السنة',money(mL*pr*12))+r('لو السعر رجع زي '+dShort(fuelHist(fc.k)[0]?fuelHist(fc.k)[Math.max(0,fuelHist(fc.k).length-3)].d:''),money(mL*(fuelHist(fc.k)[Math.max(0,fuelHist(fc.k).length-3)]||{v:0}).v)+' في الشهر'):'')+'</div>';
+    return h}
+  /* ================= any past day: currencies, gold, silver, crypto, fuel ================= */
+  var PXH={};
+  function pxHistGet(d){if(PXH[d])return Promise.resolve(PXH[d]);var c=pxJ('3bh_pxhd',{});if(c[d]){PXH[d]=c[d];return Promise.resolve(c[d])}
+    var U=['https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@'+d+'/v1/currencies/usd.min.json','https://'+d+'.currency-api.pages.dev/v1/currencies/usd.min.json','https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/'+d+'/currencies/usd.min.json'];
+    function tryI(i){if(i>=U.length)return Promise.reject(new Error('none'));return pxGet(U[i]).then(function(j){if(!j||!j.usd||!(+j.usd.egp>0))throw new Error('bad');return j},function(){return tryI(i+1)}).catch(function(){return tryI(i+1)})}
+    return tryI(0).then(function(j){var u=j.usd,o={d:j.date||d,egp:+u.egp,fx:{},xau:+u.xau||0,xag:+u.xag||0,k:{}};PXC.forEach(function(x){var v=+u[x[0].toLowerCase()];if(v>0)o.fx[x[0]]=v});
+      PXK.forEach(function(x){var v=+u[x[0].toLowerCase()];if(v>0)o.k[x[0]]=v});PXH[d]=o;var cc=pxJ('3bh_pxhd',{});cc[d]=o;var ks=Object.keys(cc).sort();while(ks.length>80)delete cc[ks.shift()];lsSet('3bh_pxhd',JSON.stringify(cc));return o})}
+  /* the same key → EGP on a past day (gold and silver with today's market difference) */
+  function pxEgpOn(o,key,side){if(!o)return 0;var E=o.egp,cal=pxCal(),m;if(key==='gpound')return pxEgpOn(o,'g21',side)*8;
+    if((m=key.match(/^c:(\w+)$/))){if(m[1]==='EGP')return 1;var r=o.fx[m[1]];return r>0?E/r:0}
+    if((m=key.match(/^k:(\w+)$/))){if(m[1]==='USDT'||m[1]==='USDC')return E;var k=o.k[m[1]];return k>0?E/k:0}
+    if((m=key.match(/^g(\d+)$/))&&o.xau){var g=E/o.xau/OZ*(1+n(cal.gp)/100)*(+m[1])/24;return side==='buy'?g*(1-n(cal.gs)/100):g}
+    if((m=key.match(/^s(\d+)$/))&&o.xag){var s=E/o.xag/OZ*(1+n(cal.sp)/100)*(+m[1])/1000;return side==='buy'?s*(1-n(cal.ss)/100):s}
+    if((m=key.match(/^f:(\w+)$/))){var f=fuelAt(m[1],o.d);return f?f.v:0}return 0}
+  function pxTabDay(){var dy=PXS.dy=PXS.dy||{d:iso(new Date(today().getFullYear(),today().getMonth(),today().getDate()-30)),s:'fx'},o=PXH[dy.d],td=iso(today());
+    var q=function(n0,l){var d=new Date(today().getFullYear(),today().getMonth(),today().getDate()-n0);return '<button class="chip'+(dy.d===iso(d)?' on':'')+'" data-act="dy-q" data-v="'+iso(d)+'">'+l+'</button>'};
+    var h='<div class="pxcv"><label for="dy-d" class="fine">اختار اليوم</label><input id="dy-d" class="in" type="date" dir="ltr" min="2020-11-23" max="'+td+'" value="'+esc(dy.d)+'" style="width:100%">'+
+      '<div class="chips">'+q(1,'امبارح')+q(7,'من أسبوع')+q(30,'من شهر')+q(91,'من 3 شهور')+q(182,'من 6 شهور')+q(365,'من سنة')+q(730,'من سنتين')+'</div></div>';
+    if(!o){if(!dy.busy&&!dy.err){dy.busy=1;pxHistGet(dy.d).then(function(){dy.busy=0;if(route==='prices'&&PXS.tab==='day')renderMain()},function(){dy.busy=0;dy.err=1;if(route==='prices'&&PXS.tab==='day')renderMain()})}
+      return h+(dy.err?'<div class="empty">مش لاقي أسعار محفوظة لليوم ده. جرّب يوم قريب منه (أقدم يوم متاح تقريبًا 23 نوفمبر 2020)، وأسعار الوقود موجودة من يوليو 2019.</div>'+pxDayFuel(dy.d):'<div class="empty">بيجيب أسعار يوم '+dShort(dy.d)+'…</div>')}
+    var secs=[['fx','💵 العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود']];
+    h+='<p class="pxstamp">📅 أسعار يوم <b>'+pxWhen(new Date(o.d+'T12:00:00').getTime()).replace(/ · الساعة.*/,'')+'</b> وجنبها التغيير لحد النهاردة.</p><div class="chips">'+secs.map(function(x){return '<button class="chip'+(dy.s===x[0]?' on':'')+'" data-act="dy-s" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
+    var row=function(key,label,sub){var then=pxEgpOn(o,key),now=pxEgp(key);if(!(then>0))return '';return '<div class="pxr"><span></span><div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(then)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(now)+'</b></span>'+(now?pxChTxt((now/then-1)*100):'')+'</div><span></span></div>'};
+    var L='';
+    if(dy.s==='fx')L=PXC.map(function(c){return row('c:'+c[0],c[1]+' '+c[2],c[0])}).join('');
+    else if(dy.s==='gold')L=PXG.map(function(g){return row('g'+g[0],g[1])}).join('')+row('gpound','🪙 جنيه الدهب','8 جرام عيار 21')+(o.xau?'<p class="fine">الأونصة يومها: $'+nf(1/o.xau,2)+' · الدولار يومها: '+nf(o.egp,2)+' ج</p>':'');
+    else if(dy.s==='silver')L=PXSV.map(function(g){return row('s'+g[0],g[1])}).join('')+(o.xag?'<p class="fine">أونصة الفضة يومها: $'+nf(1/o.xag,2)+'</p>':'');
+    else if(dy.s==='crypto')L=PXK.map(function(k){return row('k:'+k[0],k[1],k[0])}).join('');
+    else L=pxDayFuel(o.d);
+    return h+(L||'<div class="empty">مفيش أسعار للقسم ده في اليوم ده.</div>')+((dy.s==='gold'||dy.s==='silver')?'<p class="note">محسوب من السعر العالمي يومها وسعر الدولار يومها'+(n(pxCal().gp)||n(pxCal().sp)?'، وبنفس فرق الصاغة اللي ظبطته':'')+'.</p>':'')}
+  function pxDayFuel(d){var any=false,h='<div class="pxhd"><span>الوقود يوم '+dShort(d)+'</span><span>يومها · النهاردة</span></div>'+FUEL.map(function(f){var t=fuelAt(f[0],d),nw=fuelAt(f[0]);if(!t)return '';any=true;
+      return '<div class="pxr"><span></span><div class="pxn"><b>'+f[1]+'</b><small>السعر ده من '+dShort(t.at)+'</small></div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(t.v)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(nw.v)+'</b></span>'+pxChTxt((nw.v/t.v-1)*100)+'</div><span></span></div>'}).join('');
+    return any?h:'<div class="empty">مفيش أسعار وقود محفوظة قبل يوليو 2019.</div>'}
+  /* charts from daily history (gold, silver, dollar, crypto, fuel) */
+  function pxChartLoad2(){var ch=PXS.ch,N=ch.d<=7?7:ch.d<=30?15:ch.d<=90?16:ch.d<=365?24:30,td=today(),D=[];
+    for(var i=N-1;i>=0;i--){var d=new Date(td.getFullYear(),td.getMonth(),td.getDate()-Math.round(i*ch.d/(N-1||1))-1);D.push(iso(d))}
+    PXS.chd={k:ch.k,d:ch.d,busy:1};
+    Promise.all(D.map(function(d){return pxHistGet(d).then(function(o){return [new Date(d+'T12:00:00').getTime(),pxEgpOn(o,ch.k)]},function(){return null})})).then(function(R){var P=R.filter(function(p){return p&&p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);
+      PXS.chd=P.length>=2?{k:ch.k,d:ch.d,p:P}:{k:ch.k,d:ch.d,err:1};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()})}
   function screenPrices(){if(!PXD||Date.now()-(PXD.at||0)>5*60000)setTimeout(function(){pxLoad()},0);var T=PXS.tab;
-    var tabs=[['fx','💵 العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['bars','🧱 سبايك وجنيهات'],['crypto','₿ الرقمية'],['tools','🧰 أدواتي']];
+    var tabs=[['fx','💵 العملات'],['conv','🔁 محوّل العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['bars','🧱 سبايك وجنيهات'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود'],['day','📅 يوم معيّن'],['tools','🧰 أدواتي']];
     var h='<section class="sec pxs"><div class="pxtabs" role="tablist">'+tabs.map(function(x){return '<button role="tab" class="pxt'+(T===x[0]?' on':'')+'" data-act="px-tab" data-v="'+x[0]+'" aria-selected="'+(T===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
-      '<div class="pxbar"><span class="fine">'+(PXS.busy?'بيحدّث الأسعار…':PXD?'آخر تحديث '+new Date(PXD.at).toLocaleTimeString(LOC(),{hour:'numeric',minute:'2-digit'})+' · '+dShort(iso(new Date(PXD.at))):'')+'</span><button class="btn sm" data-act="px-ref"'+(PXS.busy?' disabled':'')+'>↻ حدّث</button></div>'+
+      '<div class="pxbar"><span class="fine">'+(PXS.busy?'بيحدّث الأسعار…':'الأسعار بتتحدّث لوحدها كل ما تفتح الصفحة')+'</span><button class="btn sm" data-act="px-ref"'+(PXS.busy?' disabled':'')+'>↻ حدّث</button></div>'+
       (PXS.err?'<p class="note" style="color:var(--bad)">'+PXS.err+'</p>':'')+
       (T==='fx'||T==='crypto'||T==='gold'?'<input class="in pxq" id="px-q" type="search" placeholder="دوّر: دولار، ريال، عيار 21، بيتكوين…" value="'+esc(PXS.q)+'" aria-label="دوّر">':'');
-    if(!PXD)return h+(PXS.busy?'<div class="empty">بيجيب الأسعار…</div>':'<div class="empty">مفيش أسعار لسه. اتأكد من الإنترنت ودوس حدّث.</div>')+'</section>';
-    h+=T==='gold'?pxTabGold():T==='silver'?pxTabSilver():T==='bars'?pxTabBars():T==='crypto'?pxTabCrypto():T==='tools'?pxTabTools():pxTabFx();
+    if(!PXD&&T!=='fuel'&&T!=='day')return h+(PXS.busy?'<div class="empty">بيجيب الأسعار…</div>':'<div class="empty">مفيش أسعار لسه. اتأكد من الإنترنت ودوس حدّث.</div>')+'</section>';
+    if(T!=='tools'&&T!=='fuel'&&T!=='day')h+=pxStamp(T==='bars'?'gold':T);
+    h+=T==='fuel'?pxTabFuel():T==='day'?pxTabDay():T==='gold'?pxTabGold():T==='silver'?pxTabSilver():T==='bars'?pxTabBars():T==='crypto'?pxTabCrypto():T==='tools'?pxTabTools():T==='conv'?pxTabConv():pxTabFx();
     return h+pxCmpHtml()+'</section>'}
   function pxCalHtml(){var w=sheet.w,cal=pxCal(),g=w==='gold';
     var base=g?pxEgp('g21')/(1+n(cal.gp)/100):pxEgp('s999')/(1+n(cal.sp)/100);
@@ -4365,7 +4490,19 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(act==='px-cmpx'){PXS.cmp=[];renderMain();return true}
     if(act==='px-bm'){PXS.bm=t.getAttribute('data-v');renderMain();return true}
     if(act==='px-cs'){PXS.cs=t.getAttribute('data-v');renderMain();return true}
-    if(act==='px-wk'){var e=document.getElementById('px-wk');lsSet('3bh_pxwk',String(e&&n(e.value)>0?n(e.value):''));renderMain();return true}
+    if(act==='px-wk'){var e=document.getElementById('px-wk'),co=PXS.co||lsGet('3bh_pxco')||'other',WM=pxWkMap();WM[co]=e&&n(e.value)>0?n(e.value):0;lsSet('3bh_pxwkc',JSON.stringify(WM));renderMain();return true}
+    if(act==='fu-h'){var fv=t.getAttribute('data-v');PXS.fo=PXS.fo===fv?'':fv;renderMain();return true}
+    if(act==='fc-go'){var g2=function(id){var e4=document.getElementById(id);return e4?e4.value:''};PXS.fc={k:g2('fc-k')||'b92',l:g2('fc-l'),bud:g2('fc-b'),km:g2('fc-km'),cons:g2('fc-c')};renderMain();return true}
+    if(act==='dy-q'){PXS.dy={d:t.getAttribute('data-v'),s:(PXS.dy||{}).s||'fx'};renderMain();return true}
+    if(act==='dy-s'){PXS.dy.s=t.getAttribute('data-v');renderMain();return true}
+    if(act==='px-co'){PXS.co=t.getAttribute('data-v');lsSet('3bh_pxco',PXS.co);renderMain();return true}
+    if(act==='px-sw2'){var c=pxCv(),x=c.f;c.f=c.t;c.t=x;pxCvSave();renderMain();return true}
+    if(act==='px-q2'){var c2=pxCv();c2.a=t.getAttribute('data-v');pxCvSave();pxConvRefresh();var ia=document.getElementById('px-a2');if(ia)ia.value=c2.a;return true}
+    if(act==='wc-go'){var g=function(id){var e3=document.getElementById(id);return e3?e3.value:''};PXS.wc={g:g('wc-g'),k:g('wc-k')||'21',w:g('wc-w'),t:g('wc-t')};renderMain();return true}
+    if(act==='px-al'){sheet={mode:'pxal',k:t.getAttribute('data-k')};renderSheet();return true}
+    if(act==='pa-save'){var v0=n((document.getElementById('pa-v')||{}).value),cur=pxEgp(sheet.k);if(!(v0>0)){toast('اكتب السعر');return true}
+      var A=pxAlerts();A.push({id:uid(),k:sheet.k,v:v0,dir:v0>=cur?'up':'down',at:iso(today())});lsSet('3bh_pxal',JSON.stringify(A));sheet=null;renderSheet();renderMain();toast('هنبّهك لما '+pxName(A[A.length-1].k)+(v0>=cur?' يطلع لـ ':' ينزل لـ ')+pxFmt(v0));return true}
+    if(act==='pa-del'){var di=t.getAttribute('data-id');lsSet('3bh_pxal',JSON.stringify(pxAlerts().filter(function(a){return a.id!==di})));if(sheet&&sheet.mode==='pxal')renderSheet();renderMain();return true}
     if(act==='px-calc'||act==='px-swap'){var a=document.getElementById('px-ca'),f2=document.getElementById('px-cf'),t2=document.getElementById('px-ct');PXS.cv={a:a?a.value:'1',f:f2?f2.value:'c:USD',t:t2?t2.value:'c:EGP'};
       if(act==='px-swap'){var sw=PXS.cv.f;PXS.cv.f=PXS.cv.t;PXS.cv.t=sw}renderMain();return true}
     if(act==='px-zcalc'||act==='px-zfill'){var g=function(id){var e2=document.getElementById(id);return e2?e2.value:''};PXS.zk={g:g('px-zg'),k:g('px-zk')||'21',s:g('px-zs'),c:g('px-zc')};
@@ -4379,7 +4516,12 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       if(sp!==''&&n(sp)>=0&&n(sp)<=20){if(gl)cal.gs=n(sp);else cal.ss=n(sp)}cal.at=iso(today());lsSet('3bh_pxcal',JSON.stringify(cal));sheet=null;renderSheet();pxSnap();renderMain();toast('اتظبطت الأسعار');return true}
     return false}
   document.addEventListener('input',function(e){if(route!=='prices'||!e.target||e.target.id!=='px-q')return;PXS.q=e.target.value;var p=e.target.selectionStart;renderMain();var q=document.getElementById('px-q');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}});
-  document.addEventListener('change',function(e){if(route!=='prices'||!e.target)return;if(e.target.id==='px-cf'||e.target.id==='px-ct'){var b=document.querySelector('[data-act=px-calc]');if(b)setTimeout(function(){b.click()},0)}});
+  document.addEventListener('input',function(e){if(route!=='prices'||!e.target||e.target.id!=='px-a2')return;var c=pxCv();c.a=String(e.target.value).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[^\d.]/g,'');pxCvSave();pxConvRefresh()});
+  document.addEventListener('change',function(e){if(route!=='prices'||!e.target)return;var c=pxCv();
+    if(e.target.id==='dy-d'&&e.target.value){var yd=iso(new Date(today().getFullYear(),today().getMonth(),today().getDate()-1));PXS.dy={d:e.target.value>yd?yd:e.target.value,s:(PXS.dy||{}).s||'fx'};renderMain();return}
+    if(e.target.id==='px-f2'||e.target.id==='px-t2'){c[e.target.id==='px-f2'?'f':'t']=e.target.value;pxCvSave();renderMain();return}
+    if(/^px-g\d$/.test(e.target.id)){c.g[+e.target.getAttribute('data-i')]=e.target.value;pxCvSave();pxConvRefresh();return}
+    if(e.target.id==='px-cf'||e.target.id==='px-ct'){var b=document.querySelector('[data-act=px-calc]');if(b)setTimeout(function(){b.click()},0)}});
   /* ================= managing categories: transactions, period filter, rename, move, delete ================= */
   function catHidden(k){return ((S&&S.catHide)||[]).indexOf(k)>=0}
   function incKinds(){var L=INC_KINDS.filter(function(k){return k!=='أخرى'&&!catHidden(k)});((S&&S.cats)||[]).forEach(function(c){if(c&&c.n&&c.side==='in'&&L.indexOf(c.n)<0&&!catHidden(c.n))L.push(c.n)});L.push('أخرى');return L}
@@ -4969,6 +5111,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     else if(sheet.mode==='salend'){title='سبت الشغل أو غيّرت الشركة';body=salEndHtml()}
     else if(sheet.mode==='stmtrev'){title='راجع عمليات الكشف';body=stmtRevHtml()}
     else if(sheet.mode==='hbal'){var hh=hGet(sheet.key);title=hh?hName(hh.coll,hh.o):'الرصيد';body=hbalHtml()}
+    else if(sheet.mode==='pxal'){title='🔔 نبّهني بالسعر';body=pxAlHtml()}
     else if(sheet.mode==='pxcal'){title=sheet.w==='gold'?'سعر الدهب في محل الصاغة':'سعر الفضة في المحل';body=pxCalHtml()}
     else if(sheet.mode==='txadd'){title=sheet.k==='card'?'شرا بالتقسيط':'إضافة معاملة';body=sheet.k==='card'?txCardsHtml():txAddHtml()}
     else{

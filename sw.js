@@ -1,5 +1,5 @@
 /* Financial Aid — offline cache + daily payment notification. Same-origin files: cache first, refreshed in the background. */
-var CACHE='3bh-3.2.6', NT_C='3bh-notify', NT_PLAN='./__3bh/plan', NT_SENT='./__3bh/sent', NT_INBOX='./__3bh/inbox';
+var CACHE='3bh-3.2.7', NT_C='3bh-notify', NT_PLAN='./__3bh/plan', NT_SENT='./__3bh/sent', NT_INBOX='./__3bh/inbox';
 var FILES=['./','index.html','app.css','app.html','app.js','manifest.webmanifest','logo-192.png','logo-512.png','logo-maskable-512.png'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES.map(function(f){return new Request(f,{cache:'reload'})}))}).then(function(){return self.skipWaiting()}))});
 self.addEventListener('message',function(e){if(e.data==='skip')self.skipWaiting()});
