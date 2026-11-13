@@ -1948,6 +1948,7 @@ function olCap(c){if(olModeOf(c)==='none')return 0;var a=n(c.olAllow);if(!(a>0)|
     if(!short)return false;
     var R=function(h){aiSay(h);return true};
     if(/(السلام عليكم|سلام عليكم|السلام عليكو)/.test(s))return R('وعليكم السلام ورحمة الله وبركاته'+ya+' 👋 تحب أساعدك في إيه؟');
+    if(/^(يا )?(اهلا|اهلين|اهلن|مرحبا|مرحب|هاي|هلو|hi|hello|hey|salut)( (بيك|بيكي|وسهلا|يا \S+|عبهادي|يا عبهادي))*$/.test(s.trim()))return R('أهلًا بيك'+ya+' 👋 تحب أساعدك في إيه؟');
     if(/(صباح الخير|صباحو|صباح الفل|good morning|bonjour)/.test(s))return R('صباح النور'+ya+' ☀️ يومك سعيد. تحب أشوفلك المطلوب النهاردة؟'+aiStatusLine());
     if(/(مساء الخير|مساء الفل|مسا مسا|good evening|bonsoir)/.test(s))return R('مساء النور'+ya+' 🌙 تحب أساعدك في إيه؟');
     if(/(عامل ايه|عامل اي|عامله ايه|ازيك|ازيكم|اخبارك|ايه الاخبار|كيفك|كيف حالك|انت كويس|انت تمام|how are you|hows it going|ca va|comment vas|comment ca va)/.test(s))return R('الحمد لله تمام، شكرًا إنك سألت 😊 وانت عامل إيه؟'+aiStatusLine());
@@ -2276,7 +2277,10 @@ function olCap(c){if(olModeOf(c)==='none')return 0;var a=n(c.olAllow);if(!(a>0)|
     return aiSay('<b>'+esc(o.name)+'</b><div class="actions">'+op+'</div>')}
   function aiUnify(raw){var s=String(raw==null?'':raw);if(!s.trim())return s;try{if(isFranco(s))s=franco2ar(s);s=phUnify(s)}catch(e){}return s}
   function aiAnswer(raw){
+    if(AI.pend&&AI.pend.kind==='px'){try{if(pxFlowIn(raw))return}catch(e){AI.pend=null}}
     if(!(AI.pend&&AI.pend.kind==='pdfpw')){var smT=bankSms(raw,1);if(smT)return smsSay(smsUniq(smT))}
+    try{if(pxAI(raw))return}catch(e){}
+    if(/^(يا )?(اهلا|اهلين|اهلن|مرحبا|مرحب|هاي|هلو|hi|hello|hey|salut)( (بيك|بيكي|وسهلا|يا \S+|عبهادي))*$/i.test(nz(raw).replace(/[؟?!.,،]+/g,' ').replace(/\s+/g,' ').trim()))return aiSay('أهلًا بيك'+((S.profile&&S.profile.name)?' يا '+esc(S.profile.name):'')+' 👋 تحب أساعدك في إيه؟');
     raw=aiUnify(raw);var t=nz(raw), amt=aiAmount(t), H;
     if(AI.pend&&AI.pend.kind==='pdfpw'){var pf=AI.pend.file;AI.pend=null;aiFile(pf,raw.trim());return}
     function bdBtn(k,l){return aiAct(l||'افتح التفاصيل',function(){sheet={mode:'bd',k:k,back:{mode:'ai'}};renderSheet()})}
@@ -4265,8 +4269,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxName(key){var m;if((m=key.match(/^c:(\w+)$/))){var c=PXC.filter(function(x){return x[0]===m[1]})[0];return m[1]==='EGP'?'جنيه مصري':c?c[2]:m[1]}
     if((m=key.match(/^k:(\w+)$/))){var k=PXK.filter(function(x){return x[0]===m[1]})[0];return k?k[1]:m[1]}
     if(key==='gpound')return 'جنيه الدهب';if((m=key.match(/^f:(\w+)$/)))return fuelName(m[1]);if((m=key.match(/^g(\d+)$/)))return 'جرام دهب عيار '+m[1];if((m=key.match(/^s(\d+)$/)))return 'جرام فضة عيار '+m[1];return key}
-  function pxFmt(v){v=+v;return !(v>0)?'—':v>=1000?nf(v,0):v>=10?nf(v,2):nf(v,v>=1?3:6)}
-  function pxChTxt(c){return c==null||!isFinite(c)||Math.abs(c)<0.005?'':'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+' '+nf(Math.abs(c),2)+'%</span>'}
+  function pxFmt(v){v=+v;return !(v>0)?'—':v>=1000?nf(v,0):v>=10?nf(v,2):nf(v,v>=1?3:v>=0.1?4:6)}
+  function pxChTxt(c){return c==null||!isFinite(c)||Math.abs(c)<0.005?'':'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+' '+(c>=900?nf(1+c/100,c>=9900?0:1)+' ضعف':nf(Math.abs(c),2)+'%')+'</span>'}
   function pxRow(key,label,sub,sell,buy,extra){var fav=pxFav().indexOf(key.replace(/^c:/,'').replace(/^k:/,''))>=0,cmp=PXS.cmp.indexOf(key)>=0;
     return '<div class="pxr'+(cmp?' cmp':'')+'"><button class="pxst" data-act="px-fav" data-k="'+esc(key)+'" aria-label="'+(fav?'شيل من المفضلة':'ضيف للمفضلة')+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button>'+
       '<div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
@@ -4327,7 +4331,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     /* chart */
     var CH=[['g24','🟡 جرام دهب 24'],['g21','🟡 جرام دهب 21'],['s999','⚪ جرام فضة'],['c:USD','💵 الدولار'],['c:EUR','💶 اليورو'],['c:SAR','🇸🇦 الريال'],['k:BTC','₿ بيتكوين'],['k:ETH','إيثريوم'],['f:b92','⛽ بنزين 92']],ch=PXS.ch;
     h+='<div class="rows pxtool"><h3>📈 رسم بياني</h3><div class="chips">'+CH.map(function(x){return '<button class="chip'+(ch.k===x[0]?' on':'')+'" data-act="px-chk" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
-      '<div class="chips">'+[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[365,'سنة'],[730,'سنتين']].map(function(x){return '<button class="chip'+(ch.d===x[0]?' on':'')+'" data-act="px-chd" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><div id="px-chart">'+pxChartHtml()+'</div></div>';
+      '<div class="chips">'+PXRANGE.map(function(x){return '<button class="chip'+(ch.d===x[0]?' on':'')+'" data-act="px-chd" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><div id="px-chart">'+pxChartHtml()+'</div></div>';
     var AL=pxAlerts();h+='<div class="rows pxtool"><h3>🔔 تنبيهات الأسعار</h3>'+(AL.length?AL.map(function(a){return '<div class="r"><span class="k">'+esc(pxName(a.k))+(a.dir==='up'?' يطلع لـ ':' ينزل لـ ')+'<b class="num">'+pxFmt(a.v)+'</b> ج</span><span class="v"><button class="btn sm" data-act="pa-del" data-id="'+esc(a.id)+'">امسح</button></span></div>'}).join(''):'<p class="fine" style="margin:6px 0">دوس 🔔 جنب أي سعر (عملة، أو عيار، أو عملة رقمية) وأنا أنبّهك لما يوصل للسعر اللي عايزه.</p>')+'</div>';
     /* what I hold, valued today */
     var A=(S.assets||[]).filter(function(a){var k=akOf(a);return k==='gold'||k==='silver'||k==='crypto'||k==='fx'});
@@ -4337,12 +4341,13 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxChartLoad(){var ch=PXS.ch,id=PXCH_ID[ch.k];if(!id)return;PXS.chd={k:ch.k,d:ch.d,busy:1};
     pxGet('https://api.coingecko.com/api/v3/coins/'+id+'/market_chart?vs_currency=egp&days='+ch.d).then(function(j){var P=(j&&j.prices||[]).map(function(p){var v=+p[1];if(ch.k==='g24'){v=v/OZ*(1+n(pxCal().gp)/100)}else if(ch.k==='s999'){v=v/OZ*(1+n(pxCal().sp)/100)}return [p[0],v]}).filter(function(p){return p[1]>0});
       PXS.chd={k:ch.k,d:ch.d,p:P};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()},function(){PXS.chd={k:ch.k,d:ch.d,err:1};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()})}
-  function pxChartHtml(){var c=PXS.chd,ch=PXS.ch;if(!c||c.k!==ch.k||c.d!==ch.d){setTimeout(pxChartLoad2,0);return '<div class="empty">بيحمّل الرسم…</div>'}
+  function pxChartHtml(){var c=PXS.chd,ch=PXS.ch;if(!c||c.k!==ch.k||c.d!==ch.d){setTimeout(pxChartLoad3,0);return '<div class="empty">بيحمّل الرسم…</div>'}
     if(c.busy)return '<div class="empty">بيحمّل الرسم…</div>';if(c.err||!c.p||c.p.length<2)return '<div class="empty">الرسم مش متاح دلوقتي. جرّب كمان شوية.</div>';
-    var P=c.p,mn=Math.min.apply(null,P.map(function(p){return p[1]})),mx=Math.max.apply(null,P.map(function(p){return p[1]})),W=330,H=140,t0=P[0][0],t1=P[P.length-1][0];
+    var P=c.p,mn=Math.min.apply(null,P.map(function(p){return p[1]})),mx=Math.max.apply(null,P.map(function(p){return p[1]})),W=330,H=140,t0=P[0][0],t1=P[P.length-1][0];c.mn=mn;c.mx=mx;
     var pts=P.map(function(p){return ((p[0]-t0)/(t1-t0||1)*(W-8)+4).toFixed(1)+','+(H-6-(p[1]-mn)/((mx-mn)||1)*(H-24)).toFixed(1)}).join(' ');
     var first=P[0][1],last=P[P.length-1][1],chg=(last/first-1)*100,col=chg>=0?'var(--ok)':'var(--bad)';
-    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="رسم '+esc(pxName(ch.k))+'" style="direction:ltr;display:block"><polyline fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" points="'+pts+'"/></svg>'+
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="رسم '+esc(pxName(ch.k))+'" style="direction:ltr;display:block;cursor:crosshair;touch-action:manipulation"><rect x="0" y="0" width="'+W+'" height="'+H+'" fill="transparent"/><polyline fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" points="'+pts+'"/><circle id="px-mk" r="0" cx="0" cy="0" fill="var(--accent)" stroke="#fff" stroke-width="1.5"/></svg>'+
+      '<div id="px-chpt" class="pxchpt">👆 دوس على أي نقطة في الرسم تشوف تاريخها وقيمتها</div>'+
       '<div class="pxchs"><span>أعلى <b class="num">'+pxFmt(mx)+'</b></span><span>أقل <b class="num">'+pxFmt(mn)+'</b></span><span>دلوقتي <b class="num">'+pxFmt(last)+'</b></span>'+pxChTxt(chg)+'</div>'}
   function pxCmpHtml(){var L=PXS.cmp.filter(function(k){return pxEgp(k)>0});if(!L.length)return '';var b=pxEgp(L[0]);
     return '<div class="pxcmpbar"><div class="pxch-h"><b>⚖️ مقارنة</b><button class="btn sm" data-act="px-cmpx">امسح</button></div><div class="pxcg">'+L.map(function(k,i){var v=pxEgp(k);return '<div class="pxbox"><small>'+esc(pxName(k))+'</small><b class="num">'+pxFmt(v)+' ج</b>'+pxChTxt(pxCh(k))+(i?'<span>= '+pxFmt(v/b)+' × '+esc(pxName(L[0]))+'</span>':'<span>الأساس</span>')+'</div>'}).join('')+'</div></div>'}
@@ -4394,13 +4399,14 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       (n(wc.g)>0?r('سعر الدهب نفسه',money(gv))+r('المصنعية'+(tx?' + الضريبة':''),money(wk+tx))+r('<b>هتدفع تقريبًا</b>','<b>'+money(gv+wk+tx)+'</b>')+r('لو بعته النهاردة (شراء المحل)',money(buy)+' <span class="fine">(المصنعية مش بترجع)</span>'):'')+'</div>'}
   /* ================= fuel prices in Egypt (set by the pricing committee; dated history) ================= */
   var FUEL=[['b95','⛽ بنزين 95','لتر'],['b92','⛽ بنزين 92','لتر'],['b80','⛽ بنزين 80','لتر'],['sol','🛢️ سولار','لتر'],['cng','🔵 غاز طبيعي للعربيات','متر مكعب'],['bh','🧯 أنبوبة بوتاجاز منزلي (12.5 كجم)','أنبوبة'],['bc','🧯 أنبوبة بوتاجاز تجاري (25 كجم)','أنبوبة']];
-  var FUELH=[['2019-07-05',{b80:6.75,b92:8,b95:9,sol:6.75}],['2019-10-03',{b80:6.5,b92:7.75,b95:8.75}],['2020-04-10',{b80:6.25,b92:7.5,b95:8.5}],['2021-04-23',{b80:6.5,b92:7.75,b95:8.75}],
+  var FUELH=[['2008-05-05',{b80:0.9,b92:1.85,b95:2.75,sol:1.1}],['2012-07-01',{b95:null}],['2014-07-05',{b80:1.6,b92:2.6,b95:6.25,sol:1.8,cng:1.1}],['2016-11-04',{b80:2.35,b92:3.5,sol:2.35,cng:1.6,bh:15}],
+    ['2017-06-29',{b80:3.65,b92:5,b95:6.6,sol:3.65,cng:2,bh:30}],['2018-06-16',{b80:5.5,b92:6.75,b95:7.75,sol:5.5,cng:2.75,bh:50}],['2019-07-05',{b80:6.75,b92:8,b95:9,sol:6.75,bh:65,cng:null}],['2021-07-23',{bh:null}],['2021-10-08',{cng:3.75}],['2022-07-13',{cng:null}],['2024-03-22',{bh:100,bc:200}],['2019-10-04',{b80:6.5,b92:7.75,b95:8.75}],['2020-04-10',{b80:6.25,b92:7.5,b95:8.5}],['2021-04-23',{b80:6.5,b92:7.75,b95:8.75}],
     ['2021-07-23',{b80:6.75,b92:8,b95:9}],['2021-10-08',{b80:7,b92:8.25,b95:9.25}],['2022-02-04',{b80:7.25,b92:8.5,b95:9.5}],['2022-04-15',{b80:7.5,b92:8.75,b95:9.75}],['2022-07-13',{b80:8,b92:9.25,b95:10.75,sol:7.25}],
     ['2023-03-02',{b80:8.75,b92:10.25,b95:11.25}],['2023-11-03',{b80:10,b92:11.5,b95:12.5,sol:8.25}],['2024-03-22',{b80:11,b92:12.5,b95:13.5,sol:10}],['2024-07-25',{b80:12.25,b92:13.75,b95:15,sol:11.5}],
     ['2024-09-18',{bh:150,bc:300}],['2024-10-18',{b80:13.75,b92:15.25,b95:17,sol:13.5,cng:7}],['2025-04-11',{b80:15.75,b92:17.25,b95:19,sol:15.5,bh:200,bc:400}],
     ['2025-10-17',{b80:17.75,b92:19.25,b95:21,sol:17.5,cng:10,bh:225,bc:450}],['2026-03-10',{b80:20.75,b92:22.25,b95:24,sol:20.5,cng:13,bh:275,bc:550}]];
   var FUEL_REVIEW='2026-10-15';
-  function fuelAt(k,d){var v=null,at=null;d=d||iso(today());FUELH.forEach(function(h){if(h[0]<=d&&h[1][k]!=null){v=h[1][k];at=h[0]}});return v==null?null:{v:v,at:at}}
+  function fuelAt(k,d){var v=null,at=null;d=d||iso(today());FUELH.forEach(function(h){if(h[0]<=d&&h[1][k]!==undefined){v=h[1][k];at=h[0]}});return v==null?null:{v:v,at:at}}
   function fuelHist(k){var L=[];FUELH.forEach(function(h){if(h[1][k]!=null)L.push({d:h[0],v:h[1][k]})});return L}
   function fuelName(k){var f=FUEL.filter(function(x){return x[0]===k})[0];return f?f[1].replace(/^\S+\s/,''):k}
   function pxTabFuel(){var fav=pxFav(),fc=PXS.fc=PXS.fc||{k:'b92',l:'',km:'',cons:'',bud:''},op=PXS.fo||'';
@@ -4409,10 +4415,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       return pxRow('f:'+f[0],f[1],'لكل '+f[2]+' · من '+dShort(c.at),c.v,null,pxChTxt(ch)+'<button class="btn sm" data-act="fu-h" data-v="'+f[0]+'">'+(op===f[0]?'اقفل السجل':'📜 السجل')+'</button>')+
         (op===f[0]?'<div class="rows">'+H.slice().reverse().map(function(x,i,A){var p=A[i+1];return '<div class="r"><span class="k">'+dShort(x.d)+'</span><span class="v"><b class="num">'+pxFmt(x.v)+'</b> ج'+(p?' '+pxChTxt((x.v/p.v-1)*100):' <span class="fine">(أقدم سعر عندي)</span>')+'</span></div>'}).join('')+'</div>':'')}).join('');
     /* step chart of 92 and diesel */
-    var P=FUELH.filter(function(h){return h[0]>='2019-07-05'}),t0=new Date(P[0][0]).getTime(),t1=Date.now(),W=330,H2=150,mx=25;
+    var P=FUELH.filter(function(h){return h[0]>='2008-05-05'}),t0=new Date(P[0][0]).getTime(),t1=Date.now(),W=330,H2=150,mx=25;
     var line=function(k,col){var pts=[],last=null;P.forEach(function(h){if(h[1][k]==null)return;var x=4+(new Date(h[0]).getTime()-t0)/(t1-t0)*(W-8),y=H2-8-h[1][k]/mx*(H2-20);if(last!=null)pts.push(x.toFixed(1)+','+last.toFixed(1));pts.push(x.toFixed(1)+','+y.toFixed(1));last=y});
       pts.push((W-4)+','+last.toFixed(1));return '<polyline fill="none" stroke="'+col+'" stroke-width="2" points="'+pts.join(' ')+'"/>'};
-    h+='<div class="rows pxtool"><h3>📈 رحلة الأسعار من 2019</h3><svg viewBox="0 0 '+W+' '+H2+'" width="100%" role="img" aria-label="رسم أسعار البنزين والسولار" style="direction:ltr;display:block">'+line('b95','#e8a33d')+line('b92','var(--accent)')+line('sol','var(--ok)')+line('b80','#9aa3b2')+'</svg>'+
+    h+='<div class="rows pxtool"><h3>📈 رحلة الأسعار من 2008</h3><svg viewBox="0 0 '+W+' '+H2+'" width="100%" role="img" aria-label="رسم أسعار البنزين والسولار" style="direction:ltr;display:block">'+line('b95','#e8a33d')+line('b92','var(--accent)')+line('sol','var(--ok)')+line('b80','#9aa3b2')+'</svg>'+
       '<div class="pxchs"><span style="color:#e8a33d">— 95</span><span style="color:var(--accent)">— 92</span><span style="color:#9aa3b2">— 80</span><span style="color:var(--ok)">— سولار</span><span>بنزين 92: '+pxFmt(fuelHist('b92')[0].v)+' ← '+pxFmt(fuelAt('b92').v)+' ج (×'+nf(fuelAt('b92').v/fuelHist('b92')[0].v,1)+')</span></div></div>';
     /* calculators */
     var pr=(fuelAt(fc.k)||{v:0}).v,L=n(fc.l),km=n(fc.km),cons=n(fc.cons),bud=n(fc.bud),mL=km&&cons?km*cons/100:0;
@@ -4427,7 +4433,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     return h}
   /* ================= any past day: currencies, gold, silver, crypto, fuel ================= */
   var PXH={};
-  function pxHistGet(d){if(PXH[d])return Promise.resolve(PXH[d]);var c=pxJ('3bh_pxhd',{});if(c[d]){PXH[d]=c[d];return Promise.resolve(c[d])}
+  function pxHistGet(d){if(PXH[d])return Promise.resolve(PXH[d]);
+    if(d<'2024-03-02')return histLoad().then(function(){var o=histDay(d);if(!o)throw new Error('none');PXH[d]=o;return o});
+    var d0=d;return pxHistNet(d).catch(function(){var p=new Date(d0+'T12:00:00');p.setDate(p.getDate()-1);var d1=iso(p);return pxHistNet(d1).catch(function(){p.setDate(p.getDate()-1);return pxHistNet(iso(p))})}).then(function(o){PXH[d0]=o;return o})}
+  function pxHistNet(d){if(PXH[d]&&PXH[d].src!=='hist')return Promise.resolve(PXH[d]);var c=pxJ('3bh_pxhd',{});if(c[d]){PXH[d]=c[d];return Promise.resolve(c[d])}
     var U=['https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@'+d+'/v1/currencies/usd.min.json','https://'+d+'.currency-api.pages.dev/v1/currencies/usd.min.json','https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/'+d+'/currencies/usd.min.json'];
     function tryI(i){if(i>=U.length)return Promise.reject(new Error('none'));return pxGet(U[i]).then(function(j){if(!j||!j.usd||!(+j.usd.egp>0))throw new Error('bad');return j},function(){return tryI(i+1)}).catch(function(){return tryI(i+1)})}
     return tryI(0).then(function(j){var u=j.usd,o={d:j.date||d,egp:+u.egp,fx:{},xau:+u.xau||0,xag:+u.xag||0,k:{}};PXC.forEach(function(x){var v=+u[x[0].toLowerCase()];if(v>0)o.fx[x[0]]=v});
@@ -4441,29 +4450,181 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if((m=key.match(/^f:(\w+)$/))){var f=fuelAt(m[1],o.d);return f?f.v:0}return 0}
   function pxTabDay(){var dy=PXS.dy=PXS.dy||{d:iso(new Date(today().getFullYear(),today().getMonth(),today().getDate()-30)),s:'fx'},o=PXH[dy.d],td=iso(today());
     var q=function(n0,l){var d=new Date(today().getFullYear(),today().getMonth(),today().getDate()-n0);return '<button class="chip'+(dy.d===iso(d)?' on':'')+'" data-act="dy-q" data-v="'+iso(d)+'">'+l+'</button>'};
-    var h='<div class="pxcv"><label for="dy-d" class="fine">اختار اليوم</label><input id="dy-d" class="in" type="date" dir="ltr" min="2020-11-23" max="'+td+'" value="'+esc(dy.d)+'" style="width:100%">'+
-      '<div class="chips">'+q(1,'امبارح')+q(7,'من أسبوع')+q(30,'من شهر')+q(91,'من 3 شهور')+q(182,'من 6 شهور')+q(365,'من سنة')+q(730,'من سنتين')+'</div></div>';
+    var h='<div class="pxcv"><label for="dy-d" class="fine">اختار اليوم</label><input id="dy-d" class="in" type="date" dir="ltr" min="1970-01-01" max="'+td+'" value="'+esc(dy.d)+'" style="width:100%">'+
+      '<div class="chips">'+q(1,'امبارح')+q(7,'من أسبوع')+q(30,'من شهر')+q(91,'من 3 شهور')+q(182,'من 6 شهور')+q(365,'من سنة')+q(730,'من سنتين')+q(1826,'من 5 سنين')+q(3652,'من 10 سنين')+q(7305,'من 20 سنة')+q(Math.round((today()-new Date(1970,0,1))/864e5),'1 يناير 1970')+'</div></div>';
     if(!o){if(!dy.busy&&!dy.err){dy.busy=1;pxHistGet(dy.d).then(function(){dy.busy=0;if(route==='prices'&&PXS.tab==='day')renderMain()},function(){dy.busy=0;dy.err=1;if(route==='prices'&&PXS.tab==='day')renderMain()})}
-      return h+(dy.err?'<div class="empty">مش لاقي أسعار محفوظة لليوم ده. جرّب يوم قريب منه (أقدم يوم متاح تقريبًا 23 نوفمبر 2020)، وأسعار الوقود موجودة من يوليو 2019.</div>'+pxDayFuel(dy.d):'<div class="empty">بيجيب أسعار يوم '+dShort(dy.d)+'…</div>')}
+      return h+(dy.err?'<div class="empty">مش لاقي أسعار لليوم ده. جرّب يوم قريب منه، أو اتأكد من النت.</div>'+pxDayFuel(dy.d):'<div class="empty">بيجيب أسعار يوم '+dShort(dy.d)+'…</div>')}
     var secs=[['fx','💵 العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود']];
     h+='<p class="pxstamp">📅 أسعار يوم <b>'+pxWhen(new Date(o.d+'T12:00:00').getTime()).replace(/ · الساعة.*/,'')+'</b> وجنبها التغيير لحد النهاردة.</p><div class="chips">'+secs.map(function(x){return '<button class="chip'+(dy.s===x[0]?' on':'')+'" data-act="dy-s" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
     var row=function(key,label,sub){var then=pxEgpOn(o,key),now=pxEgp(key);if(!(then>0))return '';return '<div class="pxr"><span></span><div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(then)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(now)+'</b></span>'+(now?pxChTxt((now/then-1)*100):'')+'</div><span></span></div>'};
     var L='';
     if(dy.s==='fx')L=PXC.map(function(c){return row('c:'+c[0],c[1]+' '+c[2],c[0])}).join('');
-    else if(dy.s==='gold')L=PXG.map(function(g){return row('g'+g[0],g[1])}).join('')+row('gpound','🪙 جنيه الدهب','8 جرام عيار 21')+(o.xau?'<p class="fine">الأونصة يومها: $'+nf(1/o.xau,2)+' · الدولار يومها: '+nf(o.egp,2)+' ج</p>':'');
+    else if(dy.s==='gold')L=PXG.map(function(g){return row('g'+g[0],g[1])}).join('')+row('gpound','🪙 جنيه الدهب','8 جرام عيار 21')+(o.xau?'<p class="fine">الأونصة يومها: $'+nf(1/o.xau,2)+(o.src==='hist'?' (متوسط الشهر)':'')+' · الدولار يومها: '+nf(o.egp,3)+' ج</p>':'');
     else if(dy.s==='silver')L=PXSV.map(function(g){return row('s'+g[0],g[1])}).join('')+(o.xag?'<p class="fine">أونصة الفضة يومها: $'+nf(1/o.xag,2)+'</p>':'');
-    else if(dy.s==='crypto')L=PXK.map(function(k){return row('k:'+k[0],k[1],k[0])}).join('');
+    else if(dy.s==='crypto'){if(o.d<'2017-08-17')L='<div class="empty">أسعار العملات الرقمية متاحة هنا من 17 أغسطس 2017. اختار يوم بعده.</div>';else if(o.src==='hist'&&!o.kL){pxKlDay(o).then(function(){if(route==='prices'&&PXS.tab==='day')renderMain()});L='<div class="empty">بيجيب أسعار العملات الرقمية يومها…</div>'}else L=PXK.map(function(k){return row('k:'+k[0],k[1],k[0])}).join('')}
     else L=pxDayFuel(o.d);
-    return h+(L||'<div class="empty">مفيش أسعار للقسم ده في اليوم ده.</div>')+((dy.s==='gold'||dy.s==='silver')?'<p class="note">محسوب من السعر العالمي يومها وسعر الدولار يومها'+(n(pxCal().gp)||n(pxCal().sp)?'، وبنفس فرق الصاغة اللي ظبطته':'')+'.</p>':'')}
+    return h+(L||'<div class="empty">مفيش أسعار للقسم ده في اليوم ده.</div>')+(o.approx?'<p class="note" style="color:var(--bad)">⚠️ قبل ديسمبر 2003 سعر الجنيه تقريبي (متوسط سنوي رسمي)، وكان فيه أكتر من سعر للدولار في بعض السنين.</p>':'')+((dy.s==='gold'||dy.s==='silver')?'<p class="note">محسوب من السعر العالمي يومها وسعر الدولار يومها'+(n(pxCal().gp)||n(pxCal().sp)?'، وبنفس فرق الصاغة اللي ظبطته':'')+'.</p>':'')}
   function pxDayFuel(d){var any=false,h='<div class="pxhd"><span>الوقود يوم '+dShort(d)+'</span><span>يومها · النهاردة</span></div>'+FUEL.map(function(f){var t=fuelAt(f[0],d),nw=fuelAt(f[0]);if(!t)return '';any=true;
       return '<div class="pxr"><span></span><div class="pxn"><b>'+f[1]+'</b><small>السعر ده من '+dShort(t.at)+'</small></div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(t.v)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(nw.v)+'</b></span>'+pxChTxt((nw.v/t.v-1)*100)+'</div><span></span></div>'}).join('');
-    return any?h:'<div class="empty">مفيش أسعار وقود محفوظة قبل يوليو 2019.</div>'}
+    return any?h:'<div class="empty">مفيش أسعار وقود محفوظة قبل مايو 2008.</div>'}
   /* charts from daily history (gold, silver, dollar, crypto, fuel) */
   function pxChartLoad2(){var ch=PXS.ch,N=ch.d<=7?7:ch.d<=30?15:ch.d<=90?16:ch.d<=365?24:30,td=today(),D=[];
     for(var i=N-1;i>=0;i--){var d=new Date(td.getFullYear(),td.getMonth(),td.getDate()-Math.round(i*ch.d/(N-1||1))-1);D.push(iso(d))}
     PXS.chd={k:ch.k,d:ch.d,busy:1};
     Promise.all(D.map(function(d){return pxHistGet(d).then(function(o){return [new Date(d+'T12:00:00').getTime(),pxEgpOn(o,ch.k)]},function(){return null})})).then(function(R){var P=R.filter(function(p){return p&&p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);
       PXS.chd=P.length>=2?{k:ch.k,d:ch.d,p:P}:{k:ch.k,d:ch.d,err:1};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()})}
+  /* ================= history bundled with the app (before the daily online archive) ================= */
+  var HIST=null,HISTP=null;
+  function histLoad(){if(HIST)return Promise.resolve(HIST);if(HISTP)return HISTP;HISTP=fetch('hist.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('h');return r.json()}).then(function(j){HIST=j;return j},function(e){HISTP=null;throw e});return HISTP}
+  function hAt(A,d){if(!A||!A.length||d<A[0][0])return null;var lo=0,hi=A.length-1;while(lo<hi){var mid=(lo+hi+1)>>1;if(A[mid][0]<=d)lo=mid;else hi=mid-1}return A[lo][1]}
+  function histDay(d){var H=HIST,e=hAt(H.egp,d);if(!(e>0))return null;var o={d:d,egp:e,fx:{USD:1},xau:0,xag:0,k:{},src:'hist',approx:d<H.approxUntil};
+    Object.keys(H.fx).forEach(function(c){var v=hAt(H.fx[c],d);if(v>0)o.fx[c]=v});var g=hAt(H.xau,d),s=hAt(H.xag,d);if(g>0)o.xau=1/g;if(s>0)o.xag=1/s;return o}
+  /* crypto on an old day: the daily close from Binance (USDT pairs, since 2017) */
+  function pxKlDay(o){if(o.kL)return Promise.resolve(o);var t0=new Date(o.d+'T00:00:00Z').getTime();if(o.d<'2017-08-17'){o.kL=1;return Promise.resolve(o)}
+    var syms=PXK.map(function(k){return k[0]}).filter(function(c){return c!=='USDT'&&c!=='USDC'});
+    return Promise.all(syms.map(function(c){return pxGet('https://api.binance.com/api/v3/klines?symbol='+c+'USDT&interval=1d&startTime='+t0+'&limit=1').then(function(a){var x=a&&a[0];if(x&&+x[4]>0&&Math.abs(x[0]-t0)<3*864e5)o.k[c]=1/(+x[4])},function(){})})).then(function(){o.k.USDT=1;o.kL=1;return o})}
+  function egpOn(d){if(HIST&&d<'2024-03-06'){var e=hAt(HIST.egp,d);if(e>0)return e}var best=null;Object.keys(PXH).forEach(function(k){if(k<=d&&(!best||k>best))best=k});return best?PXH[best].egp:(d>=iso(today())?pxUsd():0)}
+  /* ================= chart: long ranges and tap to read a point ================= */
+  var PXRANGE=[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[365,'سنة'],[730,'سنتين'],[1825,'5 سنين'],[3650,'10 سنين'],[7300,'20 سنة'],[20500,'من 1970']];
+  function pxChartLoad3(){var ch=PXS.ch,td=today(),start=new Date(td.getFullYear(),td.getMonth(),td.getDate()-ch.d),D=[],i;
+    PXS.chd={k:ch.k,d:ch.d,busy:1};
+    if(/^k:/.test(ch.k)&&ch.d>30){var sym=ch.k.slice(2);if(sym==='USDT'||sym==='USDC')sym='';
+      var iv=ch.d<=365?'1d':ch.d<=2555?'1w':'1M',st=Math.max(start.getTime(),new Date('2017-08-17').getTime());
+      return histLoad().catch(function(){}).then(function(){return sym?pxGet('https://api.binance.com/api/v3/klines?symbol='+sym+'USDT&interval='+iv+'&startTime='+st+'&limit=1000'):[]}).then(function(a){
+        var P=(a||[]).map(function(x){var d=iso(new Date(+x[0]));var e=egpOn(d);return [+x[0],e>0?+x[4]*e:0]}).filter(function(p){return p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);
+        pxChartDone(P)},function(){pxChartDone([])})}
+    var N=ch.d<=7?8:ch.d<=30?16:ch.d<=90?18:ch.d<=365?26:ch.d<=730?25:60,stepD=ch.d/(N-1);
+    for(i=0;i<N;i++){var d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+Math.round(i*stepD));if(d>=td)d=new Date(td.getFullYear(),td.getMonth(),td.getDate()-1);
+      if(ch.d>=730&&iso(d)>='2024-03-02')d=new Date(d.getFullYear(),d.getMonth(),1);D.push(iso(d))}
+    D=D.filter(function(x,j){return D.indexOf(x)===j});
+    histLoad().catch(function(){}).then(function(){return Promise.all(D.map(function(d){return pxHistGet(d).then(function(o){return [new Date(d+'T12:00:00').getTime(),pxEgpOn(o,ch.k)]},function(){return null})}))}).then(function(R){
+      var P=R.filter(function(p){return p&&p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);pxChartDone(P)})}
+  function pxChartDone(P){var ch=PXS.ch;PXS.chd=P.length>=2?{k:ch.k,d:ch.d,p:P}:{k:ch.k,d:ch.d,err:1};PXS.chsel=null;var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()}
+  function pxChPick(e){var svg=e.currentTarget,c=PXS.chd;if(!c||!c.p)return;var r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*330,P=c.p,t0=P[0][0],t1=P[P.length-1][0],best=0,bd=1e9;
+    P.forEach(function(p,i){var px=(p[0]-t0)/(t1-t0||1)*(330-8)+4,dd=Math.abs(px-x);if(dd<bd){bd=dd;best=i}});PXS.chsel=best;
+    var p=P[best],mk=document.getElementById('px-mk'),info=document.getElementById('px-chpt'),mn=c.mn,mx=c.mx,H=140;
+    if(mk){mk.setAttribute('cx',((p[0]-t0)/(t1-t0||1)*(330-8)+4).toFixed(1));mk.setAttribute('cy',(H-6-(p[1]-mn)/((mx-mn)||1)*(H-24)).toFixed(1));mk.setAttribute('r','5')}
+    if(info)info.innerHTML='📍 <b>'+pxWhen(p[0]).replace(/ · الساعة.*/,'')+'</b>: <b class="num">'+pxFmt(p[1])+'</b> ج'+(best>0?' '+pxChTxt((p[1]/P[0][1]-1)*100)+' <span class="fine">من أول الفترة</span>':'')}
+  document.addEventListener('click',function(e){var s=e.target&&e.target.closest&&e.target.closest('#px-chart svg');if(s)pxChPick({currentTarget:s,clientX:e.clientX})});
+  /* ================= Abhady: any question about prices, conversions, comparisons, step by step ================= */
+  var PXW=[['c:USD',/(دولار|usd|\$)/],['c:EUR',/(يورو|euro|eur\b)/],['c:GBP',/(استرليني|الاسترليني|انجليزي|gbp)/],['c:SAR',/(ريال سعودي|السعودي|ريال(?! قطري| عماني)|sar\b)/],['c:AED',/(درهم|اماراتي|aed\b)/],['c:KWD',/(دينار كويتي|كويتي|kwd\b)/],
+    ['c:QAR',/(ريال قطري|قطري|qar\b)/],['c:OMR',/(ريال عماني|عماني|omr\b)/],['c:BHD',/(دينار بحريني|بحريني)/],['c:JOD',/(دينار اردني|اردني|jod\b)/],['c:CHF',/(فرنك)/],['c:CAD',/(دولار كندي|كندي)/],['c:AUD',/(دولار استرالي|استرالي)/],['c:JPY',/(ين ياباني|الين\b|ين\b)/],
+    ['c:CNY',/(يوان|صيني)/],['c:TRY',/(ليره|تركي)/],['c:RUB',/(روبل|روسي)/],['c:INR',/(روبيه|هندي)/],
+    ['gpound',/(جنيه دهب|جنيه ذهب|الجنيه الدهب|الجنيه الذهب|جنيهات دهب)/],['f:b95',/(بنزين 95|95 بنزين)/],['f:b92',/(بنزين 92|92 بنزين|بنزين(?! 80| 95))/],['f:b80',/(بنزين 80|80 بنزين)/],['f:sol',/(سولار|ديزل|diesel)/],['f:cng',/(غاز (طبيعي|السيارات|العربيات)|cng)/],['f:bh',/(انبوبه|انبوبة|بوتاجاز|بوتجاز)/],
+    ['k:BTC',/(بيتكوين|بتكوين|bitcoin|btc)/],['k:ETH',/(ايثريوم|إيثريوم|ايثيريوم|ethereum|eth\b)/],['k:BNB',/(bnb|بينانس كوين)/],['k:SOL',/(سولانا|solana)/],['k:XRP',/(ريبل|xrp)/],['k:DOGE',/(دوج|doge)/],['k:USDT',/(usdt|تيثر)/],['k:TON',/(تون كوين|\bton\b)/]];
+  function pxItems(t){var out=[],g;var used=t;
+    var mk=used.match(/(?:عيار|قيراط)\s*(24|22|21|18|14|12)|(24|22|21|18|14|12)\s*(?:عيار|قيراط|k\b)/);
+    var gold=/(دهب|ذهب|gold|سبيك|سبايك|سبائك)/.test(t)&&!/(جنيه دهب|جنيه ذهب|الجنيه الدهب|الجنيه الذهب)/.test(t),silv=/(فضه|فضة|silver)/.test(t);
+    PXW.forEach(function(w){var m=t.match(w[1]);if(m&&out.every(function(o){return o.k!==w[0]}))out.push({k:w[0],i:m.index})});
+    if(gold||(mk&&!silv)){var gk='g'+(mk?(mk[1]||mk[2]):(/(سبيك|سبايك|سبائك)/.test(t)?24:21));var gi=t.search(/(دهب|ذهب|gold|عيار|سبيك|سبايك|سبائك)/);out.push({k:gk,i:gi<0?0:gi})}
+    if(silv){var sk=t.match(/(999|958|925|900|800)/);out.push({k:'s'+(sk?sk[1]:999),i:t.search(/(فضه|فضة|silver)/)})}
+    var eg=t.match(/(?:^|\s)(جنيه|جنيهات|ج\.م|ج|مصري|egp|بالمصري|بالجنيه)(?=\s|$|[؟?.,])/);if(eg&&out.every(function(o){return o.k!=='gpound'||!/جنيه (دهب|ذهب)/.test(t)}))out.push({k:'c:EGP',i:eg.index});
+    return out.sort(function(a,b){return a.i-b.i}).map(function(o){return o.k}).filter(function(k,j,A){return A.indexOf(k)===j})}
+  function pxDateIn(t){var m,td=today();
+    if((m=t.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/)))return iso(new Date(+m[3],+m[2]-1,+m[1]));
+    if((m=t.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/)))return iso(new Date(+m[1],+m[2]-1,+m[3]));
+    var MO=['يناير','فبراير','مارس','ابريل','مايو','يونيو','يوليو','اغسطس','سبتمبر','اكتوبر','نوفمبر','ديسمبر'];
+    if((m=t.match(/(\d{1,2})?\s*(يناير|فبراير|مارس|ابريل|مايو|يونيو|يوليو|اغسطس|سبتمبر|اكتوبر|نوفمبر|ديسمبر)\s*(\d{4})/)))return iso(new Date(+m[3],MO.indexOf(m[2]),+(m[1]||1)));
+    if((m=t.match(/(?:سنه|سنة|عام|في|من|ايام|year)\s*(19[5-9]\d|20[0-4]\d)/))||(m=t.match(/(?:^|\s)(19[5-9]\d|20[0-4]\d)(?:\s|$|[؟?])/)))return +m[1]===td.getFullYear()?iso(new Date(+m[1],0,1)):iso(new Date(+m[1],6,1));
+    if(/امبارح|امس/.test(t))return iso(new Date(td.getFullYear(),td.getMonth(),td.getDate()-1));
+    if((m=t.match(/من\s*(\d+)?\s*(يوم|ايام|اسبوع|اسابيع|شهر|شهور|سنه|سنين|سنوات|سنتين|شهرين|اسبوعين)/))){var k=+(m[1]||(/(سنتين|شهرين|اسبوعين)/.test(m[2])?2:1)),u=m[2];
+      if(/يوم|ايام/.test(u))return iso(new Date(td.getFullYear(),td.getMonth(),td.getDate()-k));if(/اسبوع|اسابيع/.test(u))return iso(new Date(td.getFullYear(),td.getMonth(),td.getDate()-7*k));
+      if(/شهر|شهور/.test(u))return iso(new Date(td.getFullYear(),td.getMonth()-k,td.getDate()));return iso(new Date(td.getFullYear()-k,td.getMonth(),td.getDate()))}
+    return null}
+  function pxReady(){if(PXD&&Date.now()-(PXD.at||0)<15*60000)return Promise.resolve();pxLoad(true);return new Promise(function(res){var n0=0,tm=setInterval(function(){if((!PXS.busy&&PXD)||++n0>40){clearInterval(tm);res()}},300)})}
+  function pxOpen(tab){return aiAct('افتح بكام النهاردة',function(){PXS.tab=tab||'fx';navTo('prices');sheet=null;renderSheet()})}
+  function pxU(k,v){return pxFmt(v)+' '+(k==='c:EGP'?'ج':esc(pxCode(k)))}
+  function pxAI(raw){var t=nz(raw).toLowerCase().replace(/[؟?!]/g,' ').replace(/\s+/g,' ').trim();if(!t)return false;
+    if(/(صرفت|دفعت|حولت|سجل|سجلت|ضيف|اضيف|سلفت|استلفت|رجعلي|قبضت|شحنت|عليا|معايا|عندي|عندى|فلوسي|محفظتي|كارت|بطاق|قسط|فايد|فوايد|رسوم|عمول|غرام|رصيدي|حسابي|ميزاني|اشتريت|بعت\s)/.test(t)&&!/(كام جنيه|بكام|يساوي|يعني كام|(^|\s)حول\s|كان بكام)/.test(t))return false;
+    var it=pxItems(t),amt=aiAmount(t.replace(/(عيار|قيراط)\s*\d+|\d+\s*(عيار|قيراط)|بنزين\s*\d+|\d+\s*بنزين|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4}|\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}|(19|20)\d\d|(999|958|925|900|800)/g,' ')),dt=pxDateIn(t);
+    var ask=/(سعر|اسعار|بكام|بكم|كام|تمن|ثمن|يساوي|يعني|حول|حوّل|احسب|قارن|مقارن|كان|بقى|وصل|عامل|price|rate|convert)/.test(t);
+    /* alerts */
+    if(/(نبهني|نبهنى|فكرني|ابعتلي|عرفني)/.test(t)&&it.length&&amt>0){var k0=it.filter(function(k){return k!=='c:EGP'})[0]||it[0];return pxReady().then(function(){var cur=pxEgp(k0);var A=pxAlerts();A.push({id:uid(),k:k0,v:amt,dir:amt>=cur?'up':'down',at:iso(today())});lsSet('3bh_pxal',JSON.stringify(A));
+      aiSay('🔔 تمام، هنبّهك لما <b>'+esc(pxName(k0))+'</b> '+(amt>=cur?'يطلع لـ ':'ينزل لـ ')+'<b class="num">'+pxFmt(amt)+'</b> ج. دلوقتي '+pxFmt(cur)+' ج.<br><span class="fine">بتأكد من السعر كل ما تفتح البرنامج.</span><div class="actions">'+pxOpen('tools')+'</div>')}),true}
+    /* zakat, workmanship, fuel cost: step by step */
+    if(/زكا/.test(t)&&(/(دهب|ذهب|فضه|فلوس|نصاب|مال)/.test(t)||t.length<20))return pxFlowGo('zakat',raw),true;
+    if(/(مصنعي|مصنعيه|مصنعية)/.test(t)&&/(دهب|ذهب|جرام|عيار|سلس|خاتم|دبل|غويش|حلق|اشتري|اشترى)/.test(t))return pxFlowGo('buy',raw),true;
+    if(/(بنزين|سولار|وقود|تفويل|تموين العربيه|العربيه بتصرف)/.test(t)&&/(هصرف|هيكلفني|هتكلفني|تكلفه|تكلفة|محتاج كام|في الشهر|شهريا|بمشي|كيلو|كم\b|مشوار|سفر|رحله|احسب|حساب|حسبه|استهلاك)/.test(t)&&!/(صرفت|الشهر ده|الشهر اللي فات|سجل)/.test(t)){var fk0=it.filter(function(k){return /^f:/.test(k)})[0];return pxFlowGo('fuel',raw,{k:(fk0||'f:b92').slice(2),kq:fk0?2:0}),true}
+    if(!it.length)return false;
+    if(!ask&&!(amt>0&&it.length>=2)&&!dt)return false;
+    /* comparison over time between items */
+    if(/(قارن|مقارن|ولا |احسن|افضل|كسب|خسر|زاد|زادت|اتضاعف|نسبه)/.test(t)&&(it.length>=2||dt)){var keys=it.filter(function(k){return k!=='c:EGP'});if(!keys.length)return false;if(keys.length===1)keys.push(keys[0]==='c:USD'?'g21':'c:USD');
+      var from=dt||iso(new Date(today().getFullYear()-1,today().getMonth(),today().getDate()));aiBusy('بجيب الأسعار…');
+      return Promise.all([pxReady(),histLoad().catch(function(){})]).then(function(){return pxHistGet(from)}).then(function(o){AI.busy='';var R=keys.map(function(k){var a=pxEgpOn(o,k),b=pxEgp(k);return {k:k,a:a,b:b,ch:a&&b?(b/a-1)*100:null}});
+        var ok=R.filter(function(x){return x.ch!=null}).sort(function(a,b){return b.ch-a.ch});
+        aiSay('⚖️ <b>مقارنة من '+dShort(o.d)+' لحد النهاردة:</b><br>'+R.map(function(x){return '• '+esc(pxName(x.k))+': '+(x.a?pxFmt(x.a)+' ← '+pxFmt(x.b)+' ج '+pxChTxt(x.ch):'مش متاح يومها')}).join('<br>')+
+          (ok.length>=2?'<br>🏆 <b>'+esc(pxName(ok[0].k))+'</b> زاد أكتر ('+nf(ok[0].ch,1)+'%)، يعني لو حطيت 10,000 ج فيه يومها كانت بقت '+pxFmt(10000*(1+ok[0].ch/100))+' ج النهاردة، وفي '+esc(pxName(ok[ok.length-1].k))+' كانت بقت '+pxFmt(10000*(1+ok[ok.length-1].ch/100))+' ج.':'')+
+          (o.approx?'<br><span class="fine">أسعار قبل ديسمبر 2003 تقريبية (متوسطات).</span>':'')+'<div class="actions">'+aiAct('قارن من سنة',function(){pxAI(keys.map(pxName).join(' و ')+' قارن من سنه')})+aiAct('قارن من 5 سنين',function(){pxAI(keys.map(pxName).join(' و ')+' قارن من 5 سنين')})+pxOpen('day')+'</div>')},function(){AI.busy='';aiSay('مش قادر أجيب أسعار اليوم ده دلوقتي. جرّب تاريخ تاني أو اتأكد من النت.')}),true}
+    /* a price on a past day */
+    if(dt&&dt<iso(today())){var k1=it.filter(function(k){return k!=='c:EGP'});if(!k1.length)return false;aiBusy('بدوّر على أسعار '+dShort(dt)+'…');
+      return Promise.all([pxReady(),histLoad().catch(function(){})]).then(function(){return pxHistGet(dt)}).then(function(o){return /^k:/.test(k1[0])&&o.src==='hist'?pxKlDay(o):o}).then(function(o){AI.busy='';
+        aiSay('📅 <b>يوم '+dShort(o.d)+':</b><br>'+k1.map(function(k){var a=pxEgpOn(o,k),b=pxEgp(k);return '• '+esc(pxName(k))+': '+(a?'<b class="num">'+pxFmt(a)+'</b> ج · النهاردة '+pxFmt(b)+' ج '+pxChTxt(a&&b?(b/a-1)*100:null):'مش متاح يومها')}).join('<br>')+
+          (o.approx?'<br><span class="fine">قبل ديسمبر 2003 الأرقام تقريبية (متوسط سنوي).</span>':'')+'<div class="actions">'+aiAct('قارنه بالدهب والدولار',function(){pxAI('قارن الدهب والدولار من '+o.d.split('-').reverse().join('/'))})+pxOpen('day')+'</div>')},function(){AI.busy='';aiSay('مش لاقي أسعار محفوظة لليوم ده. أقدم يوم عندي للعملات تقريبًا من 1970 (متوسطات) وبالتفصيل من 2003، والدهب والفضة من 1970، والوقود من 2008.')}),true}
+    /* conversion: "100 دولار كام جنيه" / "حول 300 يورو لدولار" / "10 جرام 21 بكام" */
+    var only=it.filter(function(k){return k!=='c:EGP'});if(!(amt>0)&&only.length===1)return pxReady().then(function(){pxPriceSay(only[0])}),true;
+    return pxReady().then(function(){var keys=it.slice(),a=amt>0?amt:1,from=keys[0],to=keys[1]||(from==='c:EGP'?'c:USD':'c:EGP');if(keys.length===1&&from==='c:EGP'&&!(amt>0))to='c:USD';
+      var vf=pxEgp(from),vt=pxEgp(to);if(!(vf>0)||!(vt>0)){aiSay('مش قادر أجيب السعر دلوقتي. جرّب كمان شوية.<div class="actions">'+pxOpen()+'</div>');return}
+      var res=a*vf/vt,ex='';
+      if(/^g/.test(from)||from==='gpound')ex='<br><span class="fine">بيع '+pxFmt(pxEgp(from)*a)+' ج · شراء المحل حوالي '+pxFmt(pxEgp(from,'buy')*a)+' ج (من غير مصنعية).</span>';
+      if(/^f:/.test(from))ex='<br><span class="fine">السعر الرسمي من '+dShort((fuelAt(from.slice(2))||{}).at||'')+'.</span>';
+      var st=PXD?'<br><span class="fine">🕒 آخر تحديث للأسعار: '+pxWhen(/^c:/.test(from)?PXD.fxAt:PXD.gT||PXD.at)+'</span>':'';
+      aiSay('💱 <b class="num">'+nf(a)+'</b> '+esc(pxName(from))+' = <b class="num">'+pxFmt(res)+'</b> '+(to==='c:EGP'?'جنيه':esc(pxName(to)))+(a!==1?'<br><span class="fine">الواحد = '+pxFmt(vf/vt)+' '+(to==='c:EGP'?'ج':esc(pxCode(to)))+'</span>':'')+ex+st+
+        '<div class="actions">'+aiAct('اعكس',function(){pxAI(nf(res,2).replace(/,/g,'')+' '+pxName(to)+' كام '+pxName(from))})+aiAct('كان بكام من سنة؟',function(){pxAI(pxName(from)+' كان بكام من سنه')})+aiAct('🔔 نبّهني بسعره',function(){sheet={mode:'pxal',k:from==='c:EGP'?to:from};renderSheet()})+pxOpen(/^f:/.test(from)?'fuel':/^g|gpound/.test(from)?'gold':/^s/.test(from)?'silver':/^k:/.test(from)?'crypto':'conv')+'</div>')}),true}
+  /* step-by-step flows in the chat */
+  function pxFlowStart(f,d){AI.pend={kind:'px',f:f,d:d||{}};pxFlowAsk()}
+  function pxFlowAsk(){var p=AI.pend;if(!p||p.kind!=='px')return;var d=p.d,ca=aiAct('إلغاء',function(){AI.pend=null;aiSay('تمام، لغيت الحسبة.')});
+    var q=function(h,btns){aiSay(h+'<div class="actions">'+(btns||'')+ca+'</div>')};
+    var kb=function(){return [24,21,18].map(function(k){return aiAct('عيار '+k,function(){pxFlowIn(String(k))})}).join('')};
+    if(p.f==='zakat'){if(d.g==null)return q('✨ <b>نحسب الزكاة خطوة خطوة.</b><br>1️⃣ عندك كام جرام دهب؟ (اكتب 0 لو مفيش)');if(d.g>0&&!d.k)return q('2️⃣ الدهب ده عيار كام؟',kb());if(d.s==null)return q('3️⃣ وعندك كام جرام فضة؟ (0 لو مفيش)');
+      if(d.c==null){var bal=0;(S.accounts||[]).concat(S.wallets||[]).forEach(function(o){bal+=Math.max(egpVal(o),0)});return q('4️⃣ وعندك كام فلوس ومدخرات عدّى عليها سنة؟ (بالجنيه)',aiAct('استخدم أرصدتي ('+fmt(Math.round(bal))+' ج)',function(){pxFlowIn(String(Math.round(bal)))})+aiAct('مفيش',function(){pxFlowIn('0')}))}
+      AI.pend=null;return pxReady().then(function(){var gv=d.g*pxEgp('g'+(d.k||21)),sv=d.s*pxEgp('s999'),tot=gv+d.c+sv,nis=85*pxEgp('g24');
+        aiSay('✨ <b>حساب الزكاة:</b><br>• الدهب: '+nf(d.g)+' جرام عيار '+(d.k||21)+' = '+pxFmt(gv)+' ج<br>• الفضة: '+nf(d.s)+' جرام = '+pxFmt(sv)+' ج<br>• الفلوس: '+(d.c?pxFmt(d.c):'0')+' ج<br>• الإجمالي: <b>'+pxFmt(tot)+' ج</b><br>• النصاب (85 جرام عيار 24): '+pxFmt(nis)+' ج<br>'+
+          (tot>=nis?'✅ وصلت النصاب، والزكاة (2.5%) = <b class="num">'+pxFmt(tot*0.025)+'</b> ج':'❌ أقل من النصاب، مفيش زكاة')+'<br><span class="fine">الزكاة على المال اللي عدّى عليه سنة هجرية كاملة. لو عندك ظروف خاصة اسأل دار الإفتاء.</span><div class="actions">'+pxOpen('tools')+'</div>')})}
+    if(p.f==='buy'){if(d.g==null)return q('🧮 <b>نحسب سعر الدهب بالمصنعية.</b><br>1️⃣ الوزن كام جرام؟');if(!d.k)return q('2️⃣ عيار كام؟',kb());if(d.w==null)return q('3️⃣ مصنعية الجرام كام جنيه؟',[50,100,150,200].map(function(x){return aiAct(x+' ج',function(){pxFlowIn(String(x))})}).join(''));
+      AI.pend=null;return pxReady().then(function(){var gv=d.g*pxEgp('g'+d.k),wk=d.g*d.w,bk=d.g*pxEgp('g'+d.k,'buy');
+        aiSay('🧮 <b>'+nf(d.g)+' جرام عيار '+d.k+':</b><br>• سعر الدهب: '+pxFmt(gv)+' ج<br>• المصنعية: '+pxFmt(wk)+' ج<br>• <b>هتدفع حوالي '+pxFmt(gv+wk)+' ج</b><br>• لو بعته النهاردة: حوالي '+pxFmt(bk)+' ج (المصنعية مش بترجع، يعني هتخسر '+pxFmt(gv+wk-bk)+' ج لو بعت على طول)<div class="actions">'+aiAct('قارنه بسبيكة 24',function(){pxAI(nf(d.g)+' جرام عيار 24 بكام')})+pxOpen('gold')+'</div>')})}
+    if(p.f==='fuel'){if(d.km==null)return q('⛽ <b>نحسب مصاريف البنزين.</b><br>1️⃣ بتمشي كام كيلو في الشهر تقريبًا؟',[500,1000,1500,2000,3000].map(function(x){return aiAct(nf(x)+' كم',function(){pxFlowIn(String(x))})}).join(''));
+      if(d.c==null)return q('2️⃣ عربيتك بتصرف كام لتر لكل 100 كيلو؟',[6,7,8,10,12].map(function(x){return aiAct(x+' لتر',function(){pxFlowIn(String(x))})}).join(''));
+      if(d.kq!==2){d.kq=1;return q('3️⃣ بتموّن إيه؟',FUEL.slice(0,5).map(function(f){return aiAct(f[1],function(){pxFlowIn(f[1])})}).join(''))}
+      AI.pend=null;var pr=(fuelAt(d.k)||{v:0}).v,L=d.km*d.c/100,H=fuelHist(d.k),old=H.length>2?H[H.length-3]:null;
+      return aiSay('⛽ <b>'+esc(fuelName(d.k))+' بـ '+pxFmt(pr)+' ج:</b><br>• هتحتاج حوالي <b>'+nf(L,1)+'</b> لتر في الشهر<br>• = <b class="num">'+pxFmt(L*pr)+'</b> ج في الشهر، و'+pxFmt(L*pr*12)+' ج في السنة'+(old?'<br>• نفس المشوار كان بيكلّف '+pxFmt(L*old.v)+' ج في الشهر أيام '+dShort(old.d):'')+'<div class="actions">'+aiAct('احسبها بسعر 95',function(){pxFlowStart('fuel',{km:d.km,c:d.c,k:'b95',kq:2})})+pxOpen('fuel')+'</div>')}}
+  /* reads every answer it can find in one message ("100 جرام عيار 21", "500 كيلو و 8 لتر"), then asks only for what's still missing */
+  function pxFlowIn(raw,first){var p=AI.pend;if(!p||p.kind!=='px')return false;var t=nz(raw).toLowerCase().replace(/[؟?!،,]/g,' ').replace(/\s+/g,' ').trim(),d=p.d,got=0;
+    if(/^(الغ|خلاص|بلاش|مش عايز|cancel|stop)/.test(t)){AI.pend=null;aiSay('تمام، لغيت الحسبة.');return true}
+    var N=function(x){var v=aiAmount(x);return v>0||/(^|\s)0(\s|$)/.test(x)?v:null};
+    var take=function(re){var m=t.match(re);if(!m)return null;t=t.replace(m[0],' ');return m};
+    var kar=take(/(?:عيار|قيراط)\s*(24|22|21|18|14|12)|(24|22|21|18|14|12)\s*(?:عيار|قيراط|k\b)/);var K=kar?(kar[1]||kar[2]):null;
+    if(p.f==='zakat'){var sg=take(/(\d+(?:\.\d+)?)\s*(?:جرام|جم|غرام)?\s*(?:فضه|فضة)/);if(sg&&d.s==null){d.s=+sg[1];got++}
+      var gg=take(/(\d+(?:\.\d+)?)\s*(?:جرام|جم|غرام)(?:\s*(?:دهب|ذهب))?/);if(gg&&d.g==null){d.g=+gg[1];got++}
+      if(K&&!d.k){d.k=K;got++}
+      var rest=/\d/.test(t)?N(t):(/^(لا|مفيش|ولا حاجه|صفر|معنديش)/.test(t)?0:null);
+      if(rest!=null&&!got){if(d.g==null)d.g=rest;else if(d.g>0&&!d.k){var b=String(rest);if(/^(24|22|21|18|14|12)$/.test(b))d.k=b;else rest=null}else if(d.s==null)d.s=rest;else if(d.c==null)d.c=rest;if(rest!=null)got++}}
+    else if(p.f==='buy'){var wk=take(/(?:مصنعي\S*|المصنعي\S*)\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:ج|جنيه)?\s*(?:مصنعي\S*)/);if(wk&&d.w==null){d.w=+(wk[1]||wk[2]);got++}
+      var g2=take(/(\d+(?:\.\d+)?)\s*(?:جرام|جم|غرام)/);if(g2&&d.g==null){d.g=+g2[1];got++}
+      if(K&&!d.k){d.k=K;got++}
+      var r2=/\d/.test(t)?N(t):null;
+      if(r2!=null&&!got){if(d.g==null&&r2>0)d.g=r2;else if(d.g!=null&&!d.k){if(/^(24|22|21|18|14|12)$/.test(String(r2)))d.k=String(r2);else r2=null}else if(d.w==null)d.w=r2;else r2=null;if(r2!=null)got++}}
+    else if(p.f==='fuel'){t=t.replace(/(\d+)\s*(?:بنزين)/,' بنزين $1 ');var fk=pxItems(t).filter(function(k){return /^f:/.test(k)})[0];if(fk){d.k=fk.slice(2);d.kq=2;got++;}t=t.replace(/(بنزين|سولار|غاز)\s*\d*/g,' ')
+      var km=take(/(\d+(?:\.\d+)?)\s*(?:الف|ألف)?\s*(?:كيلو|كم)/);if(km&&d.km==null){d.km=+km[1]*(/(الف|ألف)/.test(km[0])?1000:1);got++}
+      var lt=take(/(\d+(?:\.\d+)?)\s*(?:لتر)/);if(lt&&d.c==null){d.c=+lt[1];got++}
+      t=t.replace(/(في|لكل|كل)\s*(ال)?\s*100/,' ');
+      var r3=/\d/.test(t)?N(t):null;
+      if(r3>0&&!got){if(d.km==null)d.km=r3;else if(d.c==null)d.c=r3;else r3=null;if(r3!=null)got++}
+      if(!got&&d.km!=null&&d.c!=null&&d.kq===1&&/^(اه|ايوه|نعم|عادي|نفسه|92)/.test(t)){d.kq=2;got++}}
+    if(!got&&!first){/* not an answer: a new question or a different topic ends the calculation */
+      if(!/\d/.test(raw)&&nz(raw).trim().split(/\s+/).length>=2||/(سعر|بكام|بكم|كام|قارن|ازاي|ليه|عايز|اعرف|احسب|سجل|صرفت|دفعت)/.test(nz(raw))){AI.pend=null;return false}
+      return pxFlowAsk(),true}
+    pxFlowAsk();return true}
+  function pxFlowGo(f,raw,d){AI.pend={kind:'px',f:f,d:d||{}};pxFlowIn(raw,1)}
+  /* a plain "how much is X today" answer, the same numbers as the prices page */
+  function pxPriceSay(k){if(!PXD&&!/^f:/.test(k))return aiSay('مش قادر أجيب الأسعار دلوقتي. اتأكد من النت وجرّب تاني.<div class="actions">'+pxOpen()+'</div>');var st=function(t0){return '<br><span class="fine">🕒 آخر تحديث: '+pxWhen(t0)+'</span>'},h='',tab='fx';
+    if(/^g|gpound/.test(k)){tab='gold';var cal=pxCal();h='🟡 <b>الدهب النهاردة'+(cal.gp?' (مظبوط على سعر الصاغة)':'')+':</b><br>'+[24,21,18,14].concat(/^g(22|12)$/.test(k)?[+k.slice(1)]:[]).map(function(x){return '• عيار '+x+': بيع <b class="num">'+pxFmt(pxEgp('g'+x))+'</b> · شراء '+pxFmt(pxEgp('g'+x,'buy'))+' ج'+(k==='g'+x&&k!=='g24'?' ⬅️':'')}).join('<br>')+
+      '<br>• الجنيه الدهب: <b class="num">'+pxFmt(pxEgp('gpound'))+'</b> ج<br>• الأونصة عالميًا: $'+nf(PXD.gold.oz,2)+' '+pxChTxt(PXD.gold.ch)+'<br>• دولار الدهب: '+nf(pxUsd()*(1+n(cal.gp)/100),2)+' ج'+st(PXD.gT||PXD.at)+(cal.gp?'':'<br><span class="fine">ده السعر العالمي بالجنيه. محلات الصاغة أعلى شوية، وتقدر تظبطه من صفحة الدهب.</span>')}
+    else if(/^s/.test(k)){tab='silver';h='⚪ <b>الفضة النهاردة:</b><br>'+PXSV.map(function(g){return '• '+g[1]+': <b class="num">'+pxFmt(pxEgp('s'+g[0]))+'</b> ج للجرام'}).join('<br>')+'<br>• الأونصة عالميًا: $'+nf(PXD.silver.oz,2)+st(PXD.sT||PXD.at)}
+    else if(/^f:/.test(k)){tab='fuel';h='⛽ <b>أسعار الوقود النهاردة:</b><br>'+FUEL.map(function(f){var c=fuelAt(f[0]);return '• '+f[1]+': <b class="num">'+pxFmt(c.v)+'</b> ج'+(f[0]===k.slice(2)?' ⬅️':'')}).join('<br>')+'<br><span class="fine">آخر تغيير '+dShort('2026-03-10')+'، وآخر قرار للجنة التسعير '+dShort(FUEL_REVIEW)+' (تثبيت).</span>'}
+    else if(/^k:/.test(k)){tab='crypto';var c2=PXD.cr[k.slice(2)]||{};h='₿ <b>'+esc(pxName(k))+':</b> $'+pxFmt(c2.usd)+' = <b class="num">'+pxFmt(pxEgp(k))+'</b> ج '+pxChTxt(c2.ch)+' <span class="fine">(24 ساعة)</span>'+st(PXD.cT||PXD.at)}
+    else{tab='fx';var v=pxEgp(k),pv=pxPrev(k);h='💵 <b>'+esc(pxName(k))+'</b> = <b class="num">'+pxFmt(v)+'</b> ج'+(pv?' '+pxChTxt((v/pv-1)*100)+' <span class="fine">عن آخر مرة</span>':'')+st(PXD.fxAt||PXD.at)+'<br><span class="fine">ده السعر الرسمي المتوسط. البنوك بتفرق قروش بسيطة.</span>'}
+    aiSay(h+'<div class="actions">'+aiAct('كان بكام من سنة؟',function(){pxAI(pxName(k)+' كان بكام من سنه')})+aiAct('🔔 نبّهني بسعره',function(){sheet={mode:'pxal',k:k};renderSheet()})+pxOpen(tab)+'</div>')}
   function screenPrices(){if(!PXD||Date.now()-(PXD.at||0)>5*60000)setTimeout(function(){pxLoad()},0);var T=PXS.tab;
     var tabs=[['fx','💵 العملات'],['conv','🔁 محوّل العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['bars','🧱 سبايك وجنيهات'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود'],['day','📅 يوم معيّن'],['tools','🧰 أدواتي']];
     var h='<section class="sec pxs"><div class="pxtabs" role="tablist">'+tabs.map(function(x){return '<button role="tab" class="pxt'+(T===x[0]?' on':'')+'" data-act="px-tab" data-v="'+x[0]+'" aria-selected="'+(T===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
