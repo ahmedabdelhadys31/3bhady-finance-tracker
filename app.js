@@ -299,10 +299,10 @@
     assets:[
       {k:'kind',l:'النوع',t:'select',opts:['دهب','فضة','عقار','عربية','عملة أجنبية (كاش)','عملات رقمية','أسهم وصناديق','حاجة تانية'],refresh:1,full:1},
       {k:'name',l:'الاسم أو الوصف',t:'text',req:1,full:1},
-      {k:'karat',l:'العيار',t:'select',opts:['24','21','18'],when:aIs('gold')},{k:'purity',l:'النقاوة',t:'select',opts:['999','925','800'],when:aIs('silver')},
+      {k:'karat',l:'العيار',t:'select',opts:['24','22','21','18','14','12'],when:aIs('gold')},{k:'purity',l:'النقاوة',t:'select',opts:['999','958','925','900','800'],when:aIs('silver')},
       {k:'weight',l:'الوزن (جرام)',t:'number',when:aIs('gold','silver')},
-      {k:'cur',l:'العملة',t:'select',opts:['USD','EUR','GBP','SAR','AED','KWD','QAR','OMR','BHD','JOD','CHF','CAD','AUD','JPY','CNY','TRY'],when:aIs('fx')},
-      {k:'coin',l:'العملة الرقمية',t:'select',opts:['BTC','ETH','USDT','USDC','BNB','SOL','XRP','TON','DOGE','TRX','ADA'],when:aIs('crypto')},
+      {k:'cur',l:'العملة',t:'select',opts:["USD","EUR","GBP","SAR","AED","KWD","QAR","OMR","BHD","JOD","CHF","CAD","AUD","JPY","CNY","TRY","RUB","INR","LYD","MAD","TND","IQD","SEK","NOK","DKK","SGD","MYR","ZAR"],when:aIs('fx')},
+      {k:'coin',l:'العملة الرقمية',t:'select',opts:["BTC","ETH","USDT","USDC","BNB","SOL","XRP","TON","DOGE","ADA","TRX","AVAX","LINK","DOT","LTC","BCH","XLM","SHIB"],when:aIs('crypto')},
       {k:'stype',l:'نوع الاستثمار',t:'select',opts:['سهم','صندوق استثمار','صندوق ذهب','صندوق نقدي','سندات / أذون خزانة','ETF','حاجة تانية'],when:aIs('stock')},
       {k:'market',l:'البورصة / السوق',t:'select',opts:['البورصة المصرية (EGX)','السوق الأمريكي','السوق السعودي (تداول)','سوق الإمارات','سوق تاني','خارج البورصة'],when:aIs('stock')},
       {k:'ticker',l:'كود السهم (مثلًا COMI)',t:'text',when:aIs('stock')},{k:'broker',l:'شركة السمسرة أو التطبيق',t:'text',when:aIs('stock')},
@@ -361,7 +361,7 @@
 
   function mfOnly(v){return v.kind==='Money Fellows'}
   function normalize(d){
-    var o={v:2,seeds:(d&&d.seeds)||{},notifs:Array.isArray(d&&d.notifs)?d.notifs:[],notifyHour:d&&d.notifyHour!=null?d.notifyHour:10,profile:(d&&d.profile&&typeof d.profile==='object')?d.profile:{name:''},holidays:(d&&d.holidays&&typeof d.holidays==='object')?d.holidays:{add:[],del:[]},ntSince:(d&&d.ntSince)||'',cats:Array.isArray(d&&d.cats)?d.cats:[],catHide:Array.isArray(d&&d.catHide)?d.catHide:[],goals:Array.isArray(d&&d.goals)?d.goals:[],salary:salMig(d&&d.salary),depLog:(d&&d.depLog&&typeof d.depLog==='object')?d.depLog:{},dcur:(d&&d.dcur&&d.dcur.cur)?d.dcur:null,salPrev:salMig(d&&d.salPrev),salLog:(d&&d.salLog&&typeof d.salLog==='object')?d.salLog:{},vault:(d&&d.vault&&d.vault.pub&&d.vault.wrap)?d.vault:null,budget:(d&&d.budget&&typeof d.budget==='object')?d.budget:{},homeHide:Array.isArray(d&&d.homeHide)?d.homeHide.filter(function(x){return typeof x==='string'}):[],homeAdd:Array.isArray(d&&d.homeAdd)?d.homeAdd.filter(function(x){return typeof x==='string'}):[],homeOrder:Array.isArray(d&&d.homeOrder)?d.homeOrder.filter(function(x){return typeof x==='string'}):[],voidTx:Array.isArray(d&&d.voidTx)?d.voidTx:[],aiIntro:d&&d.aiIntro?1:0};
+    var o={v:2,seeds:(d&&d.seeds)||{},notifs:Array.isArray(d&&d.notifs)?d.notifs:[],notifyHour:d&&d.notifyHour!=null?d.notifyHour:10,profile:(d&&d.profile&&typeof d.profile==='object')?d.profile:{name:''},holidays:(d&&d.holidays&&typeof d.holidays==='object')?d.holidays:{add:[],del:[]},ntSince:(d&&d.ntSince)||'',cats:Array.isArray(d&&d.cats)?d.cats:[],catHide:Array.isArray(d&&d.catHide)?d.catHide:[],navBar:Array.isArray(d&&d.navBar)?d.navBar.filter(function(x){return typeof x==='string'}).slice(0,6):null,goals:Array.isArray(d&&d.goals)?d.goals:[],salary:salMig(d&&d.salary),depLog:(d&&d.depLog&&typeof d.depLog==='object')?d.depLog:{},dcur:(d&&d.dcur&&d.dcur.cur)?d.dcur:null,salPrev:salMig(d&&d.salPrev),salLog:(d&&d.salLog&&typeof d.salLog==='object')?d.salLog:{},vault:(d&&d.vault&&d.vault.pub&&d.vault.wrap)?d.vault:null,budget:(d&&d.budget&&typeof d.budget==='object')?d.budget:{},homeHide:Array.isArray(d&&d.homeHide)?d.homeHide.filter(function(x){return typeof x==='string'}):[],homeAdd:Array.isArray(d&&d.homeAdd)?d.homeAdd.filter(function(x){return typeof x==='string'}):[],homeOrder:Array.isArray(d&&d.homeOrder)?d.homeOrder.filter(function(x){return typeof x==='string'}):[],voidTx:Array.isArray(d&&d.voidTx)?d.voidTx:[],aiIntro:d&&d.aiIntro?1:0};
     KEYS.forEach(function(k){o[k]=Array.isArray(d&&d[k])?d[k]:[]});
     if(!d)o.seeds.cash=1;
     if(d&&!o.seeds.cash){o.seeds.cash=1;if(o.wallets.some(function(w){return w.id==='mf9028'})&&!o.wallets.some(function(w){return w.kind==='كاش'}))o.wallets.push({id:'cash_me',name:'كاش معايا',kind:'كاش',balance:0,currency:'EGP',notes:''},{id:'cash_wife',name:'كاش مع زوجتي',kind:'كاش',balance:0,currency:'EGP',notes:''})}
@@ -3176,7 +3176,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       tile('عدد الكروت','<span class="num">'+S.cards.length+'</span>')+
       tile('إجمالي الحدود',money(sum(S.cards,function(c){return c.limit})))+
       tile('إجمالي المديونية',money(sum(xs,function(x){return x.debt})),1)+
-      tile('المتاح تقريبًا',money(sum(xs,function(x){return x.avail})))+
+      (function(){var AV=S.cards.map(cardAvail).filter(function(v){return v!=null}),pos=sum(AV,function(v){return v>0?v:0}),neg=sum(AV,function(v){return v<0?-v:0}),nn=AV.filter(function(v){return v<0}).length;
+        return tile('إجمالي المتاح بالموجب',money(pos))+(neg>0?'<div class="tile" style="background:var(--bad-bg);border-color:transparent"><div class="k">إجمالي الأرصدة بالسالب'+(nn?' ('+nn+' كارت)':'')+'</div><div class="v" style="color:var(--bad)">− '+money(neg)+'</div></div>':tile('إجمالي الأرصدة بالسالب',money(0)))})()+
       (sum(xs,function(x){return x.over})>0?'<div class="tile" style="background:var(--bad-bg);border-color:transparent"><div class="k">أوفر ليمت</div><div class="v" style="color:var(--bad)">'+money(sum(xs,function(x){return x.over}))+'</div></div>':'')+
       tile('باقي حد أدنى مستحق',money(sum(xs,function(x){return x.waiting?0:x.remMin})))+'</section>';
     if(!S.cards.length)return h+'<div class="list"><div class="empty">مفيش كروت لسه. دوس "إضافة كارت".</div></div>';
@@ -3320,19 +3321,20 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function rpChart(list,rg){
     var days=Math.round((rg.e-rg.s)/864e5)+1; if(days<2)return '';
     var byMonth=days>62, buckets=[], idx={};
-    if(byMonth){for(var d=new Date(rg.s.getFullYear(),rg.s.getMonth(),1);d<=rg.e;d=new Date(d.getFullYear(),d.getMonth()+1,1)){idx[ym(d)]=buckets.length;buckets.push({lab:String(d.getMonth()+1),o:0,i:0})}}
-    else{for(var k=0;k<days;k++){var dd=addDays(rg.s,k);idx[iso(dd)]=buckets.length;buckets.push({lab:String(dd.getDate()),o:0,i:0})}}
+    if(byMonth){for(var d=new Date(rg.s.getFullYear(),rg.s.getMonth(),1);d<=rg.e;d=new Date(d.getFullYear(),d.getMonth()+1,1)){idx[ym(d)]=buckets.length;buckets.push({lab:String(d.getMonth()+1),o:0,i:0,d:d})}}
+    else{for(var k=0;k<days;k++){var dd=addDays(rg.s,k);idx[iso(dd)]=buckets.length;buckets.push({lab:String(dd.getDate()),o:0,i:0,d:dd})}}
     list.forEach(function(t){var d=parseD(t.date);if(!d)return;var b=buckets[idx[byMonth?ym(d):t.date]];if(!b)return;var sg=txSign(t);if(sg<0)b.o+=t.amount;else if(sg>0)b.i+=t.amount});
     var mx=Math.max.apply(null,buckets.map(function(b){return Math.max(b.o,b.i)}).concat([1]));
     var W=320,H=140,pad=18,bw=(W-pad)/buckets.length,every=Math.ceil(buckets.length/10);
-    var svg='<svg viewBox="0 0 '+W+' '+(H+16)+'" width="100%" role="img" aria-label="رسم بياني للخارج والداخل" style="display:block;direction:ltr">'+
+    var CT=buckets.map(function(b,j){return [+(pad+j*bw+bw/2).toFixed(1),+(H-Math.max(b.o,b.i)/mx*(H-14)).toFixed(1),'<b>'+(byMonth?ctMon(b.d):ctDay(b.d.getTime()))+'</b>: <span style="color:var(--bad)">خارج '+money(b.o)+'</span> · <span style="color:var(--ok)">داخل '+money(b.i)+'</span>']});
+    var svg='<svg viewBox="0 0 '+W+' '+(H+16)+'" width="100%" role="img" aria-label="رسم بياني للخارج والداخل" style="display:block;direction:ltr"'+ctAttr(CT)+'>'+
       '<line x1="'+pad+'" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke="var(--line)"/>'+
       '<text x="'+(pad-3)+'" y="10" text-anchor="end" font-size="8" fill="var(--muted)">'+fmt(Math.round(mx))+'</text>';
     buckets.forEach(function(b,j){var x=pad+j*bw, w=Math.max(bw/2-1,1), ho=b.o/mx*(H-14), hi=b.i/mx*(H-14);
       if(b.o)svg+='<rect x="'+(x+0.5)+'" y="'+(H-ho)+'" width="'+w+'" height="'+ho+'" rx="1.5" fill="var(--bad)"><title>خارج '+fmt(b.o)+'</title></rect>';
       if(b.i)svg+='<rect x="'+(x+0.5+w)+'" y="'+(H-hi)+'" width="'+w+'" height="'+hi+'" rx="1.5" fill="var(--ok)"><title>داخل '+fmt(b.i)+'</title></rect>';
       if(j%every===0)svg+='<text x="'+(x+bw/2)+'" y="'+(H+11)+'" text-anchor="middle" font-size="8" fill="var(--muted)">'+b.lab+'</text>'});
-    return '<div class="rows" style="padding:10px 8px 4px">'+svg+'</svg><div class="fine" style="display:flex;gap:14px;justify-content:center;padding:4px 0 6px"><span><span style="color:var(--bad)">■</span> خارج</span><span><span style="color:var(--ok)">■</span> داخل</span><span>'+(byMonth?'حسب الشهر':'حسب اليوم')+'</span></div></div>';
+    return '<div class="rows" style="padding:10px 8px 4px">'+svg+'</svg>'+ctBox()+'<div class="fine" style="display:flex;gap:14px;justify-content:center;padding:4px 0 6px"><span><span style="color:var(--bad)">■</span> خارج</span><span><span style="color:var(--ok)">■</span> داخل</span><span>'+(byMonth?'حسب الشهر':'حسب اليوم')+'</span></div></div>';
   }
   var CAT_COL=['#e5534b','#ee8a5b','#e6b450','#c9c94a','#7cc35a','#3fb98a','#36a9c9','#4c84e0','#8a6fe0','#c564c9','#d77a9b','#9aa3ad'];
   var CAT_IC={'أكل وشرب':'🍲','مشتريات':'🛍️','فواتير ومرافق':'💡','مواصلات وبنزين':'🚕','بيت':'🏠','عيلة':'👪','شخصي':'🧑','خروجات واجتماعيات':'🧑‍🤝‍🧑','صحة':'💊','تعليم':'📚','استثمار':'💹',
@@ -3426,10 +3428,30 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(msgs.length)setTimeout(function(){toast(msgs.join(' · '))},1600)}
 
   /* ================= bottom bar + quick add ================= */
-  function bottomNav(){var R=[['home','🏠','الرئيسية'],['reports','📊','التقارير'],['+','＋','إضافة'],['budget','🎯','الميزانية'],['cards','💳','كروت المشتريات']];
-    return R.map(function(x){if(x[0]==='+')return '<button type="button" class="bn-add" data-act="quick-add" aria-label="إضافة سريعة"><span aria-hidden="true">＋</span></button>';
-      if(x[0]==='ai')return '<button type="button" class="bn" data-act="ai-open"><span class="bi b3" aria-hidden="true">3b</span><span class="bl">عبهادي</span></button>';
-      return '<a class="bn'+(route===x[0]?' on':'')+'" href="#'+x[0]+'"><span class="bi" aria-hidden="true">'+x[1]+'</span><span class="bl">'+x[2]+'</span></a>'}).join('')}
+  /* the bar at the bottom: 2 to 6 places you pick in Settings, with ＋ in the middle */
+  var NAVOPT={home:['🏠','الرئيسية'],reports:['📊','التقارير'],prices:['💹','بكام النهاردة'],budget:['🎯','الميزانية'],cards:['💳','كروت المشتريات'],loans:['🏦','قروضي'],bnpl:['🧾','التقسيط'],gamiyas:['👥','جمعياتي'],
+    wallets:['👛','الأرصدة'],accounts:['🏛️','حساباتي'],cash:['💵','الكاش'],ewallets:['📱','المحافظ'],invest:['📒','الاستثمار'],deposits:['📜','الشهادات'],assets:['💎','ممتلكاتي'],insurance:['🛡️','التأمين'],
+    debts:['📤','سلف عليّ'],lent:['📥','فلوسي عند الناس'],spend:['💸','الصرف والسداد'],notifs:['🔔','الإشعارات'],settings:['⚙️','الإعدادات'],ai:['🤖','عبهادي']};
+  var NAVDEF=['home','reports','prices','cards'];
+  function navItems(){var L=(typeof S!=='undefined'&&S&&Array.isArray(S.navBar)?S.navBar:NAVDEF).filter(function(k,i,A){return NAVOPT[k]&&A.indexOf(k)===i});return L.length?L:NAVDEF.slice()}
+  function bottomNav(){var L=navItems(),half=Math.ceil(L.length/2),R=L.slice(0,half).concat(['+'],L.slice(half));
+    return R.map(function(k){if(k==='+')return '<button type="button" class="bn-add" data-act="quick-add" aria-label="إضافة سريعة"><span aria-hidden="true">＋</span></button>';var x=NAVOPT[k];
+      if(k==='ai')return '<button type="button" class="bn" data-act="ai-open"><span class="bi" aria-hidden="true">'+x[0]+'</span><span class="bl">'+x[1]+'</span></button>';
+      return '<a class="bn'+(route===k?' on':'')+'" href="#'+k+'"><span class="bi" aria-hidden="true">'+x[0]+'</span><span class="bl">'+x[1]+'</span></a>'}).join('')}
+  function navCustHtml(){var L=navItems(),rest=Object.keys(NAVOPT).filter(function(k){return L.indexOf(k)<0});
+    return '<section class="sec"><h2>🧭 الشريط اللي تحت</h2><p class="note">اختار الحاجات اللي تظهر في الشريط الثابت تحت الشاشة (من 2 لـ 6)، ورتّبها زي ما تحب. زرار ＋ بيفضل في النص.</p>'+
+      '<div class="navprev" aria-hidden="true">'+bottomNav().replace(/data-act="[^"]*"/g,'').replace(/href="[^"]*"/g,'')+'</div>'+
+      '<div class="list">'+L.map(function(k,i){var x=NAVOPT[k];return '<div class="item nv-row"><div class="ava">'+x[0]+'</div><div class="main"><div class="t">'+x[1]+'</div></div><div class="end nv-btns">'+
+        '<button class="btn sm" data-act="nav-mv" data-k="'+k+'" data-v="-1"'+(i?'':' disabled')+' aria-label="قدّمه">▲</button><button class="btn sm" data-act="nav-mv" data-k="'+k+'" data-v="1"'+(i<L.length-1?'':' disabled')+' aria-label="أخّره">▼</button>'+
+        '<button class="btn sm" data-act="nav-del" data-k="'+k+'"'+(L.length>2?'':' disabled')+' aria-label="شيله">✕</button></div></div>'}).join('')+'</div>'+
+      '<h3 class="subh">➕ ضيف للشريط'+(L.length>=6?' <span class="fine">(وصلت 6، شيل حاجة الأول)</span>':'')+'</h3><div class="chips">'+rest.map(function(k){return '<button class="chip" data-act="nav-add" data-k="'+k+'"'+(L.length>=6?' disabled':'')+'>'+NAVOPT[k][0]+' '+NAVOPT[k][1]+'</button>'}).join('')+'</div>'+
+      '<div class="actions"><button class="btn" data-act="nav-reset">رجّع الشريط زي الأول</button></div></section>'}
+  function navAction(act,t){if(!/^nav-(mv|del|add|reset)$/.test(act))return false;var L=navItems().slice(),k=t.getAttribute('data-k'),i=L.indexOf(k);
+    if(act==='nav-mv'){var j=i+(+t.getAttribute('data-v'));if(i<0||j<0||j>=L.length)return true;L.splice(i,1);L.splice(j,0,k)}
+    else if(act==='nav-del'){if(L.length<=2){toast('لازم يفضل حاجتين على الأقل');return true}L.splice(i,1)}
+    else if(act==='nav-add'){if(L.length>=6){toast('الشريط ياخد 6 بالكتير');return true}if(i<0)L.push(k)}
+    else L=null;
+    mutate(function(){S.navBar=L});toast(act==='nav-reset'?'رجع الشريط زي الأول':'اتغيّر الشريط');return true}
   function renderBottom(){var b=document.getElementById('bnav');if(b)b.innerHTML=bottomNav()}
   function quickHtml(){return '<div class="otiles three">'+otile('💸','اصرف','data-act="mv-new" data-t="spend"','',1)+otile('✅','سدّد','data-act="pay-new"','',1)+otile('🔁','حوّل','data-act="mv-new" data-t="xfer"')+
     otile('💰','فلوس من بره','data-act="mv-new" data-t="add"')+otile('🤝','استلفت','data-act="borrow-new"')+otile('📤','سلّفت حد','data-act="lend-new"')+'</div>'+
@@ -3481,12 +3503,13 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     S.reports.forEach(function(x){var d=parseD(x.date);if(!d)return;var i=idx[ym(d)];if(i==null)return;var sg=txSign(x);if(sg<0)B[i].o+=n(x.amount);else if(sg>0)B[i].i+=n(x.amount)});
     B.forEach(function(b){b.v=kind==='in'?b.i:kind==='save'?b.i-b.o:b.o});
     var mx=Math.max.apply(null,B.map(function(b){return Math.abs(b.v)}).concat([1])),W=330,H=130,bw=W/B.length,col=kind==='in'?'#34c38f':kind==='save'?'var(--accent)':'#f46a6a';
-    var svg='<svg viewBox="0 0 '+W+' '+(H+30)+'" width="100%" style="display:block;direction:ltr" role="img" aria-label="مقارنة الشهور">';
+    var CT=B.map(function(b,i){return [+(i*bw+bw/2).toFixed(1),+(H-Math.abs(b.v)/mx*(H-26)).toFixed(1),'<b>'+ctMon(b.d)+'</b>: '+(kind==='in'?'دخل':kind==='save'?(b.v>=0?'وفّرت':'صرفت زيادة'):'مصروفات')+' <b class="num">'+money(Math.abs(b.v))+'</b>']});
+    var svg='<svg viewBox="0 0 '+W+' '+(H+30)+'" width="100%" style="display:block;direction:ltr" role="img" aria-label="مقارنة الشهور"'+ctAttr(CT)+'>';
     B.forEach(function(b,i){var x=i*bw+bw/2,hh=Math.abs(b.v)/mx*(H-26),cur=i===B.length-1,neg=b.v<0;
       svg+='<rect x="'+(x-bw*0.28)+'" y="'+(H-hh)+'" width="'+(bw*0.56)+'" height="'+Math.max(hh,2)+'" rx="7" fill="'+(neg?'#f46a6a':col)+'" opacity="'+(cur?1:.32)+'"/>'+
         '<text x="'+x+'" y="'+(H-hh-6)+'" text-anchor="middle" font-size="9.5" font-weight="'+(cur?700:500)+'" fill="var(--ink)">'+(neg?'−':'')+(Math.abs(b.v)>=1000?(Math.round(Math.abs(b.v)/100)/10)+'k':Math.round(Math.abs(b.v)))+'</text>'+
         '<text x="'+x+'" y="'+(H+16)+'" text-anchor="middle" font-size="9" fill="'+(cur?'var(--ink)':'var(--muted)')+'"'+(cur?' font-weight="700"':'')+'>'+esc(b.d.toLocaleDateString(LOC(),{month:'short'}))+'</text>'});
-    return '<div class="chips cmpc">'+[['out','مصروفات'],['in','دخل'],['save','توفير']].map(function(c){return '<button class="chip'+(kind===c[0]?' on':'')+'" data-act="rp-cmp" data-k="'+c[0]+'">'+c[1]+'</button>'}).join('')+'</div>'+svg+'</svg>'}
+    return '<div class="chips cmpc">'+[['out','مصروفات'],['in','دخل'],['save','توفير']].map(function(c){return '<button class="chip'+(kind===c[0]?' on':'')+'" data-act="rp-cmp" data-k="'+c[0]+'">'+c[1]+'</button>'}).join('')+'</div>'+svg+'</svg>'+ctBox()}
   function donutLabels(rows){var R=58,C=2*Math.PI*R,off=0,s='';
     rows.forEach(function(r){var len=r.p*C,mid=(off+len/2)/C*2*Math.PI-Math.PI/2;off+=len;if(r.p<0.06)return;
       s+='<text x="'+(80+R*Math.cos(mid)).toFixed(1)+'" y="'+(80+R*Math.sin(mid)+3.5).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fff">'+Math.round(r.p*100)+'%</text>'});return s}
@@ -3509,11 +3532,12 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var X=function(i){return 8+i*(W-16)/(pts.length-1)},Y=function(v){return 8+(1-(v-mn)/(mx-mn))*(H-20)};
     var line=pts.map(function(p,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)}).join(' ');
     var lab=function(p){return pts.length>14?p.d.toLocaleDateString(LOC(),{month:'short'}):String(p.d.getDate())};
-    var every=Math.ceil(pts.length/7),s='<svg viewBox="0 0 '+W+' '+(H+16)+'" width="100%" style="display:block;direction:ltr" role="img" aria-label="حركة فلوسك"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>'+
+    var CT=pts.map(function(p,i){return [+X(i).toFixed(1),+Y(p.v).toFixed(1),'<b>'+(i===pts.length-1?'النهاردة':ctDay(p.d.getTime()))+'</b>: <b class="num">'+money(p.v)+'</b>']});
+    var every=Math.ceil(pts.length/7),s='<svg viewBox="0 0 '+W+' '+(H+16)+'" width="100%" style="display:block;direction:ltr" role="img" aria-label="حركة فلوسك"'+ctAttr(CT)+'><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>'+
       '<path d="'+line+' L'+X(pts.length-1).toFixed(1)+' '+H+' L'+X(0).toFixed(1)+' '+H+' Z" fill="url(#tg)"/><path d="'+line+'" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
     pts.forEach(function(p,i){if(pts.length<=14||i%every===0||i===pts.length-1)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.2" fill="#ffb02e" stroke="var(--surface)" stroke-width="1.4"/>';
       if(i%every===0||i===pts.length-1)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H+13)+'" text-anchor="middle" font-size="8.5" fill="var(--muted)">'+esc(lab(p))+'</text>'});
-    return s+'</svg>'}
+    return s+'</svg>'+ctBox()}
   function monthNet(){var s=iso(new Date(today().getFullYear(),today().getMonth(),1)),L=S.reports.filter(function(t){return t.date>=s}),i=0,o=0;L.forEach(function(t){var g=txSign(t);if(g>0)i+=n(t.amount);else if(g<0)o+=n(t.amount)});return {i:i,o:o,net:i-o}}
   function balanceCard(){var T=holdTotal(),m=monthNet(),days=+HOMEP||30,pts=balSeries(days);
     return '<div class="hero2"><div class="h2-top"><div><small>رصيدك الكلي (الحسابات والمحافظ والكاش)</small><b class="num">'+fmt(Math.round(cv(T)))+' <span>'+esc(curSym())+'</span></b></div>'+
@@ -3914,7 +3938,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function stkPL(v){return '<span style="color:var('+(v>=0?'--ok':'--bad')+')">'+(v>=0?'+':'−')+'</span>'}
   function stkSpark(a){var P=(a.ph||[]).slice(-30);if(P.length<2)return '';var ys=P.map(function(p){return n(p[1])}),mn=Math.min.apply(null,ys),mx=Math.max.apply(null,ys),rg=mx-mn||1,w=300,h=56;
     var pts=ys.map(function(y,i){return (i*w/(ys.length-1)).toFixed(1)+','+(h-4-(y-mn)/rg*(h-8)).toFixed(1)}).join(' '),up=ys[ys.length-1]>=ys[0];
-    return '<div class="stk-sp" aria-hidden="true"><svg viewBox="0 0 300 56" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+(up?'#3fbf7f':'#e5535f')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="100" class="stk-line"/></svg><span class="fine">حركة السعر من آخر '+P.length+' تحديث</span></div>'}
+    var CT=ys.map(function(y,i){return [+(i*w/(ys.length-1)).toFixed(1),+(h-4-(y-mn)/rg*(h-8)).toFixed(1),'<b>'+(P[i][0]?dShort(P[i][0]):'')+'</b>: <b class="num">'+fmt(y)+'</b> '+esc(String(a.ccy||'EGP').toUpperCase()==='EGP'?'ج':a.ccy)]});
+    return '<div class="stk-sp"><svg viewBox="0 0 300 56" preserveAspectRatio="none"'+ctAttr(CT)+'><polyline points="'+pts+'" fill="none" stroke="'+(up?'#3fbf7f':'#e5535f')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="100" class="stk-line"/></svg>'+ctBox()+'<span class="fine">حركة السعر من آخر '+P.length+' تحديث</span></div>'}
   function detailStock(a){var X=stkCalc(a),mk=a.market||'',isF=/صندوق|ETF/.test(a.stype||'');
     var h=vzWrap(vzRing(Math.min(Math.abs(X.unrealPct),1),(X.unreal>=0?'+':'−')+'<span class="num">'+fmt(Math.round(Math.abs(X.unrealPct)*1000)/10)+'</span>%',X.unreal>=0?'مكسب لحد دلوقتي':'خسارة لحد دلوقتي',X.unreal>=0?'ok':'bad'));
     h+=stkSpark(a);
@@ -3972,7 +3997,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var h='<div class="tiles">'+tile('قيمتها النهاردة',money(v),1)+(gg!=null?tile(gg>=0?'المكسب':'الخسارة','<span style="color:var('+(gg>=0?'--ok':'--bad')+')">'+money(Math.abs(gg))+(n(a.buyPrice)?' ('+fmt(Math.round(gg/n(a.buyPrice)*1000)/10)+'٪)':'')+'</span>'):'')+'</div>';
     h+='<div class="rows">'+r('النوع',esc(a.kind))+(assetSub(a)?r('التفاصيل',esc(assetSub(a))):'')+r('اتشرت يوم',a.buyDate?dShort(a.buyDate):'—')+r('اتشرت بـ',n(a.buyPrice)?money(a.buyPrice):'—')+
       r(priceLbl(a),(k==='estate'||k==='car'||k==='other')?(n(a.value)?money(a.value):'—'):(n(a.price)?money(a.price):'—'))+r('آخر تحديث للسعر',a.priceAt?dShort(a.priceAt):'—')+'</div>';
-    h+='<div class="actions"><button class="btn sm primary" data-act="as-price">✏️ حدّث '+priceLbl(a)+'</button>'+(auto?'<button class="btn sm" data-act="as-online">🔄 تحديث السعر تلقائيًا</button>':'')+'<button class="btn sm" data-act="as-sell">بعتها</button></div>';
+    h+='<div class="actions"><button class="btn sm primary" data-act="as-price">✏️ حدّث '+priceLbl(a)+'</button>'+(auto?'<button class="btn sm" data-act="as-online">🔄 تحديث السعر تلقائيًا</button>':'')+'<button class="btn sm" data-act="as-sell">بعتها</button>'+(pxKeyOfAsset(a)?'<button class="btn sm" data-act="px-open" data-k="'+esc(pxKeyOfAsset(a))+'">📈 السعر والرسم</button>':'')+'</div>';
     h+='<div class="actions"><button class="btn sm" data-act="edit">تعديل</button>'+delBtn('assets',a.id)+'</div>';
     return h}
   function asPriceHtml(){var a=find('assets',sheet.id)||{},k=akOf(a),isV=k==='estate'||k==='car'||k==='other';
@@ -3985,7 +4010,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function fxRates(){if(PX.fx&&Date.now()-PX.at<60000)return Promise.resolve(PX.fx);return pxGet('https://open.er-api.com/v6/latest/USD').then(function(j){if(!j||!j.rates||!(+j.rates.EGP>0))throw new Error('bad');PX.fx=j.rates;PX.at=Date.now();PX.fxT=+(j.time_last_update_unix||0)*1000;return j.rates})}
   function egpPer(cur){cur=String(cur||'').toUpperCase();if(cur==='USDT'||cur==='USDC')cur='USD';return fxRates().then(function(R){var x=+R[cur];if(!(x>0))throw new Error('cur');return Math.round(R.EGP/x*10000)/10000})}
   function cgUsd(ids){return pxGet('https://api.coingecko.com/api/v3/simple/price?ids='+ids.join(',')+'&vs_currencies=usd')}
-  function assetOnline(a){var k=akOf(a);
+  function assetOnline(a){var pk=pxKeyOfAsset(a);if(pk)return pxReady().then(function(){var v=pxAssetUnitPrice(a);if(v>0)return Math.round(v*100)/100;throw new Error('px')}).catch(function(){return assetOnline0(a)});return assetOnline0(a)}
+  function assetOnline0(a){var k=akOf(a);
     if(k==='fx')return egpPer(a.cur);
     if(k==='silver')return Promise.all([cgUsd(['kinesis-silver']),fxRates()]).then(function(x){var oz=+(x[0]['kinesis-silver']&&x[0]['kinesis-silver'].usd);if(!(oz>0))throw new Error('bad');return Math.round(oz/31.1035*x[1].EGP*(n(a.purity)||999)/1000*100)/100});
     if(k==='crypto'){var cc=String(a.coin||'').toUpperCase();if(cc==='USDT'||cc==='USDC')return egpPer('USD');var id=COINID[cc];if(!id)return Promise.reject(new Error('coin'));
@@ -4213,7 +4239,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     S.reports.forEach(function(t){var sg=txSign(t);if((side==='in'?sg<=0:sg>=0)||txCat(t)!==c)return;var d=parseD(t.date);if(!d)return;var i=idx[ym(d)];if(i!=null)B[i].v+=t.amount});
     var mx=Math.max.apply(null,B.map(function(b){return b.v}).concat([1])), tot=sum(B,function(b){return b.v}), act=B.filter(function(b){return b.v>0}).length;
     var W=330,H=150,pad=6,bw=(W-pad*2)/12;
-    var svg='<svg viewBox="0 0 '+W+' '+(H+34)+'" width="100%" role="img" aria-label="رسم شهري لـ '+esc(c)+'" style="direction:ltr;display:block"><line x1="0" y1="'+(H+2)+'" x2="'+W+'" y2="'+(H+2)+'" stroke="var(--line)"/>';
+    var CT=B.map(function(b,i){return [+(pad+i*bw+bw/2).toFixed(1),+(H+2-b.v/mx*(H-22)).toFixed(1),'<b>'+ctMon(b.d)+'</b>: <b class="num">'+money(b.v)+'</b>']});
+    var svg='<svg viewBox="0 0 '+W+' '+(H+34)+'" width="100%" role="img" aria-label="رسم شهري لـ '+esc(c)+'" style="direction:ltr;display:block"'+ctAttr(CT)+'><line x1="0" y1="'+(H+2)+'" x2="'+W+'" y2="'+(H+2)+'" stroke="var(--line)"/>';
     B.forEach(function(b,i){var x=pad+i*bw, h0=b.v/mx*(H-22), w=bw*0.62, cx=x+bw/2, cur=i===11;
       if(b.v>0){svg+='<rect x="'+(cx-w/2)+'" y="'+(H+2-h0)+'" width="'+w+'" height="'+h0+'" rx="3" fill="'+col+'"'+(cur?'':' opacity=".85"')+'><title>'+fmt(b.v)+'</title></rect>';
         svg+='<text x="'+cx+'" y="'+(H-4-h0)+'" text-anchor="middle" font-size="8.5" fill="var(--ink)">'+(b.v>=1000?(Math.round(b.v/100)/10)+'k':Math.round(b.v))+'</text>'}
@@ -4221,7 +4248,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
         (b.d.getMonth()===0||i===0?'<text x="'+cx+'" y="'+(H+28)+'" text-anchor="middle" font-size="7.5" fill="var(--muted)">'+b.d.getFullYear()+'</text>':'')});
     svg+='</svg>';
     var h='<div class="tiles">'+tile(B[11].d.toLocaleDateString(LOC(),{month:'long',year:'numeric'}),money(B[11].v),1)+tile('متوسط الشهر'+(act?' ('+act+' شهر فيه حركة)':''),money(act?tot/act:0))+tile('آخر 12 شهر',money(tot))+'</div>';
-    h+='<div class="rows" style="padding:10px 8px 6px">'+svg+'</div>';
+    h+='<div class="rows" style="padding:10px 8px 6px">'+svg+ctBox()+'</div>';
     h+=catMgrHtml();
     return h;
   }
@@ -4250,7 +4277,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       var nowT=Date.now(),okG=!!(gb&&gb.usd>0||gc&&gc.usd>0),okS=!!(sc&&sc.usd>0),okC=Object.keys(cr).length>2;
       PXD={at:nowT,fxT:PX.fxT||(PXD&&PXD.fxT)||0,fxAt:nowT,gT:okG?nowT:(PXD&&PXD.gT)||0,sT:okS?nowT:(PXD&&PXD.sT)||0,cT:okC?nowT:(PXD&&PXD.cT)||0,fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
         silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0}:(PXD&&PXD.silver)||null,cr:okC?cr:(PXD&&PXD.cr)||cr};
-      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();PXS.busy=false;if(route==='prices')renderMain()},
+      lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();try{pxAssetSync()}catch(e){}PXS.busy=false;if(route==='prices')renderMain()},
       function(){PXS.busy=false;PXS.err='مش قادر أجيب الأسعار دلوقتي. اتأكد من الإنترنت وجرّب تاني.'+(PXD?' بعرضلك آخر أسعار اتجابت.':'');if(route==='prices')renderMain()})}
   /* a daily snapshot on this phone, to show the change since the day before */
   function pxSnap(){var h=pxJ('3bh_pxh',{}),k=iso(today()),v={};PXC.forEach(function(c){var x=pxEgp('c:'+c[0]);if(x)v['c:'+c[0]]=x});var g=pxEgp('g24');if(g)v.g24=g;var s=pxEgp('s999');if(s)v.s999=s;
@@ -4272,7 +4299,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxFmt(v){v=+v;return !(v>0)?'—':v>=1000?nf(v,0):v>=10?nf(v,2):nf(v,v>=1?3:v>=0.1?4:6)}
   function pxChTxt(c){return c==null||!isFinite(c)||Math.abs(c)<0.005?'':'<span class="pxch '+(c>=0?'up':'dn')+'">'+(c>=0?'▲':'▼')+' '+(c>=900?nf(1+c/100,c>=9900?0:1)+' ضعف':nf(Math.abs(c),2)+'%')+'</span>'}
   function pxRow(key,label,sub,sell,buy,extra){var fav=pxFav().indexOf(key.replace(/^c:/,'').replace(/^k:/,''))>=0,cmp=PXS.cmp.indexOf(key)>=0;
-    return '<div class="pxr'+(cmp?' cmp':'')+'"><button class="pxst" data-act="px-fav" data-k="'+esc(key)+'" aria-label="'+(fav?'شيل من المفضلة':'ضيف للمفضلة')+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button>'+
+    return '<div class="pxr'+(cmp?' cmp':'')+(pxDetailable(key)?' pxgo" data-act="px-open" data-k="'+esc(key)+'" role="button" tabindex="0" aria-label="'+esc(pxName(key))+'"':'"')+'><button class="pxst" data-act="px-fav" data-k="'+esc(key)+'" aria-label="'+(fav?'شيل من المفضلة':'ضيف للمفضلة')+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button>'+
       '<div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'+
       '<div class="pxv">'+(typeof sell==='string'?sell:buy!=null?'<span class="pxb"><small>بيع</small><b class="num">'+pxFmt(sell)+'</b></span><span class="pxb"><small>شراء</small><b class="num">'+pxFmt(buy)+'</b></span>':'<b class="num">'+pxFmt(sell)+'</b>')+(extra||'')+'</div>'+
       '<span class="pxact"><button class="pxcm'+(cmp?' on':'')+'" data-act="px-cmp" data-k="'+esc(key)+'" aria-label="قارن" aria-pressed="'+cmp+'">⚖️</button><button class="pxcm'+(pxAlerts().some(function(a){return a.k===key})?' on':'')+'" data-act="px-al" data-k="'+esc(key)+'" aria-label="نبّهني بالسعر">🔔</button></span></div>'}
@@ -4342,13 +4369,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     pxGet('https://api.coingecko.com/api/v3/coins/'+id+'/market_chart?vs_currency=egp&days='+ch.d).then(function(j){var P=(j&&j.prices||[]).map(function(p){var v=+p[1];if(ch.k==='g24'){v=v/OZ*(1+n(pxCal().gp)/100)}else if(ch.k==='s999'){v=v/OZ*(1+n(pxCal().sp)/100)}return [p[0],v]}).filter(function(p){return p[1]>0});
       PXS.chd={k:ch.k,d:ch.d,p:P};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()},function(){PXS.chd={k:ch.k,d:ch.d,err:1};var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()})}
   function pxChartHtml(){var c=PXS.chd,ch=PXS.ch;if(!c||c.k!==ch.k||c.d!==ch.d){setTimeout(pxChartLoad3,0);return '<div class="empty">بيحمّل الرسم…</div>'}
-    if(c.busy)return '<div class="empty">بيحمّل الرسم…</div>';if(c.err||!c.p||c.p.length<2)return '<div class="empty">الرسم مش متاح دلوقتي. جرّب كمان شوية.</div>';
-    var P=c.p,mn=Math.min.apply(null,P.map(function(p){return p[1]})),mx=Math.max.apply(null,P.map(function(p){return p[1]})),W=330,H=140,t0=P[0][0],t1=P[P.length-1][0];c.mn=mn;c.mx=mx;
-    var pts=P.map(function(p){return ((p[0]-t0)/(t1-t0||1)*(W-8)+4).toFixed(1)+','+(H-6-(p[1]-mn)/((mx-mn)||1)*(H-24)).toFixed(1)}).join(' ');
-    var first=P[0][1],last=P[P.length-1][1],chg=(last/first-1)*100,col=chg>=0?'var(--ok)':'var(--bad)';
-    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="رسم '+esc(pxName(ch.k))+'" style="direction:ltr;display:block;cursor:crosshair;touch-action:manipulation"><rect x="0" y="0" width="'+W+'" height="'+H+'" fill="transparent"/><polyline fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" points="'+pts+'"/><circle id="px-mk" r="0" cx="0" cy="0" fill="var(--accent)" stroke="#fff" stroke-width="1.5"/></svg>'+
-      '<div id="px-chpt" class="pxchpt">👆 دوس على أي نقطة في الرسم تشوف تاريخها وقيمتها</div>'+
-      '<div class="pxchs"><span>أعلى <b class="num">'+pxFmt(mx)+'</b></span><span>أقل <b class="num">'+pxFmt(mn)+'</b></span><span>دلوقتي <b class="num">'+pxFmt(last)+'</b></span>'+pxChTxt(chg)+'</div>'}
+    if(c.busy)return '<div class="empty">بيحمّل الرسم…</div>';if(c.err||!c.p||c.p.length<2)return '<div class="empty">الرسم مش متاح دلوقتي. جرّب كمان شوية.</div>';return pxChartSvg(ch.k,c.p)}
   function pxCmpHtml(){var L=PXS.cmp.filter(function(k){return pxEgp(k)>0});if(!L.length)return '';var b=pxEgp(L[0]);
     return '<div class="pxcmpbar"><div class="pxch-h"><b>⚖️ مقارنة</b><button class="btn sm" data-act="px-cmpx">امسح</button></div><div class="pxcg">'+L.map(function(k,i){var v=pxEgp(k);return '<div class="pxbox"><small>'+esc(pxName(k))+'</small><b class="num">'+pxFmt(v)+' ج</b>'+pxChTxt(pxCh(k))+(i?'<span>= '+pxFmt(v/b)+' × '+esc(pxName(L[0]))+'</span>':'<span>الأساس</span>')+'</div>'}).join('')+'</div></div>'}
   /* when each part was last updated */
@@ -4418,7 +4439,9 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     var P=FUELH.filter(function(h){return h[0]>='2008-05-05'}),t0=new Date(P[0][0]).getTime(),t1=Date.now(),W=330,H2=150,mx=25;
     var line=function(k,col){var pts=[],last=null;P.forEach(function(h){if(h[1][k]==null)return;var x=4+(new Date(h[0]).getTime()-t0)/(t1-t0)*(W-8),y=H2-8-h[1][k]/mx*(H2-20);if(last!=null)pts.push(x.toFixed(1)+','+last.toFixed(1));pts.push(x.toFixed(1)+','+y.toFixed(1));last=y});
       pts.push((W-4)+','+last.toFixed(1));return '<polyline fill="none" stroke="'+col+'" stroke-width="2" points="'+pts.join(' ')+'"/>'};
-    h+='<div class="rows pxtool"><h3>📈 رحلة الأسعار من 2008</h3><svg viewBox="0 0 '+W+' '+H2+'" width="100%" role="img" aria-label="رسم أسعار البنزين والسولار" style="direction:ltr;display:block">'+line('b95','#e8a33d')+line('b92','var(--accent)')+line('sol','var(--ok)')+line('b80','#9aa3b2')+'</svg>'+
+    var FT=P.map(function(hh){return hh[0]}).concat([iso(today())]).map(function(d){var x=4+(new Date(d).getTime()-t0)/(t1-t0)*(W-8),b=fuelAt('b92',d);var v=function(k){var a=fuelAt(k,d);return a?pxFmt(a.v):'—'};
+      return [+Math.min(x,W-4).toFixed(1),+(H2-8-(b?b.v:0)/mx*(H2-20)).toFixed(1),'<b>'+(d===iso(today())?'النهاردة':ctDay(new Date(d+'T12:00:00').getTime()))+'</b>: 95 <b class="num">'+v('b95')+'</b> · 92 <b class="num">'+v('b92')+'</b> · 80 <b class="num">'+v('b80')+'</b> · سولار <b class="num">'+v('sol')+'</b> ج']});
+    h+='<div class="rows pxtool"><h3>📈 رحلة الأسعار من 2008</h3><svg viewBox="0 0 '+W+' '+H2+'" width="100%" role="img" aria-label="رسم أسعار البنزين والسولار" style="direction:ltr;display:block"'+ctAttr(FT)+'>'+line('b95','#e8a33d')+line('b92','var(--accent)')+line('sol','var(--ok)')+line('b80','#9aa3b2')+'</svg>'+ctBox()+
       '<div class="pxchs"><span style="color:#e8a33d">— 95</span><span style="color:var(--accent)">— 92</span><span style="color:#9aa3b2">— 80</span><span style="color:var(--ok)">— سولار</span><span>بنزين 92: '+pxFmt(fuelHist('b92')[0].v)+' ← '+pxFmt(fuelAt('b92').v)+' ج (×'+nf(fuelAt('b92').v/fuelHist('b92')[0].v,1)+')</span></div></div>';
     /* calculators */
     var pr=(fuelAt(fc.k)||{v:0}).v,L=n(fc.l),km=n(fc.km),cons=n(fc.cons),bud=n(fc.bud),mL=km&&cons?km*cons/100:0;
@@ -4456,7 +4479,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       return h+(dy.err?'<div class="empty">مش لاقي أسعار لليوم ده. جرّب يوم قريب منه، أو اتأكد من النت.</div>'+pxDayFuel(dy.d):'<div class="empty">بيجيب أسعار يوم '+dShort(dy.d)+'…</div>')}
     var secs=[['fx','💵 العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود']];
     h+='<p class="pxstamp">📅 أسعار يوم <b>'+pxWhen(new Date(o.d+'T12:00:00').getTime()).replace(/ · الساعة.*/,'')+'</b> وجنبها التغيير لحد النهاردة.</p><div class="chips">'+secs.map(function(x){return '<button class="chip'+(dy.s===x[0]?' on':'')+'" data-act="dy-s" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
-    var row=function(key,label,sub){var then=pxEgpOn(o,key),now=pxEgp(key);if(!(then>0))return '';return '<div class="pxr"><span></span><div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(then)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(now)+'</b></span>'+(now?pxChTxt((now/then-1)*100):'')+'</div><span></span></div>'};
+    var row=function(key,label,sub){var then=pxEgpOn(o,key),now=pxEgp(key);if(!(then>0))return '';return '<div class="pxr pxgo" data-act="px-open" data-k="'+esc(key)+'" role="button" tabindex="0"><span></span><div class="pxn"><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(then)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(now)+'</b></span>'+(now?pxChTxt((now/then-1)*100):'')+'</div><span></span></div>'};
     var L='';
     if(dy.s==='fx')L=PXC.map(function(c){return row('c:'+c[0],c[1]+' '+c[2],c[0])}).join('');
     else if(dy.s==='gold')L=PXG.map(function(g){return row('g'+g[0],g[1])}).join('')+row('gpound','🪙 جنيه الدهب','8 جرام عيار 21')+(o.xau?'<p class="fine">الأونصة يومها: $'+nf(1/o.xau,2)+(o.src==='hist'?' (متوسط الشهر)':'')+' · الدولار يومها: '+nf(o.egp,3)+' ج</p>':'');
@@ -4465,7 +4488,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     else L=pxDayFuel(o.d);
     return h+(L||'<div class="empty">مفيش أسعار للقسم ده في اليوم ده.</div>')+(o.approx?'<p class="note" style="color:var(--bad)">⚠️ قبل ديسمبر 2003 سعر الجنيه تقريبي (متوسط سنوي رسمي)، وكان فيه أكتر من سعر للدولار في بعض السنين.</p>':'')+((dy.s==='gold'||dy.s==='silver')?'<p class="note">محسوب من السعر العالمي يومها وسعر الدولار يومها'+(n(pxCal().gp)||n(pxCal().sp)?'، وبنفس فرق الصاغة اللي ظبطته':'')+'.</p>':'')}
   function pxDayFuel(d){var any=false,h='<div class="pxhd"><span>الوقود يوم '+dShort(d)+'</span><span>يومها · النهاردة</span></div>'+FUEL.map(function(f){var t=fuelAt(f[0],d),nw=fuelAt(f[0]);if(!t)return '';any=true;
-      return '<div class="pxr"><span></span><div class="pxn"><b>'+f[1]+'</b><small>السعر ده من '+dShort(t.at)+'</small></div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(t.v)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(nw.v)+'</b></span>'+pxChTxt((nw.v/t.v-1)*100)+'</div><span></span></div>'}).join('');
+      return '<div class="pxr pxgo" data-act="px-open" data-k="f:'+f[0]+'" role="button" tabindex="0"><span></span><div class="pxn"><b>'+f[1]+'</b><small>السعر ده من '+dShort(t.at)+'</small></div><div class="pxv"><span class="pxb"><small>يومها</small><b class="num">'+pxFmt(t.v)+'</b></span><span class="pxb"><small>النهاردة</small><b class="num">'+pxFmt(nw.v)+'</b></span>'+pxChTxt((nw.v/t.v-1)*100)+'</div><span></span></div>'}).join('');
     return any?h:'<div class="empty">مفيش أسعار وقود محفوظة قبل مايو 2008.</div>'}
   /* charts from daily history (gold, silver, dollar, crypto, fuel) */
   function pxChartLoad2(){var ch=PXS.ch,N=ch.d<=7?7:ch.d<=30?15:ch.d<=90?16:ch.d<=365?24:30,td=today(),D=[];
@@ -4486,26 +4509,13 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function egpOn(d){if(HIST&&d<'2024-03-06'){var e=hAt(HIST.egp,d);if(e>0)return e}var best=null;Object.keys(PXH).forEach(function(k){if(k<=d&&(!best||k>best))best=k});return best?PXH[best].egp:(d>=iso(today())?pxUsd():0)}
   /* ================= chart: long ranges and tap to read a point ================= */
   var PXRANGE=[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[365,'سنة'],[730,'سنتين'],[1825,'5 سنين'],[3650,'10 سنين'],[7300,'20 سنة'],[20500,'من 1970']];
-  function pxChartLoad3(){var ch=PXS.ch,td=today(),start=new Date(td.getFullYear(),td.getMonth(),td.getDate()-ch.d),D=[],i;
-    PXS.chd={k:ch.k,d:ch.d,busy:1};
-    if(/^k:/.test(ch.k)&&ch.d>30){var sym=ch.k.slice(2);if(sym==='USDT'||sym==='USDC')sym='';
-      var iv=ch.d<=365?'1d':ch.d<=2555?'1w':'1M',st=Math.max(start.getTime(),new Date('2017-08-17').getTime());
-      return histLoad().catch(function(){}).then(function(){return sym?pxGet('https://api.binance.com/api/v3/klines?symbol='+sym+'USDT&interval='+iv+'&startTime='+st+'&limit=1000'):[]}).then(function(a){
-        var P=(a||[]).map(function(x){var d=iso(new Date(+x[0]));var e=egpOn(d);return [+x[0],e>0?+x[4]*e:0]}).filter(function(p){return p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);
-        pxChartDone(P)},function(){pxChartDone([])})}
-    var N=ch.d<=7?8:ch.d<=30?16:ch.d<=90?18:ch.d<=365?26:ch.d<=730?25:60,stepD=ch.d/(N-1);
-    for(i=0;i<N;i++){var d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+Math.round(i*stepD));if(d>=td)d=new Date(td.getFullYear(),td.getMonth(),td.getDate()-1);
-      if(ch.d>=730&&iso(d)>='2024-03-02')d=new Date(d.getFullYear(),d.getMonth(),1);D.push(iso(d))}
-    D=D.filter(function(x,j){return D.indexOf(x)===j});
-    histLoad().catch(function(){}).then(function(){return Promise.all(D.map(function(d){return pxHistGet(d).then(function(o){return [new Date(d+'T12:00:00').getTime(),pxEgpOn(o,ch.k)]},function(){return null})}))}).then(function(R){
-      var P=R.filter(function(p){return p&&p[1]>0});var nw=pxEgp(ch.k);if(nw>0)P.push([Date.now(),nw]);pxChartDone(P)})}
-  function pxChartDone(P){var ch=PXS.ch;PXS.chd=P.length>=2?{k:ch.k,d:ch.d,p:P}:{k:ch.k,d:ch.d,err:1};PXS.chsel=null;var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()}
+  function pxChartLoad3(){var k=PXS.ch.k,d=PXS.ch.d;PXS.chd={k:k,d:d,busy:1};pxSeries(k,d).then(function(P){pxChartDone(P,k,d)},function(){pxChartDone([],k,d)})}
+  function pxChartDone(P,k0,d0){var ch=PXS.ch;if(k0&&(k0!==ch.k||d0!==ch.d))return;PXS.chd=P.length>=2?{k:ch.k,d:ch.d,p:P}:{k:ch.k,d:ch.d,err:1};PXS.chsel=null;var el=document.getElementById('px-chart');if(el)el.innerHTML=pxChartHtml()}
   function pxChPick(e){var svg=e.currentTarget,c=PXS.chd;if(!c||!c.p)return;var r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*330,P=c.p,t0=P[0][0],t1=P[P.length-1][0],best=0,bd=1e9;
     P.forEach(function(p,i){var px=(p[0]-t0)/(t1-t0||1)*(330-8)+4,dd=Math.abs(px-x);if(dd<bd){bd=dd;best=i}});PXS.chsel=best;
     var p=P[best],mk=document.getElementById('px-mk'),info=document.getElementById('px-chpt'),mn=c.mn,mx=c.mx,H=140;
     if(mk){mk.setAttribute('cx',((p[0]-t0)/(t1-t0||1)*(330-8)+4).toFixed(1));mk.setAttribute('cy',(H-6-(p[1]-mn)/((mx-mn)||1)*(H-24)).toFixed(1));mk.setAttribute('r','5')}
     if(info)info.innerHTML='📍 <b>'+pxWhen(p[0]).replace(/ · الساعة.*/,'')+'</b>: <b class="num">'+pxFmt(p[1])+'</b> ج'+(best>0?' '+pxChTxt((p[1]/P[0][1]-1)*100)+' <span class="fine">من أول الفترة</span>':'')}
-  document.addEventListener('click',function(e){var s=e.target&&e.target.closest&&e.target.closest('#px-chart svg');if(s)pxChPick({currentTarget:s,clientX:e.clientX})});
   /* ================= Abhady: any question about prices, conversions, comparisons, step by step ================= */
   var PXW=[['c:USD',/(دولار|usd|\$)/],['c:EUR',/(يورو|euro|eur\b)/],['c:GBP',/(استرليني|الاسترليني|انجليزي|gbp)/],['c:SAR',/(ريال سعودي|السعودي|ريال(?! قطري| عماني)|sar\b)/],['c:AED',/(درهم|اماراتي|aed\b)/],['c:KWD',/(دينار كويتي|كويتي|kwd\b)/],
     ['c:QAR',/(ريال قطري|قطري|qar\b)/],['c:OMR',/(ريال عماني|عماني|omr\b)/],['c:BHD',/(دينار بحريني|بحريني)/],['c:JOD',/(دينار اردني|اردني|jod\b)/],['c:CHF',/(فرنك)/],['c:CAD',/(دولار كندي|كندي)/],['c:AUD',/(دولار استرالي|استرالي)/],['c:JPY',/(ين ياباني|الين\b|ين\b)/],
@@ -4625,6 +4635,171 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     else if(/^k:/.test(k)){tab='crypto';var c2=PXD.cr[k.slice(2)]||{};h='₿ <b>'+esc(pxName(k))+':</b> $'+pxFmt(c2.usd)+' = <b class="num">'+pxFmt(pxEgp(k))+'</b> ج '+pxChTxt(c2.ch)+' <span class="fine">(24 ساعة)</span>'+st(PXD.cT||PXD.at)}
     else{tab='fx';var v=pxEgp(k),pv=pxPrev(k);h='💵 <b>'+esc(pxName(k))+'</b> = <b class="num">'+pxFmt(v)+'</b> ج'+(pv?' '+pxChTxt((v/pv-1)*100)+' <span class="fine">عن آخر مرة</span>':'')+st(PXD.fxAt||PXD.at)+'<br><span class="fine">ده السعر الرسمي المتوسط. البنوك بتفرق قروش بسيطة.</span>'}
     aiSay(h+'<div class="actions">'+aiAct('كان بكام من سنة؟',function(){pxAI(pxName(k)+' كان بكام من سنه')})+aiAct('🔔 نبّهني بسعره',function(){sheet={mode:'pxal',k:k};renderSheet()})+pxOpen(tab)+'</div>')}
+  /* ================= any chart: tap (or drag) on it to read a point ================= */
+  /* a chart's <svg> carries data-ct = [[x, y, "label html"], …] in its own viewBox units */
+  function ctAttr(P){return ' data-ct="'+esc(JSON.stringify(P))+'"'}
+  function ctBox(){return '<div class="ctip">👆 دوس على أي نقطة في الرسم تشوف تاريخها وقيمتها</div>'}
+  function ctPick(sv,cx){var P;try{P=JSON.parse(sv.getAttribute('data-ct'))}catch(e){return}if(!P||!P.length)return;
+    var r=sv.getBoundingClientRect(),vb=sv.viewBox&&sv.viewBox.baseVal;if(!vb||!r.width)return;
+    var x=(cx-r.left)/r.width*vb.width+vb.x,b=0,bd=1e9;P.forEach(function(p,i){var d=Math.abs(p[0]-x);if(d<bd){bd=d;b=i}});
+    var p=P[b],NS='http://www.w3.org/2000/svg',ln=sv.querySelector('.ct-ln'),mk=sv.querySelector('.ct-mk');
+    if(!ln){ln=document.createElementNS(NS,'line');ln.setAttribute('class','ct-ln');sv.appendChild(ln)}
+    ln.setAttribute('x1',p[0]);ln.setAttribute('x2',p[0]);ln.setAttribute('y1',vb.y);ln.setAttribute('y2',vb.y+vb.height);
+    if(!mk){mk=document.createElementNS(NS,'circle');mk.setAttribute('class','ct-mk');mk.setAttribute('r','4.5');sv.appendChild(mk)}
+    mk.setAttribute('cx',p[0]);mk.setAttribute('cy',p[1]);
+    var box=sv.nextElementSibling;while(box&&!(box.classList&&box.classList.contains('ctip')))box=box.nextElementSibling;
+    if(!box&&sv.parentNode)box=sv.parentNode.querySelector('.ctip');if(box)box.innerHTML='📍 '+p[2]}
+  var CTDN=null;
+  document.addEventListener('pointerdown',function(e){var s=e.target&&e.target.closest&&e.target.closest('svg[data-ct]');CTDN=s||null;if(s)ctPick(s,e.clientX)});
+  document.addEventListener('pointermove',function(e){if(CTDN&&(e.buttons||e.pointerType==='touch'))ctPick(CTDN,e.clientX)});
+  document.addEventListener('pointerup',function(){CTDN=null});document.addEventListener('pointercancel',function(){CTDN=null});
+  function ctDay(ts){return pxWhen(ts).replace(/ · الساعة.*/,'')}
+  function ctMon(d){return d.toLocaleDateString(LOC(),{month:'long',year:'numeric'})}
+
+  /* ================= price series (one loader for every price chart) ================= */
+  var PXSER={};
+  function pxSeries(k,days){var id=k+'|'+days,c=PXSER[id];if(c&&Date.now()-c.at<20*60000)return c.pr;
+    var pr=pxSeriesLoad(k,days);PXSER[id]={pr:pr,at:Date.now()};pr.then(function(P){if(!P||P.length<2)delete PXSER[id]},function(){delete PXSER[id]});return pr}
+  function pxSeriesLoad(k,days){var td=today(),start=new Date(td.getFullYear(),td.getMonth(),td.getDate()-days),D=[],i;
+    if(/^f:/.test(k)){var fk=k.slice(2),s0=iso(start),a0=fuelAt(fk,s0),P=[];if(a0)P.push([start.getTime(),a0.v]);
+      fuelHist(fk).forEach(function(x){if(x.d>s0){var t=new Date(x.d+'T12:00:00').getTime();if(P.length&&t-864e5>P[P.length-1][0])P.push([t-864e5,P[P.length-1][1]]);P.push([t,x.v])}});
+      var nw=pxEgp(k);if(nw>0)P.push([Date.now(),nw]);return Promise.resolve(P)}
+    if(/^k:/.test(k)&&days>30){var sym=k.slice(2);if(sym==='USDT'||sym==='USDC')sym='';
+      var iv=days<=365?'1d':days<=2555?'1w':'1M',st=Math.max(start.getTime(),new Date('2017-08-17').getTime());
+      return histLoad().catch(function(){}).then(function(){return sym?pxGet('https://api.binance.com/api/v3/klines?symbol='+sym+'USDT&interval='+iv+'&startTime='+st+'&limit=1000'):[]}).then(function(a){
+        var P=(a||[]).map(function(x){var d=iso(new Date(+x[0]));var e=egpOn(d);return [+x[0],e>0?+x[4]*e:0]}).filter(function(p){return p[1]>0});var nw=pxEgp(k);if(nw>0)P.push([Date.now(),nw]);return P})}
+    var N=days<=7?8:days<=30?16:days<=90?18:days<=180?20:days<=365?26:days<=730?25:60,stepD=days/(N-1);
+    for(i=0;i<N;i++){var d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+Math.round(i*stepD));if(d>=td)d=new Date(td.getFullYear(),td.getMonth(),td.getDate()-1);
+      if(days>=730&&iso(d)>='2024-03-02')d=new Date(d.getFullYear(),d.getMonth(),1);D.push(iso(d))}
+    D=D.filter(function(x,j){return D.indexOf(x)===j});
+    return histLoad().catch(function(){}).then(function(){return Promise.all(D.map(function(d){return pxHistGet(d).then(function(o){return [new Date(d+'T12:00:00').getTime(),pxEgpOn(o,k)]},function(){return null})}))}).then(function(R){
+      var P=R.filter(function(p){return p&&p[1]>0});var nw=pxEgp(k);if(nw>0)P.push([Date.now(),nw]);return P})}
+  /* the chart itself: line + tap readout + high / low / now */
+  function pxChartSvg(k,P){var mn=Math.min.apply(null,P.map(function(p){return p[1]})),mx=Math.max.apply(null,P.map(function(p){return p[1]})),W=330,H=150,t0=P[0][0],t1=P[P.length-1][0];
+    var X=function(t){return (t-t0)/(t1-t0||1)*(W-8)+4},Y=function(v){return H-6-(v-mn)/((mx-mn)||1)*(H-24)};
+    var first=P[0][1],last=P[P.length-1][1],chg=(last/first-1)*100,col=chg>=0?'var(--ok)':'var(--bad)',now=Date.now();
+    var pts=P.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)}).join(' ');
+    var line=P.map(function(p,i){return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)}).join(' ');
+    var CT=P.map(function(p,i){return [+X(p[0]).toFixed(1),+Y(p[1]).toFixed(1),'<b>'+(now-p[0]<6*36e5?'دلوقتي':ctDay(p[0]))+'</b>: <b class="num">'+pxFmt(p[1])+'</b> ج'+(i>0&&pxChTxt((p[1]/first-1)*100)?' '+pxChTxt((p[1]/first-1)*100)+' <span class="fine">من أول الفترة</span>':'')]});
+    var gid='pg'+Math.random().toString(36).slice(2,7);
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="رسم '+esc(pxName(k))+'" style="direction:ltr;display:block"'+ctAttr(CT)+'><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+(chg>=0?'#34c38f':'#f46a6a')+'" stop-opacity=".28"/><stop offset="1" stop-color="'+(chg>=0?'#34c38f':'#f46a6a')+'" stop-opacity="0"/></linearGradient></defs>'+
+      '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="transparent"/><path d="'+line+' L'+X(t1).toFixed(1)+' '+H+' L'+X(t0).toFixed(1)+' '+H+' Z" fill="url(#'+gid+')"/><polyline fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" points="'+pts+'"/></svg>'+ctBox()+
+      '<div class="pxchs"><span>أعلى <b class="num">'+pxFmt(mx)+'</b></span><span>أقل <b class="num">'+pxFmt(mn)+'</b></span><span>دلوقتي <b class="num">'+pxFmt(last)+'</b></span>'+pxChTxt(chg)+'</div>'}
+
+  /* ================= one item in "بكام النهاردة": its own page ================= */
+  function pxDetailable(k){return /^(c:\w+|k:\w+|g\d+|gpound|s\d+|f:\w+)$/.test(k)&&k!=='c:EGP'}
+  function pxMetal(k){return /^(g\d+|gpound|s\d+)$/.test(k)}
+  function pxUnit(k){return k==='gpound'?'جنيه':/^(g|s)\d/.test(k)?'جرام':/^[ck]:/.test(k)?k.slice(2):''}
+  function pxGetPrice(k){return pxMetal(k)?pxEgp(k,'buy'):pxEgp(k)}
+  var PXPER={},PXDC={};
+  function pxPeriods(k){var c=PXPER[k];if(c&&Date.now()-c.at<30*60000)return;c=PXPER[k]={at:Date.now(),v:{}};var td=today();
+    [7,30,90,180,365].forEach(function(n0){var d=iso(new Date(td.getFullYear(),td.getMonth(),td.getDate()-n0));
+      var p=/^f:/.test(k)?Promise.resolve((fuelAt(k.slice(2),d)||{}).v||0):histLoad().catch(function(){}).then(function(){return pxHistGet(d)}).then(function(o){return /^k:/.test(k)&&o.src==='hist'?pxKlDay(o):o}).then(function(o){return pxEgpOn(o,k)});
+      p.then(function(v){c.v[n0]=v>0?v:null},function(){c.v[n0]=null}).then(function(){var el=document.getElementById('pxd-per');if(el&&sheet&&sheet.mode==='pxd'&&sheet.k===k)el.innerHTML=pxPerHtml(k)})})}
+  function pxPerHtml(k){var c=PXPER[k]||{v:{}},now=pxEgp(k),L=[['اليوم',/^f:/.test(k)?null:pxCh(k)]].concat([[7,'7 أيام'],[30,'30 يوم'],[90,'90 يوم'],[180,'6 شهور'],[365,'سنة']].map(function(x){var v=c.v[x[0]];return [x[1],v===undefined?'…':v&&now?(now/v-1)*100:null]}));
+    return L.map(function(x){var v=x[1];return '<div class="pxper-i"><small>'+x[0]+'</small>'+(v==='…'?'<b class="fine">…</b>':v==null||!isFinite(v)?'<b class="fine">—</b>':'<b class="num '+(v>=0.005?'up':v<=-0.005?'dn':'')+'">'+(v>=0.005?'+':v<=-0.005?'−':'')+nf(Math.abs(v),2)+'%</b>')+'</div>'}).join('')}
+  function pxdChart(k,d){var id=k+'|'+d,c=PXDC[id],ld='<div class="empty">بيحمّل الرسم…</div>';
+    if(!c||(c.at&&Date.now()-c.at>20*60000)){PXDC[id]={busy:1};pxSeries(k,d).then(function(P){PXDC[id]={p:P,at:Date.now()}},function(){PXDC[id]={err:1,at:Date.now()-19*60000}}).then(function(){var el=document.getElementById('pxd-chart');if(el&&sheet&&sheet.mode==='pxd'&&sheet.k===k&&(sheet.d||365)===d)el.innerHTML=pxdChart(k,d)});return ld}
+    if(c.busy)return ld;if(c.err||!c.p||c.p.length<2)return '<div class="empty">الرسم مش متاح دلوقتي. جرّب مدة تانية أو كمان شوية.</div>';return pxChartSvg(k,c.p)}
+  function pxdInfo(k){var v=pxEgp(k),R=[],m,E=pxUsd(),rr=function(a,b){R.push('<div class="r"><span class="k">'+a+'</span><span class="v">'+b+'</span></div>')};
+    if((m=k.match(/^c:(\w+)$/))){rr('1 '+m[1],'<b class="num">'+pxFmt(v)+'</b> ج');rr('1 جنيه','<b class="num">'+pxFmt(1/v)+'</b> '+m[1]);if(m[1]!=='USD'&&E)rr('قصاد الدولار','1 '+m[1]+' = <b class="num">'+pxFmt(v/E)+'</b> $');
+      [100,1000].forEach(function(q){rr(nf(q)+' '+m[1],'<b class="num">'+pxFmt(v*q)+'</b> ج')});if(PXD&&PXD.fxAt)rr('المصدر نشر السعر',pxWhen(PXD.fxAt));rr('نوع السعر','السعر الرسمي المتوسط (البنوك بتفرق قروش)')}
+    else if((m=k.match(/^k:(\w+)$/))){var c=PXD&&PXD.cr&&PXD.cr[m[1]]||{};if(c.usd)rr('بالدولار','<b class="num">$'+pxFmt(c.usd)+'</b>');rr('بالجنيه','<b class="num">'+pxFmt(v)+'</b> ج');if(c.ch!=null)rr('التغيير في 24 ساعة',pxChTxt(c.ch)||'0%');
+      rr('1,000 ج تجيب','<b class="num">'+(v?nf(1000/v,v>100000?6:v>1000?4:2):'—')+'</b> '+m[1]);if(PXD&&(PXD.cT||PXD.at))rr('آخر تحديث',pxWhen(PXD.cT||PXD.at))}
+    else if(pxMetal(k)){var b=pxEgp(k,'buy'),gr=k==='gpound'?8:1;rr('المحل بيبيعلك',(gr>1?'الجنيه ':'الجرام ')+'<b class="num">'+pxFmt(v)+'</b> ج');rr('المحل بيشتري منك','<b class="num">'+pxFmt(b)+'</b> ج');rr('الفرق بين البيع والشراء','<b class="num">'+pxFmt(v-b)+'</b> ج');
+      if(k==='gpound')rr('وزنه','8 جرام عيار 21');else{[10,100].forEach(function(q){rr(q+' جرام','<b class="num">'+pxFmt(v*q)+'</b> ج')});}
+      if(/^g/.test(k)&&PXD&&PXD.gold){rr('الأونصة عالميًا','<b class="num">$'+nf(PXD.gold.oz,2)+'</b> '+pxChTxt(PXD.gold.ch));var cal=pxCal();rr('دولار الدهب',nf(E*(1+n(cal.gp)/100),2)+' ج'+(cal.gp?' <span class="fine">(مظبوط على سعر الصاغة)</span>':''))}
+      if(/^s/.test(k)&&PXD&&PXD.silver)rr('الأونصة عالميًا','<b class="num">$'+nf(PXD.silver.oz,2)+'</b>');
+      if(PXD)rr('آخر تحديث',pxWhen(/^s/.test(k)?PXD.sT||PXD.at:PXD.gT||PXD.at))}
+    else if((m=k.match(/^f:(\w+)$/))){var fa=fuelAt(m[1]),H=fuelHist(m[1]).slice().reverse();rr('السعر من',fa?dShort(fa.at):'—');rr('آخر قرار للجنة التسعير',dShort(FUEL_REVIEW));
+      H.slice(0,8).forEach(function(x,i){var p=H[i+1];rr(dShort(x.d),'<b class="num">'+pxFmt(x.v)+'</b> ج'+(p?' '+pxChTxt((x.v/p.v-1)*100):''))})}
+    return R.join('')}
+  /* what you own of it (kept in "الممتلكات والأصول" so it counts in your net money) */
+  function pxKeyOfAsset(a){if(!a)return null;if(a.pxk)return a.pxk;var k=akOf(a);return k==='gold'?'g'+(a.karat||'21'):k==='silver'?'s'+(a.purity||'999'):k==='fx'&&a.cur?'c:'+String(a.cur).toUpperCase():k==='crypto'&&a.coin?'k:'+String(a.coin).toUpperCase():null}
+  function pxAssetsOf(k){return (S.assets||[]).filter(function(a){return !a.sold&&pxKeyOfAsset(a)===k}).sort(function(a,b){return (b.pxk?1:0)-(a.pxk?1:0)||String(a.buyDate||'').localeCompare(String(b.buyDate||''))})}
+  function pxQtyOf(a,k){return k==='gpound'?n(a.weight)/8:(akOf(a)==='gold'||akOf(a)==='silver')?n(a.weight):n(a.qty)}
+  function pxAssetUnitPrice(a){var k=pxKeyOfAsset(a);if(!k)return 0;return k==='gpound'?pxEgp('g21','buy'):pxGetPrice(k)}
+  function pxNewAsset(k){var m,a={id:uid(),pxk:k,buyDate:iso(today()),buyPrice:0,price:0,priceAt:iso(today())};
+    if(k==='gpound'){a.kind='دهب';a.karat='21';a.weight=0;a.qty=0;a.name='جنيهات دهب'}
+    else if((m=k.match(/^g(\d+)$/))){a.kind='دهب';a.karat=m[1];a.weight=0;a.name='دهب عيار '+m[1]}
+    else if((m=k.match(/^s(\d+)$/))){a.kind='فضة';a.purity=m[1];a.weight=0;a.name='فضة '+m[1]}
+    else if((m=k.match(/^c:(\w+)$/))){a.kind='عملة أجنبية (كاش)';a.cur=m[1];a.qty=0;a.name=pxName(k)+' (كاش)'}
+    else if((m=k.match(/^k:(\w+)$/))){a.kind='عملات رقمية';a.coin=m[1];a.qty=0;a.name=pxName(k)}
+    return a}
+  function pxSetQty(a,k,q){q=Math.round(q*1e6)/1e6;if(k==='gpound'){a.weight=Math.round(q*8*1e4)/1e4;a.qty=q}else if(akOf(a)==='gold'||akOf(a)==='silver')a.weight=q;else a.qty=q;
+    var p=pxAssetUnitPrice(a);if(p>0){a.price=k==='gpound'?p:p;a.priceAt=iso(today())}}
+  function pxQtyTxt(k,q){return '<b class="num">'+nf(q,q<1?6:q<100?4:2).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'')+'</b> '+pxUnit(k)}
+  function pxdHold(k){var A=pxAssetsOf(k),q=sum(A,function(a){return pxQtyOf(a,k)}),cost=sum(A,function(a){return n(a.buyPrice)}),pr=k==='gpound'?pxEgp('g21','buy')*8:pxGetPrice(k),val=q*pr,g=cost?val-cost:null;
+    var h='<div class="rows pxtool"><h3>💼 اللي معاك منه</h3>';
+    if(A.length){h+='<div class="tiles">'+tile('الكمية',pxQtyTxt(k,q),1)+tile(pxMetal(k)?'قيمته لو بعته النهاردة':'قيمته النهاردة',money(val))+(g!=null?tile(g>=0?'المكسب':'الخسارة','<span style="color:var('+(g>=0?'--ok':'--bad')+')">'+money(Math.abs(g))+(cost?' ('+nf(Math.abs(g)/cost*100,1)+'%)':'')+'</span>'):'')+'</div>'+
+      (cost&&q?'<p class="fine">متوسط سعر الشرا: '+pxFmt(cost/q)+' ج لكل '+pxUnit(k)+' · اتشرى بإجمالي '+fmt(Math.round(cost))+' ج</p>':'')+
+      '<div class="list">'+A.map(function(a){return '<button class="item" data-act="open" data-coll="assets" data-id="'+esc(a.id)+'"><div class="ava">'+(AKI[a.kind]||'📦')+'</div><div class="main"><div class="t">'+esc(a.name)+'</div><div class="s">'+esc(assetSub(a))+(a.buyDate?' · '+dShort(a.buyDate):'')+'</div></div><div class="end"><div class="v">'+money(pxQtyOf(a,k)*pr)+'</div></div></button>'}).join('')+'</div>'}
+    else h+='<p class="note">لو عندك منه، سجّل اللي معاك أو اللي اشتريته، ويتحسب في صافي فلوسك وفي الممتلكات.</p>';
+    h+='<div class="actions pxd-act"><button class="btn sm primary" data-act="pxh" data-v="buy">🛒 اشتريت</button>'+(A.length?'<button class="btn sm" data-act="pxh" data-v="sell">💰 بعت</button>':'')+'<button class="btn sm" data-act="pxh" data-v="bal">📝 '+(A.length?'عدّل اللي معايا':'معايا رصيد')+'</button></div></div>';
+    return h}
+  function pxdHtml(){var k=sheet.k,d=sheet.d||365,fu=/^f:/.test(k);
+    if(!PXD&&!fu){setTimeout(function(){pxReady().then(function(){if(sheet&&sheet.mode==='pxd')renderSheet()})},0);return '<div class="empty">بيجيب الأسعار…</div>'}
+    var v=pxEgp(k),met=pxMetal(k),fav=pxFav().indexOf(k.replace(/^[ck]:/,''))>=0,cr=/^k:/.test(k)&&PXD&&PXD.cr&&PXD.cr[k.slice(2)];pxPeriods(k);
+    var h='<div class="pxd-top"><div class="pxd-p"><b class="num">'+pxFmt(v)+'</b> <span>ج</span>'+(fu?' <span class="fine">لكل '+esc((FUEL.filter(function(f){return f[0]===k.slice(2)})[0]||[])[2]||'')+'</span>':'')+'</div>'+
+      '<div class="pxd-s">'+(met?'<span>شراء المحل منك <b class="num">'+pxFmt(pxEgp(k,'buy'))+'</b> ج</span>':'')+(cr?'<span class="num">$'+pxFmt(cr.usd)+'</span>':'')+(fu?'':pxChTxt(pxCh(k)))+'</div></div>';
+    h+='<div class="pxper" id="pxd-per">'+pxPerHtml(k)+'</div>';
+    h+='<div class="rows pxtool"><div class="chips pxd-r">'+[[7,'أسبوع'],[30,'شهر'],[90,'3 شهور'],[180,'6 شهور'],[365,'سنة'],[730,'سنتين'],[1825,'5 سنين'],[3650,'10 سنين'],[7300,'20 سنة'],[20500,'من 1970']].filter(function(x){return !/^k:/.test(k)||x[0]<=3650}).map(function(x){return '<button class="chip'+(d===x[0]?' on':'')+'" data-act="pxd-d" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><div id="pxd-chart">'+pxdChart(k,d)+'</div></div>';
+    h+='<div class="rows pxtool"><h3>ℹ️ بيانات</h3>'+pxdInfo(k)+'</div>';
+    if(!fu)h+=pxdHold(k);
+    h+='<div class="actions"><button class="btn sm" data-act="px-al" data-k="'+esc(k)+'">🔔 نبّهني بسعره</button>'+(fu?'':'<button class="btn sm" data-act="pxd-conv">🔁 حوّل</button>')+'<button class="btn sm" data-act="px-fav" data-k="'+esc(k)+'">'+(fav?'★ في المفضلة':'☆ ضيف للمفضلة')+'</button></div>';
+    return h}
+  /* bought / sold / what I have */
+  function pxhHtml(){var k=sheet.k,op=sheet.op,A=pxAssetsOf(k),have=sum(A,function(a){return pxQtyOf(a,k)}),u=pxUnit(k),pB=k==='gpound'?pxEgp('gpound'):pxEgp(k),pS=k==='gpound'?pxEgp('g21','buy')*8:pxGetPrice(k);
+    var qL=k==='gpound'?'عدد الجنيهات':pxMetal(k)?'الوزن (جرام)':'الكمية ('+u+')';
+    var h='<p class="note" style="margin-top:0">'+esc(pxName(k))+' · '+(op==='sell'?'المحل/السوق بيشتري بـ '+pxFmt(pS):'السعر النهاردة '+pxFmt(pB))+' ج لكل '+u+(have?' · معاك '+pxQtyTxt(k,have):'')+'</p><div class="fields">';
+    if(op==='bal'){h+='<label>معاك كام؟ ('+qL+')<input id="ph-q" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+(have?esc(String(Math.round(have*1e6)/1e6)):'')+'"></label>'+
+      '<label>اتشرى بكام إجمالي؟ (اختياري، بالجنيه)<input id="ph-t" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+(A.length?esc(String(Math.round(sum(A,function(a){return n(a.buyPrice)})))):'')+'"></label></div>'+
+      '<p class="note">ده بيسجّل اللي معاك بس، من غير ما يخصم أو يضيف على أي حساب.'+(A.length?' لو غيّرت الكمية وسبت الإجمالي زي ما هو، الزيادة بتتحسب بسعر النهاردة.':'')+'</p><div class="actions"><button class="btn primary" data-act="ph-save">احفظ</button><button class="btn" data-act="sheet-back">إلغاء</button></div>';return h}
+    h+='<label>'+qL+'<input id="ph-q" class="ltr" type="number" inputmode="decimal" min="0" step="any" data-p="'+(op==='sell'?pS:pB)+'"></label>'+
+      '<label>'+(op==='sell'?'بعته بكام؟ (الإجمالي بالجنيه)':'دفعت كام؟ (الإجمالي بالجنيه'+(pxMetal(k)&&/^g|gpound/.test(k)?' ومعاه المصنعية':'')+')')+'<input id="ph-t" class="ltr" type="number" inputmode="decimal" min="0" step="any"></label>'+
+      '<label>التاريخ<input id="ph-d" type="date" value="'+iso(today())+'" max="'+iso(today())+'"></label>'+
+      '<label>'+(op==='sell'?'الفلوس دخلت على':'الفلوس خرجت من')+holdSel('ph-h','',op==='sell'?'اختار الحساب أو المحفظة':'اختار الحساب أو المحفظة أو الكارت')+'</label></div>'+
+      '<p class="note">'+(op==='sell'?'بيتخصم من اللي معاك، والفلوس بتتضاف على الحساب اللي تختاره، وبتظهر في التقارير.':'بيتضاف على اللي معاك في الممتلكات، والفلوس بتتخصم من الحساب اللي تختاره، وبتظهر في التقارير.')+'</p>'+
+      '<div class="actions"><button class="btn primary" data-act="ph-save">سجّل '+(op==='sell'?'البيع':'الشرا')+'</button><button class="btn" data-act="sheet-back">إلغاء</button></div>';
+    return h}
+  /* the total follows the quantity until you type your own total */
+  document.addEventListener('input',function(e){var t=e.target;if(!t||!sheet||sheet.mode!=='pxh')return;
+    if(t.id==='ph-t'){t.setAttribute('data-own',t.value?'1':'');return}
+    if(t.id==='ph-q'){var tt=document.getElementById('ph-t'),p=n(t.getAttribute('data-p'));if(tt&&p>0&&tt.getAttribute('data-own')!=='1'){var q=n(t.value);tt.value=q>0?String(Math.round(q*p*100)/100):''}}});
+  function pxMove(key,delta,note,date){var h=hGet(key);if(!h)return null;var b0=hBal(h.coll,h.o),rt=hRate(h.coll,h.o)||1,dl=hCur(h.coll,h.o)==='EGP'?delta:delta/rt;
+    hSet(h.coll,h.o,Math.round((b0+dl)*100)/100);var m=txById(logTx('تحويل',h.coll,h.o,Math.abs(delta),note,date));m.grp=uid();m.mv='xfer';m.seq=Date.now();m.eff=[{coll:h.coll,id:h.o.id,delta:dl,paid:0}];return m}
+  function pxhSave(){var k=sheet.k,op=sheet.op,q=n((document.getElementById('ph-q')||{}).value),tot=n((document.getElementById('ph-t')||{}).value),
+      date=(document.getElementById('ph-d')||{}).value||iso(today()),hk=(document.getElementById('ph-h')||{}).value||'',A=pxAssetsOf(k),have=sum(A,function(a){return pxQtyOf(a,k)}),u=pxUnit(k),qt=nf(q,q<1?6:4).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+    if(op==='bal'){if(!(q>=0)||(document.getElementById('ph-q')||{}).value===''){toast('اكتب الكمية اللي معاك');return}
+      var own=(document.getElementById('ph-t')||{getAttribute:function(){return ''}}).getAttribute('data-own')==='1',cost0=sum(A,function(a){return n(a.buyPrice)}),pS0=k==='gpound'?pxEgp('g21','buy')*8:pxGetPrice(k);
+      if(A.length&&!own)tot=q>have?cost0+(q-have)*pS0:have?cost0*q/have:0;
+      mutate(function(){var a=A.filter(function(x){return x.pxk===k})[0],other=sum(A.filter(function(x){return x!==a}),function(x){return pxQtyOf(x,k)});
+        if(!a){a=pxNewAsset(k);S.assets=(S.assets||[]).concat([a])}var mine=Math.max(q-other,0);pxSetQty(a,k,mine);if(tot>0)a.buyPrice=Math.round(Math.max(tot-sum(A.filter(function(x){return x!==a}),function(x){return n(x.buyPrice)}),0)*100)/100;
+        if(!(mine>0))S.assets=S.assets.filter(function(x){return x.id!==a.id})});
+      toast('اتحفظ: معاك '+qt+' '+u);sheet={mode:'pxd',k:k,d:(sheet.back&&sheet.back.d)||365};renderSheet();return}
+    if(!(q>0)){toast('اكتب الكمية');return}if(!(tot>0)){toast(op==='sell'?'اكتب بعته بكام':'اكتب دفعت كام');return}
+    if(op==='sell'&&q>have+1e-9){toast('معاك '+nf(have,4).replace(/\.?0+$/,'')+' '+u+' بس');return}
+    var gain=null;
+    mutate(function(){var note=(op==='sell'?'بيع ':'شرا ')+qt+' '+(/^[ck]:/.test(k)?pxName(k):k==='gpound'?'جنيه دهب':u+' '+pxName(k).replace(/^جرام\s*/,''));
+      if(op==='buy'){var a=A.filter(function(x){return x.pxk===k})[0];if(!a){a=pxNewAsset(k);a.buyDate=date;S.assets=(S.assets||[]).concat([a])}
+        pxSetQty(a,k,pxQtyOf(a,k)+q);a.buyPrice=Math.round((n(a.buyPrice)+tot)*100)/100;
+        if(hk)pxMove(hk,-tot,note,date);else{var t0=txById(logTx('تحويل','assets',a,tot,note+' (من غير ما يتخصم من رصيد)',date));t0.name=a.name}}
+      else{var left=q,costOut=0;A.forEach(function(a){if(left<=1e-9)return;var aq=pxQtyOf(a,k),take=Math.min(aq,left),c0=n(a.buyPrice);if(!(aq>0))return;var cpart=c0*take/aq;costOut+=cpart;left-=take;
+          if(aq-take<=1e-9)S.assets=S.assets.filter(function(x){return x.id!==a.id});else{pxSetQty(a,k,aq-take);a.buyPrice=Math.round((c0-cpart)*100)/100}});
+        gain=costOut?tot-costOut:null;note+=gain!=null?' ('+(gain>=0?'مكسب ':'خسارة ')+fmt(Math.round(Math.abs(gain)))+' ج)':'';
+        if(hk)pxMove(hk,tot,note,date);else logTx('تحويل','assets',null,tot,note+' (من غير ما يتضاف على رصيد)',date)}});
+    toast(op==='sell'?'اتسجل البيع'+(gain!=null?' · '+(gain>=0?'مكسب ':'خسارة ')+fmt(Math.round(Math.abs(gain)))+' ج':''):'اتسجل الشرا ✅');sheet={mode:'pxd',k:k,d:(sheet.back&&sheet.back.d)||365};renderSheet()}
+  /* asset prices follow "بكام النهاردة" (same numbers everywhere); saved quietly, no re-render */
+  function pxAssetSync(){if(!S||!S.assets||!PXD)return;var ch=0,t=iso(today());S.assets.forEach(function(a){var k=pxKeyOfAsset(a);if(!k)return;var p=pxAssetUnitPrice(a);if(k==='gpound')p=pxEgp('g21','buy');
+      if(p>0&&(!(n(a.price)>0)||Math.abs(p-n(a.price))/p>0.002)){a.price=Math.round(p*100)/100;a.priceAt=t;ch++}});if(ch){try{save()}catch(e){}if(route==='assets'||route==='home')renderMain()}}
+  function pxdAction(act,t){
+    if(act==='px-open'){var k=t.getAttribute('data-k');if(!pxDetailable(k))return false;sheet={mode:'pxd',k:k,d:365};renderSheet();return true}
+    if(act==='pxd-d'){if(!sheet||sheet.mode!=='pxd')return true;sheet.d=+t.getAttribute('data-v');var el=document.getElementById('pxd-chart');
+      [].forEach.call(document.querySelectorAll('.pxd-r .chip'),function(b){b.classList.toggle('on',b===t)});if(el)el.innerHTML=pxdChart(sheet.k,sheet.d);return true}
+    if(act==='pxh'){if(!sheet||sheet.mode!=='pxd')return true;sheet={mode:'pxh',k:sheet.k,op:t.getAttribute('data-v'),back:{mode:'pxd',k:sheet.k,d:sheet.d||365}};renderSheet();return true}
+    if(act==='ph-save'){if(sheet&&sheet.mode==='pxh')pxhSave();return true}
+    if(act==='pxd-conv'){var c=pxCv(),k2=sheet&&sheet.k;if(k2){c.f=k2;c.t=k2==='c:EGP'?'c:USD':'c:EGP';c.a='1';pxCvSave()}sheet=null;renderSheet();PXS.tab='conv';navTo('prices');return true}
+    return false}
   function screenPrices(){if(!PXD||Date.now()-(PXD.at||0)>5*60000)setTimeout(function(){pxLoad()},0);var T=PXS.tab;
     var tabs=[['fx','💵 العملات'],['conv','🔁 محوّل العملات'],['gold','🟡 الدهب'],['silver','⚪ الفضة'],['bars','🧱 سبايك وجنيهات'],['crypto','₿ الرقمية'],['fuel','⛽ الوقود'],['day','📅 يوم معيّن'],['tools','🧰 أدواتي']];
     var h='<section class="sec pxs"><div class="pxtabs" role="tablist">'+tabs.map(function(x){return '<button role="tab" class="pxt'+(T===x[0]?' on':'')+'" data-act="px-tab" data-v="'+x[0]+'" aria-selected="'+(T===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
@@ -4646,7 +4821,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(act==='go-px'){navTo('prices');return true}
     if(act==='px-tab'){PXS.tab=t.getAttribute('data-v');PXS.q='';renderMain();return true}
     if(act==='px-ref'){pxLoad(true);return true}
-    if(act==='px-fav'){var k=t.getAttribute('data-k').replace(/^c:/,'').replace(/^k:/,''),f=pxFav(),i=f.indexOf(k);if(i>=0)f.splice(i,1);else f.push(k);lsSet('3bh_pxfav',JSON.stringify(f));renderMain();return true}
+    if(act==='px-fav'){var k=t.getAttribute('data-k').replace(/^c:/,'').replace(/^k:/,''),f=pxFav(),i=f.indexOf(k);if(i>=0)f.splice(i,1);else f.push(k);lsSet('3bh_pxfav',JSON.stringify(f));renderMain();if(sheet&&sheet.mode==='pxd')renderSheet();return true}
     if(act==='px-cmp'){var k2=t.getAttribute('data-k'),j=PXS.cmp.indexOf(k2);if(j>=0)PXS.cmp.splice(j,1);else{if(PXS.cmp.length>=3){toast('تقدر تقارن 3 حاجات بالكتير');return true}PXS.cmp.push(k2)}renderMain();return true}
     if(act==='px-cmpx'){PXS.cmp=[];renderMain();return true}
     if(act==='px-bm'){PXS.bm=t.getAttribute('data-v');renderMain();return true}
@@ -4660,7 +4835,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(act==='px-sw2'){var c=pxCv(),x=c.f;c.f=c.t;c.t=x;pxCvSave();renderMain();return true}
     if(act==='px-q2'){var c2=pxCv();c2.a=t.getAttribute('data-v');pxCvSave();pxConvRefresh();var ia=document.getElementById('px-a2');if(ia)ia.value=c2.a;return true}
     if(act==='wc-go'){var g=function(id){var e3=document.getElementById(id);return e3?e3.value:''};PXS.wc={g:g('wc-g'),k:g('wc-k')||'21',w:g('wc-w'),t:g('wc-t')};renderMain();return true}
-    if(act==='px-al'){sheet={mode:'pxal',k:t.getAttribute('data-k')};renderSheet();return true}
+    if(act==='px-al'){sheet={mode:'pxal',k:t.getAttribute('data-k'),back:sheet&&sheet.mode==='pxd'?{mode:'pxd',k:sheet.k,d:sheet.d}:undefined};renderSheet();return true}
     if(act==='pa-save'){var v0=n((document.getElementById('pa-v')||{}).value),cur=pxEgp(sheet.k);if(!(v0>0)){toast('اكتب السعر');return true}
       var A=pxAlerts();A.push({id:uid(),k:sheet.k,v:v0,dir:v0>=cur?'up':'down',at:iso(today())});lsSet('3bh_pxal',JSON.stringify(A));sheet=null;renderSheet();renderMain();toast('هنبّهك لما '+pxName(A[A.length-1].k)+(v0>=cur?' يطلع لـ ':' ينزل لـ ')+pxFmt(v0));return true}
     if(act==='pa-del'){var di=t.getAttribute('data-id');lsSet('3bh_pxal',JSON.stringify(pxAlerts().filter(function(a){return a.id!==di})));if(sheet&&sheet.mode==='pxal')renderSheet();renderMain();return true}
@@ -5227,7 +5402,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     setTimeout(function(){var s=el.querySelector('.sheet-scrim');if(s)s.scrollTop=(key===oldKey?oldTop:0)},0);
     el.setAttribute('data-key',key);
     var title, body;
-    if(sheet.mode==='form'){title=sheet.title;body=(sheet.coll==='cards'||sheet.coll==='accounts'?'<p class="secnote" role="note">⚠️ <b>ملحوظة مهمة:</b> رقم الكارت كامل والـ CVV وتاريخ الانتهاء معلومات بنكية سرية. كتابتها في البرنامج <b>اختيارية</b>، لو محتاج تحتفظ ببيانات كروتك. لو مش محتاجها سيبها فاضية، والبرنامج هيشتغل عادي بآخر 4 أرقام بس.</p>':'')+formHtml()}
+    if(sheet.mode==='form'){title=sheet.title;body=(sheet.coll==='cards'||sheet.coll==='accounts'?'<p class="secnote" role="note">⚠️ <b>ملحوظة مهمة:</b> رقم الكارت كامل والـ CVV معلومات بنكية سرية. كتابتها في البرنامج <b>اختيارية</b>، لو محتاج تحتفظ ببيانات كروتك. لو مش محتاجها سيبها فاضية، والبرنامج هيشتغل عادي بآخر 4 أرقام بس.</p>':'')+formHtml()}
     else if(sheet.mode==='bd'){title=breakdown(sheet.k).title;body=bdHtml(sheet.k)}
     else if(sheet.mode==='pick'&&sheet.k==='wallet'){title='رصيد جديد';
       body='<p class="note">اختار النوع:</p><div class="otiles">'+[['حساب بنكي','🏛️','حساب بنكي','جاري أو توفير وكارته'],['محفظة موبايل','📱','محفظة على خط','فودافون كاش، اتصالات، أورنج، WE Pay'],
@@ -5273,6 +5448,8 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     else if(sheet.mode==='stmtrev'){title='راجع عمليات الكشف';body=stmtRevHtml()}
     else if(sheet.mode==='hbal'){var hh=hGet(sheet.key);title=hh?hName(hh.coll,hh.o):'الرصيد';body=hbalHtml()}
     else if(sheet.mode==='pxal'){title='🔔 نبّهني بالسعر';body=pxAlHtml()}
+    else if(sheet.mode==='pxd'){title=pxFlag(sheet.k)+' '+pxName(sheet.k);body=pxdHtml()}
+    else if(sheet.mode==='pxh'){title=({buy:'🛒 اشتريت',sell:'💰 بعت',bal:'📝 اللي معايا'}[sheet.op]||'')+' · '+pxName(sheet.k);body=pxhHtml()}
     else if(sheet.mode==='pxcal'){title=sheet.w==='gold'?'سعر الدهب في محل الصاغة':'سعر الفضة في المحل';body=pxCalHtml()}
     else if(sheet.mode==='txadd'){title=sheet.k==='card'?'شرا بالتقسيط':'إضافة معاملة';body=sheet.k==='card'?txCardsHtml():txAddHtml()}
     else{
@@ -6197,7 +6374,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     if(txDelAction(act,t))return;
     if(salAction(act,t))return;
     if(depAction(act,t))return;
-    if(catAction(act,t))return;if(pxAction(act,t))return;if(assetAction(act,t))return;
+    if(catAction(act,t))return;if(navAction(act,t))return;if(pxdAction(act,t))return;if(pxAction(act,t))return;if(assetAction(act,t))return;
     if(micAction(act,t))return;
     if(fbAction(act,t))return;
     if(crAction(act,t))return;
@@ -6601,6 +6778,7 @@ function renderSheet(){shChain();var op=!!(sheet&&sheet.mode==='ai');if(aiWasOpe
     var L=[];
     if(acctHtml())L.push(['acct','👤','الحساب',c?(clErr?'⚠️ ما اتحفظش':esc(c.email||'')):'مش داخل على حساب',function(){return acctHtml()}]);
     L.push(['home','🏠','التحكم في الشاشة الرئيسية',(homeHidden().length?homeHidden().length+' مخفي':'كل حاجة ظاهرة')+(homeAdded().length?' · +'+homeAdded().length:''),homeCustHtml]);
+    L.push(['bar','🧭','الشريط اللي تحت',navItems().map(function(k){return NAVOPT[k][1]}).join('، '),navCustHtml]);
     L.push(['sec','🔐','القفل والأمان',[lk.pin?'🔢':'',lk.bio&&lk.bio.length?'👆':'',lk.rec?'🗝️':''].join(' ').trim()||'مش متفعّل',function(){return secPart(1)}]);
     L.push(['bk','🛟','النسخ الاحتياطي',lb?(ds?'آخر نسخة من '+ds+' يوم':'آخر نسخة النهاردة'):'⚠️ لسه',function(){return bkHtml()+dataHtml()}]);
     L.push(['sal','💼','المرتب والدخل',S.salary&&S.salary.has?fmt(S.salary.amt)+' ج':'مش متسجل',salSecHtml]);
