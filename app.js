@@ -4293,20 +4293,40 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   var PXG=[[24,'عيار 24'],[22,'عيار 22'],[21,'عيار 21'],[18,'عيار 18'],[14,'عيار 14'],[12,'عيار 12']],PXSV=[[999,'عيار 999'],[958,'عيار 958 (بريتانيا)'],[925,'عيار 925'],[900,'عيار 900'],[800,'عيار 800']];
   var OZ=31.1035,PXD=null,PXS={tab:'hub',q:'',cmp:[],busy:false,err:'',ch:{k:'g24',d:30},chd:null,cv:{a:'1',f:'c:USD',t:'c:EGP'},zk:{g:'',k:'21',s:'',c:''}};
   function pxJ(k,d){try{var v=JSON.parse(lsGet(k)||'null');return v==null?d:v}catch(e){return d}}
-  function pxCal(){return pxJ('3bh_pxcal',{gp:0,sp:0,gs:0.65,ss:3.4,at:''})}
+  /* the Egyptian market (average of the shops' guide price) sells above the world price; measured 15/11/2026: gold +2.1%, silver 999 +5.8%, buy/sell gap 0.65% / 3.4% */
+  var PX_MKT={gp:2.1,sp:5.8,gs:0.65,ss:3.4};
+  function pxAuto(){var a=pxJ('3bh_pxauto',null);return a&&Date.now()-(a.t||0)<4*864e5?a:null}
+  function pxCal(){var c=pxJ('3bh_pxcal',null)||{},gu=c.gu!=null?!!c.gu:!!n(c.gp),su=c.su!=null?!!c.su:!!n(c.sp),A=pxAuto()||{},ga=!gu&&A.gp!=null,sa=!su&&A.sp!=null;
+    return {gp:gu?n(c.gp):ga?A.gp:PX_MKT.gp,sp:su?n(c.sp):sa?A.sp:PX_MKT.sp,gs:gu&&c.gs!=null&&c.gs!==''?n(c.gs):ga&&A.gs!=null?A.gs:c.gs!=null&&c.gs!==''?n(c.gs):PX_MKT.gs,
+      ss:su&&c.ss!=null&&c.ss!==''?n(c.ss):sa&&A.ss!=null?A.ss:c.ss!=null&&c.ss!==''?n(c.ss):PX_MKT.ss,at:c.at||'',gu:gu,su:su,ga:ga,sa:sa,aT:A.t||0}}
+  /* Egyptian dealers' live price (Daleelak: licensed banks and gold dealers, no key, open to browsers): we keep only how far it sits above the world price */
+  function pxAutoFrom(J,oz,soz,E){try{var L=(J&&J.assets)||[],f=function(re){return L.filter(function(a){return re.test(String(a.slug||a.id||''))})[0]};
+      var pr=function(a){if(!a)return null;var b=a.benchmark||{},v=[+b.buy,+b.sell].filter(function(x){return x>0});
+        if(v.length<2&&a.directions){var d=a.directions;[d.buy&&d.buy.best&&d.buy.best.value,d.sell&&d.sell.best&&d.sell.best.value].forEach(function(x){if(+x>0)v.push(+x)})}
+        if(!v.length)return null;var hi=Math.max.apply(null,v),lo=Math.min.apply(null,v);return {hi:hi,lo:lo,at:a.observedAt||a.asOf||J.generatedAt||''}};
+      var out={t:Date.now(),src:'دليلك'},ok=0,g=pr(f(/gold-?21/i)),k=21;if(!g){g=pr(f(/gold-?24/i));k=24}
+      if(g&&oz>0&&E>0){var w=oz*E/OZ*k/24,gp=(g.hi/w-1)*100,gs=(1-g.lo/g.hi)*100;if(gp>-5&&gp<15&&gs>=0&&gs<5){out.gp=Math.round(gp*100)/100;out.gs=Math.round(gs*100)/100;out.g21=k===21?g.hi:g.hi*21/24;out.gAt=g.at;ok=1}}
+      var sv=pr(f(/silver-?999/i))||pr(f(/^silver$/i))||pr(f(/silver/i));
+      if(sv&&soz>0&&E>0){var ws=soz*E/OZ*0.999,sp=(sv.hi/ws-1)*100,ss=(1-sv.lo/sv.hi)*100;if(sp>-5&&sp<20&&ss>=0&&ss<10){out.sp=Math.round(sp*100)/100;out.ss=Math.round(ss*100)/100;ok=1}}
+      if(ok)lsSet('3bh_pxauto',JSON.stringify(out));return ok}catch(e){return 0}}
   function pxFav(){return pxJ('3bh_pxfav',['USD','EUR','SAR','g21','BTC'])}
   (function(){var c=pxJ('3bh_pxd',null);if(c&&c.fx)PXD=c})();
   function pxLoad(force){if(PXS.busy)return;if(!force&&PXD&&Date.now()-(PXD.at||0)<5*60000)return;PXS.busy=true;PXS.err='';if(route==='prices')renderMain();
     var syms=PXK.filter(function(k){return k[0]!=='USDT'&&k[0]!=='USDC'}).map(function(k){return k[0]}).concat(['PAXG']);
+    var tmo=function(pr,ms){return Promise.race([pr,new Promise(function(r){setTimeout(function(){r(null)},ms)})])};
+    var dlk=tmo(pxGet('https://getdaleelak.com/api/v1/feed.json?category=metals').catch(function(){return null}),8000);
+    var xau=tmo(pxGet('https://api.gold-api.com/price/XAU').catch(function(){return null}),7000),xag=tmo(pxGet('https://api.gold-api.com/price/XAG').catch(function(){return null}),7000);
     var fx=fxRates(),bn=bnTick(syms).catch(function(){return {}}),
       cg=pxGet('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,kinesis-silver,'+PXK.map(function(k){return k[2]}).join(',')+'&vs_currencies=usd&include_24hr_change=true').catch(function(){return {}});
-    Promise.all([fx,bn,cg]).then(function(r){var R=r[0],B=r[1]||{},C=r[2]||{},cr={};
+    Promise.all([fx,bn,cg,xau,xag,dlk]).then(function(r){var R=r[0],B=r[1]||{},C=r[2]||{},cr={},XA=r[3],XG=r[4],xa=XA&&+XA.price>0?+XA.price:0,xg=XG&&+XG.price>0?+XG.price:0;
       PXK.forEach(function(k){var b=B[k[0]],c=C[k[2]];if(k[0]==='USDT'||k[0]==='USDC'){cr[k[0]]={usd:c&&c.usd||1,ch:c&&c.usd_24h_change||0};return}
         if(b&&b.usd>0)cr[k[0]]={usd:b.usd,ch:b.ch};else if(c&&c.usd>0)cr[k[0]]={usd:c.usd,ch:c.usd_24h_change||0}});
-      var gb=B.PAXG,gc=C['pax-gold'],sc=C['kinesis-silver'];
+      var gb=B.PAXG,gc=C['pax-gold'],sc=C['kinesis-silver'],gch=gb&&gb.usd>0?gb.ch:gc&&gc.usd_24h_change||0;
+      if(xa>500)gb={usd:xa,ch:gch,spot:1};if(xg>3)sc={usd:xg,usd_24h_change:sc&&sc.usd_24h_change||0,spot:1};
       var nowT=Date.now(),okG=!!(gb&&gb.usd>0||gc&&gc.usd>0),okS=!!(sc&&sc.usd>0),okC=Object.keys(cr).length>2;
-      PXD={at:nowT,fxT:PX.fxT||(PXD&&PXD.fxT)||0,fxAt:nowT,gT:okG?nowT:(PXD&&PXD.gT)||0,sT:okS?nowT:(PXD&&PXD.sT)||0,cT:okC?nowT:(PXD&&PXD.cT)||0,fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
-        silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0}:(PXD&&PXD.silver)||null,cr:okC?cr:(PXD&&PXD.cr)||cr};
+      PXD={at:nowT,fxT:PX.fxT||(PXD&&PXD.fxT)||0,fxAt:nowT,gT:okG?nowT:(PXD&&PXD.gT)||0,sT:okS?nowT:(PXD&&PXD.sT)||0,cT:okC?nowT:(PXD&&PXD.cT)||0,fx:R,gold:gb&&gb.usd>0?{oz:gb.usd,ch:gb.ch,spot:gb.spot||0}:gc&&gc.usd>0?{oz:gc.usd,ch:gc.usd_24h_change||0}:(PXD&&PXD.gold)||null,
+        silver:sc&&sc.usd>0?{oz:sc.usd,ch:sc.usd_24h_change||0,spot:sc.spot||0}:(PXD&&PXD.silver)||null,cr:okC?cr:(PXD&&PXD.cr)||cr};
+      if(r[5]&&PXD.gold)pxAutoFrom(r[5],PXD.gold.oz,PXD.silver&&PXD.silver.oz,+R.EGP);
       lsSet('3bh_pxd',JSON.stringify(PXD));pxSnap();pxAlertCheck();if(route==='home')try{plPxRefresh()}catch(e){}try{pxAssetSync()}catch(e){}PXS.busy=false;if(route==='prices')renderMain()},
       function(){PXS.busy=false;PXS.err='مش قادر أجيب الأسعار دلوقتي. اتأكد من الإنترنت وجرّب تاني.'+(PXD?' بعرضلك آخر أسعار اتجابت.':'');if(route==='prices')renderMain()})}
   /* a daily snapshot on this phone, to show the change since the day before */
@@ -4335,19 +4355,19 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       '<span class="pxact"><button class="pxcm'+(cmp?' on':'')+'" data-act="px-cmp" data-k="'+esc(key)+'" aria-label="قارن" aria-pressed="'+cmp+'">⚖️</button><button class="pxcm'+(pxAlerts().some(function(a){return a.k===key})?' on':'')+'" data-act="px-al" data-k="'+esc(key)+'" aria-label="نبّهني بالسعر">🔔</button></span></div>'}
   function pxQ(s){var q=nz(PXS.q||'').trim();return !q||nz(s).indexOf(q)>=0}
   function pxTabFx(){var E=pxUsd(),fav=pxFav(),L=PXC.filter(function(c){return pxQ(c[0]+' '+c[2])});L.sort(function(a,b){return (fav.indexOf(b[0])>=0)-(fav.indexOf(a[0])>=0)});
-    var cal=pxCal(),gd=cal.gp&&E?E*(1+n(cal.gp)/100):0;
+    var cal=pxCal(),gd=E?E*(1+n(cal.gp)/100):0;
     return '<div class="pxhd"><span>العملة</span><span>بالجنيه</span></div>'+L.map(function(c){var k='c:'+c[0],v=pxEgp(k),per=c[0]==='JPY'||c[0]==='IQD'?(c[0]==='JPY'?100:1000):1;
       return pxRow(k,c[1]+' '+c[2],c[0]+(per>1?' · لكل '+per:''),v*per,null,pxChTxt(pxCh(k)))}).join('')+
       (gd?'<div class="pxnote">💛 دولار الصاغة (من سعر الدهب اللي سجّلته): <b class="num">'+nf(gd,2)+'</b> ج</div>':'')+
       '<p class="note">السعر الرسمي المتوسط للعملة قصاد الجنيه، وبيتحدث مرة في اليوم. سعر البنوك بيفرق عنه قروش بسيطة في الشراء والبيع، وسعر السوق الموازي مش رسمي ومش متاح هنا.</p>'}
   function pxTabGold(){if(!PXD||!PXD.gold)return '<div class="empty">سعر الدهب مش متاح دلوقتي.</div>';var cal=pxCal(),g24=pxEgp('g24'),g21=pxEgp('g21');
-    var h='<div class="pxtop"><div><small>الأونصة عالميًا</small><b class="num">$'+nf(PXD.gold.oz,2)+'</b>'+pxChTxt(PXD.gold.ch)+'</div><div><small>دولار '+(cal.gp?'الصاغة':'رسمي')+'</small><b class="num">'+nf(pxUsd()*(1+n(cal.gp)/100),2)+'</b></div></div>';
+    var h='<div class="pxtop"><div><small>الأونصة عالميًا</small><b class="num">$'+nf(PXD.gold.oz,2)+'</b>'+pxChTxt(PXD.gold.ch)+'</div><div><small>دولار الصاغة'+(cal.gu||cal.ga?'':' (تقريبي)')+'</small><b class="num">'+nf(pxUsd()*(1+n(cal.gp)/100),2)+'</b></div></div>';
     h+='<div class="pxhd"><span>العيار (للجرام)</span><span>بيع · شراء</span></div>'+PXG.filter(function(g){return pxQ(g[1])}).map(function(g){var k='g'+g[0];return pxRow(k,g[1],g[0]===21?'الأكثر انتشارًا في مصر':g[0]===24?'دهب خالص (سبايك)':'',pxEgp(k),pxEgp(k,'buy'))}).join('');
     h+=pxRow('gpound','🪙 جنيه الدهب','8 جرام عيار 21',g21*8,pxEgp('g21','buy')*8);
     h+='<div class="pxgrid">'+[['نص جنيه',g21*4,'4 جرام عيار 21'],['الأونصة',g24*OZ,'31.1 جرام عيار 24'],['كيلو الدهب',g24*1000,'عيار 24']].map(function(x){return '<div class="pxbox"><small>'+x[0]+'</small><b class="num">'+pxFmt(x[1])+'</b><span>'+x[2]+'</span></div>'}).join('')+'</div>';
     return h+pxCalNote('gold')+pxGoldExtra()}
-  function pxCalNote(w){var cal=pxCal();return '<p class="note">'+(w==='gold'?(cal.gp?'الأسعار مظبوطة على سعر الصاغة اللي كتبته'+(cal.at?' يوم '+dShort(cal.at):'')+' (+'+nf(cal.gp,2)+'% عن السعر العالمي). ':'دي أسعار الدهب العالمية محسوبة بالجنيه وبسعر الدولار الرسمي. محلات الصاغة في مصر بتسعّر أعلى شوية. ')
-      :(cal.sp?'الفضة مظبوطة على السعر اللي كتبته (+'+nf(cal.sp,2)+'%). ':'دي أسعار الفضة العالمية بالجنيه. '))+'الأسعار من غير مصنعية، والشراء تقريبي.</p><div class="actions"><button class="btn sm" data-act="px-cal" data-v="'+w+'">✏️ ظبّط على سعر محل الصاغة</button></div>'}
+  function pxCalNote(w){var cal=pxCal();return '<p class="note">'+(w==='gold'?(cal.gu?'الأسعار مظبوطة على سعر الصاغة اللي كتبته'+(cal.at?' يوم '+dShort(cal.at):'')+' ('+(cal.gp>=0?'+':'')+nf(cal.gp,2)+'% عن السعر العالمي). ':cal.ga?'✅ الأسعار مظبوطة لوحدها على سعر محلات الصاغة في مصر (من دليلك'+(cal.aT?'، آخر مرة '+pxWhen(cal.aT).replace(/^\S+ /,''):'')+'): السوق بيبيع '+(cal.gp>=0?'أعلى':'أقل')+' من السعر العالمي بـ '+nf(Math.abs(cal.gp),2)+'%. ':'الأسعار على متوسط سوق الدهب المصري تقريبًا: سعر الأونصة العالمي (الشاشة) بدولار البنوك، وفوقه فرق السوق المصري (حوالي '+nf(cal.gp,1)+'%). أول ما سعر الصاغة يوصل، الأسعار بتتظبط عليه لوحدها. ')
+      :(cal.su?'الفضة مظبوطة على السعر اللي كتبته ('+(cal.sp>=0?'+':'')+nf(cal.sp,2)+'%). ':cal.sa?'✅ الفضة مظبوطة لوحدها على سعر السوق في مصر (من دليلك). ':'الأسعار على متوسط سوق الفضة المصري تقريبًا: الأونصة العالمية بدولار البنوك، وفوقها فرق السوق المصري (حوالي '+nf(cal.sp,1)+'%). '))+'الأسعار من غير مصنعية، والشراء تقريبي.</p><div class="actions"><button class="btn sm" data-act="px-cal" data-v="'+w+'">✏️ '+((w==='gold'?cal.gu:cal.su)?'غيّر سعر محلك':'محلك بسعر مختلف؟ اكتبه')+'</button>'+((w==='gold'?cal.gu:cal.su)?'<button class="btn sm" data-act="px-calauto" data-v="'+w+'">↺ رجّع للتلقائي</button>':'')+'</div>'}
   function pxTabSilver(){if(!PXD||!PXD.silver)return '<div class="empty">سعر الفضة مش متاح دلوقتي.</div>';var s=pxEgp('s999');
     var h='<div class="pxtop"><div><small>الأونصة عالميًا</small><b class="num">$'+nf(PXD.silver.oz,2)+'</b>'+pxChTxt(PXD.silver.ch)+'</div><div><small>نسبة الدهب للفضة</small><b class="num">'+(PXD.gold?nf(PXD.gold.oz/PXD.silver.oz,1):'—')+'</b></div></div>';
     h+='<div class="pxnis">⚖️ نصاب زكاة الفضة = 595 جرام فضة خالصة = <b class="num">'+pxFmt(s*595)+'</b> ج <button class="btn sm" data-act="px-tab" data-v="tools">احسب زكاتك</button></div>';
@@ -4441,7 +4461,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxWkMap(){return pxJ('3bh_pxwkc',{})}
   function pxGoldExtra(){var cal=pxCal(),g24=pxEgp('g24'),E=pxUsd(),gd=E*(1+n(cal.gp)/100),wc=PXS.wc=PXS.wc||{g:'',k:'21',w:'',t:''};
     var gv=n(wc.g)*pxEgp('g'+wc.k),wk=n(wc.g)*n(wc.w),tx=wk*n(wc.t)/100,buy=n(wc.g)*pxEgp('g'+wc.k,'buy');
-    return '<div class="pxnis"><b>💛 دولار الدهب: <span class="num">'+nf(gd,2)+'</span> ج</b>'+(cal.gp?'':' <span class="fine">(= الرسمي، لحد ما تظبطه على سعر الصاغة)</span>')+
+    return '<div class="pxnis"><b>💛 دولار الدهب: <span class="num">'+nf(gd,2)+'</span> ج</b>'+(cal.gu?'':cal.ga?' <span class="fine">(من سعر الصاغة النهاردة)</span>':' <span class="fine">(تقريبي على متوسط السوق المصري)</span>')+
       '<br>⚖️ نصاب زكاة الدهب = 85 جرام عيار 24 = <b class="num">'+pxFmt(g24*85)+'</b> ج <button class="btn sm" data-act="px-tab" data-v="tools">احسب زكاتك</button></div>'+
       '<div class="rows pxtool"><h3>🧮 حاسبة مصنعية الدهب</h3><div class="fields"><label for="wc-g">الوزن (جرام)<input id="wc-g" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+esc(wc.g)+'"></label>'+
       '<label for="wc-k">العيار<select id="wc-k" class="in">'+PXG.map(function(x){return '<option value="'+x[0]+'"'+(String(wc.k)===String(x[0])?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'+
@@ -4658,8 +4678,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxFlowGo(f,raw,d){AI.pend={kind:'px',f:f,d:d||{}};pxFlowIn(raw,1)}
   /* a plain "how much is X today" answer, the same numbers as the prices page */
   function pxPriceSay(k){if(!PXD&&!/^f:/.test(k))return aiSay('مش قادر أجيب الأسعار دلوقتي. اتأكد من النت وجرّب تاني.<div class="actions">'+pxOpen()+'</div>');var st=function(t0){return '<br><span class="fine">🕒 آخر تحديث: '+pxWhen(t0)+'</span>'},h='',tab='fx';
-    if(/^g|gpound/.test(k)){tab='gold';var cal=pxCal();h='🟡 <b>الدهب النهاردة'+(cal.gp?' (مظبوط على سعر الصاغة)':'')+':</b><br>'+[24,21,18,14].concat(/^g(22|12)$/.test(k)?[+k.slice(1)]:[]).map(function(x){return '• عيار '+x+': بيع <b class="num">'+pxFmt(pxEgp('g'+x))+'</b> · شراء '+pxFmt(pxEgp('g'+x,'buy'))+' ج'+(k==='g'+x&&k!=='g24'?' ⬅️':'')}).join('<br>')+
-      '<br>• الجنيه الدهب: <b class="num">'+pxFmt(pxEgp('gpound'))+'</b> ج<br>• الأونصة عالميًا: $'+nf(PXD.gold.oz,2)+' '+pxChTxt(PXD.gold.ch)+'<br>• دولار الدهب: '+nf(pxUsd()*(1+n(cal.gp)/100),2)+' ج'+st(PXD.gT||PXD.at)+(cal.gp?'':'<br><span class="fine">ده السعر العالمي بالجنيه. محلات الصاغة أعلى شوية، وتقدر تظبطه من صفحة الدهب.</span>')}
+    if(/^g|gpound/.test(k)){tab='gold';var cal=pxCal();h='🟡 <b>الدهب النهاردة'+(cal.gu?' (مظبوط على سعر محلك)':cal.ga?' (على سعر الصاغة في مصر)':' (متوسط السوق المصري)')+':</b><br>'+[24,21,18,14].concat(/^g(22|12)$/.test(k)?[+k.slice(1)]:[]).map(function(x){return '• عيار '+x+': بيع <b class="num">'+pxFmt(pxEgp('g'+x))+'</b> · شراء '+pxFmt(pxEgp('g'+x,'buy'))+' ج'+(k==='g'+x&&k!=='g24'?' ⬅️':'')}).join('<br>')+
+      '<br>• الجنيه الدهب: <b class="num">'+pxFmt(pxEgp('gpound'))+'</b> ج<br>• الأونصة عالميًا: $'+nf(PXD.gold.oz,2)+' '+pxChTxt(PXD.gold.ch)+'<br>• دولار الدهب: '+nf(pxUsd()*(1+n(cal.gp)/100),2)+' ج'+st(PXD.gT||PXD.at)+(cal.gu?'':'<br><span class="fine">ده تقريب لمتوسط السوق المصري. لو محلك بسعر مختلف، ظبّطه من صفحة الدهب.</span>')}
     else if(/^s/.test(k)){tab='silver';h='⚪ <b>الفضة النهاردة:</b><br>'+PXSV.map(function(g){return '• '+g[1]+': <b class="num">'+pxFmt(pxEgp('s'+g[0]))+'</b> ج للجرام'}).join('<br>')+'<br>• الأونصة عالميًا: $'+nf(PXD.silver.oz,2)+st(PXD.sT||PXD.at)}
     else if(/^f:/.test(k)){tab='fuel';h='⛽ <b>أسعار الوقود النهاردة:</b><br>'+FUEL.map(function(f){var c=fuelAt(f[0]);return '• '+f[1]+': <b class="num">'+pxFmt(c.v)+'</b> ج'+(f[0]===k.slice(2)?' ⬅️':'')}).join('<br>')+'<br><span class="fine">آخر تغيير '+dShort('2026-03-10')+'، وآخر قرار للجنة التسعير '+dShort(FUEL_REVIEW)+' (تثبيت).</span>'}
     else if(/^k:/.test(k)){tab='crypto';var c2=PXD.cr[k.slice(2)]||{};h='₿ <b>'+esc(pxName(k))+':</b> $'+pxFmt(c2.usd)+' = <b class="num">'+pxFmt(pxEgp(k))+'</b> ج '+pxChTxt(c2.ch)+' <span class="fine">(24 ساعة)</span>'+st(PXD.cT||PXD.at)}
@@ -4738,7 +4758,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       rr('1,000 ج تجيب','<b class="num">'+(v?nf(1000/v,v>100000?6:v>1000?4:2):'—')+'</b> '+m[1]);if(PXD&&(PXD.cT||PXD.at))rr('آخر تحديث',pxWhen(PXD.cT||PXD.at))}
     else if(pxMetal(k)){var b=pxEgp(k,'buy'),gr=k==='gpound'?8:1;rr('المحل بيبيعلك',(gr>1?'الجنيه ':'الجرام ')+'<b class="num">'+pxFmt(v)+'</b> ج');rr('المحل بيشتري منك','<b class="num">'+pxFmt(b)+'</b> ج');rr('الفرق بين البيع والشراء','<b class="num">'+pxFmt(v-b)+'</b> ج');
       if(k==='gpound')rr('وزنه','8 جرام عيار 21');else{[10,100].forEach(function(q){rr(q+' جرام','<b class="num">'+pxFmt(v*q)+'</b> ج')});}
-      if(/^g/.test(k)&&PXD&&PXD.gold){rr('الأونصة عالميًا','<b class="num">$'+nf(PXD.gold.oz,2)+'</b> '+pxChTxt(PXD.gold.ch));var cal=pxCal();rr('دولار الدهب',nf(E*(1+n(cal.gp)/100),2)+' ج'+(cal.gp?' <span class="fine">(مظبوط على سعر الصاغة)</span>':''))}
+      if(/^g/.test(k)&&PXD&&PXD.gold){rr('الأونصة عالميًا','<b class="num">$'+nf(PXD.gold.oz,2)+'</b> '+pxChTxt(PXD.gold.ch));var cal=pxCal();rr('دولار الدهب',nf(E*(1+n(cal.gp)/100),2)+' ج'+(cal.gu?' <span class="fine">(مظبوط على سعر محلك)</span>':cal.ga?' <span class="fine">(من سعر الصاغة)</span>':' <span class="fine">(تقريبي)</span>'))}
       if(/^s/.test(k)&&PXD&&PXD.silver)rr('الأونصة عالميًا','<b class="num">$'+nf(PXD.silver.oz,2)+'</b>');
       if(PXD)rr('آخر تحديث',pxWhen(/^s/.test(k)?PXD.sT||PXD.at:PXD.gT||PXD.at))}
     else if((m=k.match(/^f:(\w+)$/))){var fa=fuelAt(m[1]),H=fuelHist(m[1]).slice().reverse();rr('السعر من',fa?dShort(fa.at):'—');rr('آخر قرار للجنة التسعير',dShort(FUEL_REVIEW));
@@ -4896,7 +4916,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function pxCalHtml(){var w=sheet.w,cal=pxCal(),g=w==='gold';
     var base=g?pxEgp('g21')/(1+n(cal.gp)/100):pxEgp('s999')/(1+n(cal.sp)/100);
     return '<p class="note">اكتب السعر اللي شفته النهاردة في محل الصاغة أو في تطبيق الأسعار، وأنا هظبط كل '+(g?'العيارات والجنيه والسبايك':'أسعار الفضة')+' عليه.</p><div class="fields">'+
-      '<label for="pc-v">'+(g?'سعر جرام عيار 21 (بيع)':'سعر جرام الفضة 999 (بيع)')+'<input id="pc-v" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+(n(g?cal.gp:cal.sp)?Math.round(base*(1+n(g?cal.gp:cal.sp)/100)*100)/100:'')+'" placeholder="'+(base?Math.round(base):'')+'"></label>'+
+      '<label for="pc-v">'+(g?'سعر جرام عيار 21 (بيع)':'سعر جرام الفضة 999 (بيع)')+'<input id="pc-v" class="ltr" type="number" inputmode="decimal" min="0" step="any" value="'+((g?cal.gu:cal.su)?Math.round(base*(1+n(g?cal.gp:cal.sp)/100)*100)/100:'')+'" placeholder="'+(base?Math.round(base*(1+n(g?cal.gp:cal.sp)/100)):'')+'"></label>'+
       '<label for="pc-s">الفرق بين البيع والشراء ٪<input id="pc-s" class="ltr" type="number" inputmode="decimal" min="0" max="20" step="any" value="'+(g?cal.gs:cal.ss)+'"></label></div>'+
       '<p class="fine">السعر العالمي بالجنيه دلوقتي: '+pxFmt(base)+' ج. سيب الخانة فاضية عشان ترجع للسعر العالمي.</p>'+
       '<div class="actions"><button class="btn primary" data-act="pc-save">احفظ</button><button class="btn" data-act="close-sheet-btn">إلغاء</button></div>'}
@@ -4929,9 +4949,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
     if(act==='px-chk'){PXS.ch={k:t.getAttribute('data-v'),d:PXS.ch.d};renderMain();return true}
     if(act==='px-chd'){PXS.ch={k:PXS.ch.k,d:+t.getAttribute('data-v')};renderMain();return true}
     if(act==='px-cal'){sheet={mode:'pxcal',w:t.getAttribute('data-v')};renderSheet();return true}
+    if(act==='px-calauto'){var c0=pxJ('3bh_pxcal',null)||{};if(t.getAttribute('data-v')==='gold')c0.gu=false;else c0.su=false;lsSet('3bh_pxcal',JSON.stringify(c0));pxSnap();renderMain();toast('رجعت تلقائي على سعر الصاغة');return true}
     if(act==='pc-save'){var cal=pxCal(),w=sheet.w,v=n((document.getElementById('pc-v')||{}).value),sp=(document.getElementById('pc-s')||{}).value,gl=w==='gold';
       var base=gl?pxEgp('g21')/(1+n(cal.gp)/100):pxEgp('s999')/(1+n(cal.sp)/100);
-      if(v>0&&base>0){var pr=Math.round((v/base-1)*10000)/100;if(Math.abs(pr)>25){toast('السعر ده بعيد أوي عن السعر العالمي، راجعه');return true}if(gl)cal.gp=pr;else cal.sp=pr}else{if(gl)cal.gp=0;else cal.sp=0}
+      if(v>0&&base>0){var pr=Math.round((v/base-1)*10000)/100;if(Math.abs(pr)>25){toast('السعر ده بعيد أوي عن السعر العالمي، راجعه');return true}if(gl){cal.gp=pr;cal.gu=true}else{cal.sp=pr;cal.su=true}}else{if(gl){cal.gp=PX_MKT.gp;cal.gu=false}else{cal.sp=PX_MKT.sp;cal.su=false}}
       if(sp!==''&&n(sp)>=0&&n(sp)<=20){if(gl)cal.gs=n(sp);else cal.ss=n(sp)}cal.at=iso(today());lsSet('3bh_pxcal',JSON.stringify(cal));sheet=null;renderSheet();pxSnap();renderMain();toast('اتظبطت الأسعار');return true}
     return false}
   document.addEventListener('input',function(e){if(route!=='prices'||!e.target||e.target.id!=='px-q')return;PXS.q=e.target.value;var p=e.target.selectionStart;renderMain();var q=document.getElementById('px-q');if(q){q.focus();try{q.setSelectionRange(p,p)}catch(x){}}});
