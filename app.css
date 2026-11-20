@@ -986,16 +986,30 @@ textarea:not(#ai-in){min-height:76px;resize:vertical}
 .about-ov.veil .about-card>*:not(.help-top){filter:blur(14px);opacity:.15}
 .about-ov.veil .about-card::after{content:"🔒";position:absolute;inset:0;display:grid;place-items:center;font-size:44px;z-index:3}
 @media print{.about-ov,.about-card{display:none!important}}
-/* welcome message v3.3.6: drawn as moving dots on a canvas, page by page */
-.about-card{display:flex;flex-direction:column;height:calc(100dvh - 24px);max-height:760px;overflow:hidden;background-image:none!important}
-.ab-stage{position:relative;flex:1 1 auto;min-height:220px;margin:10px 0 6px;border-radius:14px;overflow:hidden;background:var(--surface);cursor:pointer;touch-action:pan-y}
-.ab-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+
+
+[data-skin="classic"] .lang.on,.lang.on.th-cls,.lang.on.th-fut{background:#b3541e!important;color:#fff8ec!important;border-color:#7a3a12!important;box-shadow:0 3px 0 #7a3a12}
+/* classic: cards that are dark in the other looks become paper here, so their writing turns to ink */
+[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad),[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad) *:not(.btn.primary):not(.btn.primary *){color:#2e2213!important;-webkit-text-fill-color:currentColor!important}
+[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad) :is(.gk,.gs,.k,.s,small,.sub,.lbl,.muted){color:#6a5338!important}
+[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad) svg text{fill:#2e2213!important}
+[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad) [style*="#5fd09a"],[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif) [style*="34c38f"]{color:#3f7a22!important}
+[data-skin="classic"] :is(.gcard,.gtile,.otile,.tile,.salc,.whatif):not(.g-good):not(.g-bad) :is([style*="#ef5d5d"],[style*="#ff8a8a"],[style*="e5534b"]){color:#a8321e!important}
+[data-skin="classic"] .gcard .gchip{background:rgba(90,58,28,.08)!important;border:1px solid rgba(90,58,28,.25)!important}
+[data-skin="classic"] .chip:not(.on){color:#2e2213!important}
+[data-skin="classic"] .gcard:not(.g-good):not(.g-bad) :is(.eye,.g-eye,[data-act=eye]){background:rgba(90,58,28,.1)!important}
+[data-skin="classic"] .hero2{background:linear-gradient(160deg,#5a3a1c,#3a2410)!important;border-color:#8a6a40!important}[data-skin="classic"] .hero2 .ctip{color:#fbf1da!important}
+/* welcome message: clear writing, page by page */
+.about-card.ab-paged{display:flex;flex-direction:column;height:calc(100dvh - 24px);max-height:780px;overflow:hidden}
+.ab-stage{position:relative;flex:1 1 auto;min-height:200px;margin:8px 0 8px;border-radius:14px;overflow:hidden;background-repeat:repeat;touch-action:pan-y}
+.ab-page{position:absolute;inset:0;padding:2px 4px;overflow:auto}
+.ab-page.ab-measure{visibility:hidden;pointer-events:none;overflow:visible;bottom:auto}
+.ab-page .about-s{margin:0 0 12px}.ab-page .about-s h3{font-size:19px;margin:0 0 6px}.ab-page .about-s h3 small{font-size:13px;color:var(--muted);font-weight:600}
+.ab-page .about-s p,.ab-page .about-s li{font-size:16px;line-height:1.75}.ab-page .about-s ul{margin:0 0 6px}
 .ab-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}
 .ab-nav .btn{min-width:92px}.ab-nav .btn:disabled{opacity:.35}
 .ab-pg{font-weight:700;color:var(--muted);font-size:14px;direction:ltr}
-.about-card .about-act{flex:0 0 auto;margin-top:10px}.about-card .about-note{flex:0 0 auto;font-size:12px;line-height:1.5}
-
-[data-skin="classic"] .lang.on,.lang.on.th-cls,.lang.on.th-fut{background:#b3541e!important;color:#fff8ec!important;border-color:#7a3a12!important;box-shadow:0 3px 0 #7a3a12}
+.about-card.ab-paged .about-act{flex:0 0 auto;margin-top:10px}.about-card.ab-paged .about-note{flex:0 0 auto;font-size:12.5px;line-height:1.5}
 /* standalone additions */
 #gate{position:fixed;inset:0;z-index:250;background:radial-gradient(120% 90% at 50% 0%,#211c0e 0,#0b0b0c 55%,#000 100%);color:#f2f2f3;overflow:auto;-webkit-overflow-scrolling:touch}
 html.gated,html.gated body{overflow:hidden}
