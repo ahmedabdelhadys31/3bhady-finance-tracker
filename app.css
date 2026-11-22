@@ -1181,6 +1181,7 @@ html[data-skin="sky"] .h3{--g1:#8ecdf7;--g2:#2a86c7;--g3:#175e91;--ok:#178a6e;--
 .sc-photo .sc-cap{position:absolute;left:0;right:0;bottom:12%;top:auto;text-align:center;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .sc-photo .sc-cap b{display:block;font-size:30px;letter-spacing:.02em}.sc-photo .sc-cap span{display:block;margin-top:6px;font-size:17px;opacity:.92}
 @media (prefers-reduced-motion: reduce){.sc-photo .sc-img{animation:none}}
+.inv-b{margin-top:10px;line-height:1.75}.inv-b .inv-i{white-space:normal}
 /* standalone additions */
 #gate{position:fixed;inset:0;z-index:250;background:radial-gradient(120% 90% at 50% 0%,#211c0e 0,#0b0b0c 55%,#000 100%);color:#f2f2f3;overflow:auto;-webkit-overflow-scrolling:touch}
 html.gated,html.gated body{overflow:hidden}
