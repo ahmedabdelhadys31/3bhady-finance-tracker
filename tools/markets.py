@@ -318,29 +318,30 @@ def fund_article_links():
 def funds(today):
     fh_path = os.path.join(OUT, 'funds-hist.json')
     FH = load(fh_path, {})
-    got = None
-    for d, link, title in fund_article_links()[:10]:
+    got = []
+    for d, link, title in fund_article_links()[:12]:
         try:
             page, final = get(link)
         except Exception as e:  # noqa: BLE001
-            print('fund page', link, e, file=sys.stderr)
+            print('fund page', link[:120], e, file=sys.stderr)
             continue
         rows = parse_funds(page)
-        if len(rows) >= 10:
-            got = (d or fund_date(urllib.parse.unquote(final)) or today, rows, final)
-            break
-    if got:
-        d, rows, src = got
+        d = d or fund_date(urllib.parse.unquote(final)) or fund_date(title)
+        print('fund page rows', len(rows), d, final[:100], file=sys.stderr)
+        if len(rows) >= 10 and d:
+            got.append((d, rows, final))
+    # every page that could be read adds its day to the history (newest last)
+    for d, rows, src in sorted(got, key=lambda x: x[0]):
         for name, nav, cur in rows:
             key = name.strip()
             h = FH.setdefault(key, {'cur': cur, 'p': []})
             h['cur'] = cur
-            if not h['p'] or h['p'][-1][0] < d:
-                h['p'].append([d, nav])
-            elif h['p'][-1][0] == d:
-                h['p'][-1][1] = nav
-            h['p'] = h['p'][-1900:]
-        FH['_src'] = {'d': d, 'url': src}
+            P = {r[0]: r[1] for r in h['p']}
+            P[d] = nav
+            h['p'] = [[k, P[k]] for k in sorted(P)][-1900:]
+        if not FH.get('_src') or FH['_src'].get('d', '') <= d:
+            FH['_src'] = {'d': d, 'url': src}
+    if got:
         dump(fh_path, FH)
     out = []
     for name, h in FH.items():
