@@ -5433,10 +5433,10 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   var MKS={g:'eg',q:''},MKH={};
   var MK_G=[['eg','🇪🇬','الأسهم المصرية'],['fd','🏦','الصناديق المصرية'],['gl','🌍','الأسهم والصناديق العالمية'],['ix','📊','المؤشرات']];
   function mkData(){try{var o=JSON.parse(lsGet('3bh_mkt')||'null');return o&&Array.isArray(o.items)?o:null}catch(e){return null}}
-  function mkLoad(force){var D=mkData();if(MKS.busy)return Promise.resolve(D);if(!force&&D&&Date.now()-(D._got||0)<3600e3)return Promise.resolve(D);MKS.busy=1;
-    return fetch('markets/latest.json?h='+Math.floor(Date.now()/3600e3),{credentials:'omit',cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){MKS.busy=0;MKS.err='';
+  function mkLoad(force){var D=mkData();if(MKS.busy)return Promise.resolve(D);if(!force&&MKS.failAt&&Date.now()-MKS.failAt<10*60e3)return Promise.resolve(D);if(!force&&D&&Date.now()-(D._got||0)<3600e3)return Promise.resolve(D);MKS.busy=1;
+    return fetch('markets/latest.json?h='+Math.floor(Date.now()/3600e3),{credentials:'omit',cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){MKS.busy=0;MKS.err='';MKS.failAt=0;
       if(!j||!Array.isArray(j.items))throw 0;j._got=Date.now();lsSet('3bh_mkt',JSON.stringify(j));try{mkAssetSync()}catch(e){}if(route==='prices'&&PXS.tab==='stocks')renderMain();return j},
-      function(){MKS.busy=0;MKS.err=D?'مش قادر أجيب أسعار جديدة دلوقتي. بعرضلك آخر أسعار اتجابت.':'أسعار الأسهم والصناديق لسه مش متاحة. هتظهر أول ما يتحدّث مصدر الأسعار.';if(route==='prices'&&PXS.tab==='stocks')renderMain();return D})}
+      function(){MKS.busy=0;MKS.failAt=Date.now();MKS.err=D?'مش قادر أجيب أسعار جديدة دلوقتي. بعرضلك آخر أسعار اتجابت.':'أسعار الأسهم والصناديق لسه مش متاحة. هتظهر أول ما يتحدّث مصدر الأسعار.';if(route==='prices'&&PXS.tab==='stocks')renderMain();return D})}
   function mkFile(s){return 'markets/h/'+String(s).replace(/[^A-Za-z0-9_.-]/g,'_')+'.json'}
   function mkItem(s){var D=mkData();return D?D.items.filter(function(x){return x.s===s})[0]:null}
   function mkFmt(v){v=+v;return !isFinite(v)?'—':v>=1000?nf(v,2):v>=10?nf(v,2):nf(v,v>=1?3:5)}
@@ -5455,8 +5455,8 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
   function mkTab(){mkLoad();var D=mkData(),g=MKS.g,q=nz(MKS.q||'');
     var h='<div class="chips mk-g" role="group" aria-label="القسم">'+MK_G.map(function(x){return '<button class="chip'+(g===x[0]?' on':'')+'" data-act="mk-g" data-k="'+x[0]+'">'+x[1]+' '+x[2]+'</button>'}).join('')+'</div>'+
       '<input class="in pxq" id="mk-q" type="search" placeholder="دوّر: اسم أو كود (COMI، أزيموت، Apple)…" value="'+esc(MKS.q||'')+'" aria-label="دوّر في الأسهم والصناديق">';
-    if(MKS.err)h+='<p class="note" style="color:var(--bad)">'+esc(MKS.err)+'</p>';
-    if(!D)return h+'<div class="empty">'+(MKS.busy?'بيجيب الأسعار…':'مفيش أسعار لسه.')+'</div>';
+    if(MKS.err)h+='<p class="note" style="color:var(--bad)">'+esc(MKS.err)+'</p>'+(D?'':'<div class="actions"><button class="btn sm" data-act="mk-retry">↻ جرّب تاني</button></div>');
+    if(!D)return h+(MKS.err?'':'<div class="empty">'+(MKS.busy?'بيجيب الأسعار…':'مفيش أسعار لسه.')+'</div>');
     var L=D.items.filter(function(i){return q?nz(i.s+' '+i.n+' '+(i.e||'')).indexOf(q)>=0:i.g===g});
     if(g==='fd'&&!q)L.sort(function(a,b){return String(a.n).localeCompare(String(b.n))});
     var mine={};(S.assets||[]).forEach(function(a){var x=akOf(a)==='stock'&&mkFind(a);if(x)mine[x.s]=1});
@@ -5484,6 +5484,7 @@ function faqAnswer(t){var best=null,bs=0;FAQ.forEach(function(f){var m=t.match(f
       function(){var c=document.getElementById('mk-chart');if(c)c.innerHTML='<div class="empty">الرسم مش متاح دلوقتي.</div>';var el=document.getElementById('mk-per');if(el)el.innerHTML=''})},0);
     return h}
   function mkAction(act,t){
+    if(act==='mk-retry'){mkLoad(true);renderMain();return true}
     if(act==='mk-g'){MKS.g=t.getAttribute('data-k')||'eg';MKS.q='';renderMain();return true}
     if(act==='mk-open'){sheet={mode:'mkd',s:t.getAttribute('data-s'),d:365};renderSheet();return true}
     if(act==='mk-d'){if(sheet&&sheet.mode==='mkd'){sheet.d=+t.getAttribute('data-v');renderSheet()}return true}
