@@ -188,6 +188,16 @@ def google_last(gsym):
     return None
 
 
+def trading_day(grp, cur, today):
+    """True when the market of this item trades on this (Cairo) date"""
+    wd = dt.date.fromisoformat(today).weekday()  # Mon=0 … Sun=6
+    if cur == 'EGP':
+        return wd in (6, 0, 1, 2, 3)  # Sunday to Thursday
+    if cur == 'SAR':
+        return wd in (6, 0, 1, 2, 3)
+    return wd in (0, 1, 2, 3, 4)
+
+
 def merge_hist(old, new):
     d = {r[0]: r[1] for r in (old or [])}
     for r in new:
@@ -204,10 +214,11 @@ def securities(today):
         hp = os.path.join(HIST, safe(sym) + '.json')
         old = load(hp, {}).get('p', [])
         h = yahoo(ysym)
-        if not h:
+        # Yahoo is often a day late for the Egyptian market: take today's price from Google Finance when it is newer
+        if not h or (h[-1][0] < today and trading_day(grp, cur, today)):
             g = google_last(gsym)
-            if g:
-                h = [[today, round(g, 4)]]
+            if g and (not h or abs(g - h[-1][1]) > 1e-9):
+                h = (h or []) + [[today, round(g, 4)]]
         h = merge_hist(old, h)
         if not h:
             print('no data', sym, file=sys.stderr)
@@ -271,8 +282,10 @@ def fund_article_links():
     q = 'أسعار وثائق صناديق الاستثمار المصرية'
     links = []
     feeds = [
-        'https://www.bing.com/news/search?q=%s&format=rss&qft=sortbydate%%3d%%221%%22' % urllib.parse.quote('"%s"' % q),
-        'https://news.google.com/rss/search?q=%s&hl=ar&gl=EG&ceid=EG:ar' % urllib.parse.quote(q + ' when:7d'),
+        'https://www.bing.com/search?format=rss&q=%s' % urllib.parse.quote('site:decypha.com ' + q),
+        'https://www.bing.com/search?format=rss&q=%s' % urllib.parse.quote('site:mubasher.info ' + q),
+        'https://www.bing.com/news/search?format=rss&qft=sortbydate%%3d%%221%%22&q=%s' % urllib.parse.quote(q + ' مباشر'),
+        'https://www.bing.com/news/search?format=rss&qft=sortbydate%%3d%%221%%22&q=%s' % urllib.parse.quote('"%s"' % q),
     ]
     for f in feeds:
         try:
@@ -289,15 +302,24 @@ def fund_article_links():
             if m and 'bing.com' in link:
                 link = urllib.parse.unquote(m.group(1))
             links.append((fund_date(title) or fund_date(urllib.parse.unquote(link)) or '', link, title))
-    links.sort(key=lambda x: x[0], reverse=True)
-    return links
+    seen, out = set(), []
+    for d, link, title in links:
+        if link in seen or 'news.google.com' in link:
+            continue
+        seen.add(link)
+        out.append((d, link, title))
+    # Mubasher's own pages first (they carry the full table), newest first
+    out.sort(key=lambda x: (('decypha.com' in x[1] or 'mubasher.info' in x[1]), x[0]), reverse=True)
+    for d, link, title in out[:12]:
+        print('fund candidate', d, link[:140], file=sys.stderr)
+    return out
 
 
 def funds(today):
     fh_path = os.path.join(OUT, 'funds-hist.json')
     FH = load(fh_path, {})
     got = None
-    for d, link, title in fund_article_links()[:6]:
+    for d, link, title in fund_article_links()[:10]:
         try:
             page, final = get(link)
         except Exception as e:  # noqa: BLE001
